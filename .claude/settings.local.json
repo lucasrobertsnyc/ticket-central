@@ -7,7 +7,11 @@
       "Bash(find /usr /opt /Users/lucasroberts -name \"node\" -type f 2>/dev/null | head -10 *)",
       "Bash(mdfind -name \"node\" -onlyin /usr/local)",
       "Bash(mdfind -name \"node\" -onlyin /Applications)",
-      "Bash(mkdir -p \"/Users/lucasroberts/Downloads/Ticket Central/app/events/[id]\")"
+      "Bash(mkdir -p \"/Users/lucasroberts/Downloads/Ticket Central/app/events/[id]\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(gh auth *)"
     ]
   }
 }

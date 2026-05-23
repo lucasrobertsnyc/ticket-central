@@ -169,7 +169,7 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
       </main>
 
       <footer className="border-t border-slate-800 mt-8 px-6 py-4 text-center text-slate-700 text-xs">
-        Ticket Central &middot; All prices include fees and taxes &middot; Not affiliated with any ticketing platform
+        TicketCentral &middot; All prices include fees and taxes &middot; Not affiliated with any ticketing platform
       </footer>
     </div>
   );
