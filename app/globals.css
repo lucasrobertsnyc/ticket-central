@@ -11,3 +11,66 @@ input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   opacity: 0.5;
 }
+
+/* ── Dual-handle price range slider ─────────────────────────────────────── */
+/* The input itself is transparent — only the thumb receives pointer events  */
+.dual-range-input {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+  outline: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Transparent track — we draw our own track with divs */
+.dual-range-input::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 4px;
+}
+.dual-range-input::-moz-range-track {
+  background: transparent;
+  height: 4px;
+  border: none;
+}
+
+/* Styled thumb — this is what the user drags */
+.dual-range-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: all;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #3b82f6;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  margin-top: -6px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.dual-range-input::-webkit-slider-thumb:hover,
+.dual-range-input:active::-webkit-slider-thumb {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+
+.dual-range-input::-moz-range-thumb {
+  pointer-events: all;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #3b82f6;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.dual-range-input::-moz-range-thumb:hover {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}

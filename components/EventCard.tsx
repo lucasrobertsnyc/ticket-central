@@ -3,15 +3,25 @@
 import Link from "next/link";
 import type { Event } from "@/types/ticket";
 
-// Single accent color per genre — used only as a 4px top border stripe.
-// Everything else is neutral so the card looks designed, not generated.
-const GENRE_ACCENT: Record<string, string> = {
-  "R&B / Pop":         "#7c3aed",
-  "Pop / R&B":         "#d97706",
-  "Pop / Country":     "#2563eb",
-  "Hip-Hop":           "#374151",
-  "Latin / Reggaeton": "#059669",
-  "Rock / Pop":        "#0284c7",
+// Picsum seed → deterministic photo per artist (replace seeds with real CDN
+// URLs when you have actual artist images from Spotify / Ticketmaster API).
+const ARTIST_SEED: Record<string, string> = {
+  "evt-001": "weeknd-msg",
+  "evt-002": "beyonce-sofi",
+  "evt-003": "taylor-atttstadium",
+  "evt-004": "kendrick-chase",
+  "evt-005": "badbunny-hardrock",
+  "evt-006": "coldplay-rosebowl",
+};
+
+// Dark fallback shown behind the image while it loads / if it 404s
+const GENRE_FALLBACK_BG: Record<string, string> = {
+  "R&B / Pop":         "#0f0a1a",
+  "Pop / R&B":         "#150e05",
+  "Pop / Country":     "#060d1c",
+  "Hip-Hop":           "#0d0d0d",
+  "Latin / Reggaeton": "#061410",
+  "Rock / Pop":        "#070e18",
 };
 
 interface Props {
@@ -19,26 +29,44 @@ interface Props {
 }
 
 export default function EventCard({ event }: Props) {
-  const accent = GENRE_ACCENT[event.genre] ?? "#6b7280";
+  const seed = ARTIST_SEED[event.id] ?? event.id;
+  const fallback = GENRE_FALLBACK_BG[event.genre] ?? "#111";
 
   return (
     <Link href={`/events/${event.id}`} className="group block">
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-150 hover:shadow-md hover:border-gray-300">
-        {/* Thin genre accent stripe — the only color on the card */}
-        <div className="h-1" style={{ backgroundColor: accent }} />
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-150 hover:shadow-lg hover:-translate-y-0.5">
 
-        <div className="p-4">
-          {/* Artist + genre */}
-          <div className="mb-3">
-            <h3 className="text-gray-900 font-bold text-lg leading-snug group-hover:text-blue-600 transition-colors">
-              {event.artist}
-            </h3>
-            <span className="text-xs text-gray-400 font-medium">{event.genre}</span>
+        {/* ── Artist image ─────────────────────────── */}
+        <div className="relative h-40 overflow-hidden" style={{ backgroundColor: fallback }}>
+          {/* Photo */}
+          <img
+            src={`https://picsum.photos/seed/${seed}/480/200`}
+            alt={event.artist}
+            className="w-full h-full object-cover opacity-75 group-hover:opacity-85 group-hover:scale-105 transition-all duration-500"
+          />
+          {/* Bottom-fade gradient so text is always legible */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+          {/* Genre tag — top left */}
+          <div className="absolute top-3 left-3">
+            <span className="inline-block bg-black/50 backdrop-blur-sm text-white/80 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded">
+              {event.genre}
+            </span>
           </div>
 
-          {/* Venue + date */}
-          <div className="space-y-1.5 mb-4">
-            <p className="text-gray-600 text-sm flex items-center gap-1.5 truncate">
+          {/* Artist name — anchored to bottom of image */}
+          <div className="absolute bottom-0 left-0 right-0 px-3.5 pb-3 pt-6">
+            <h3 className="text-white font-extrabold text-xl leading-tight drop-shadow">
+              {event.artist}
+            </h3>
+          </div>
+        </div>
+
+        {/* ── Event details ────────────────────────── */}
+        <div className="px-3.5 pt-3 pb-3.5">
+          <div className="space-y-1 mb-3">
+            {/* Venue */}
+            <p className="text-sm flex items-center gap-1.5 truncate">
               <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -46,6 +74,7 @@ export default function EventCard({ event }: Props) {
               <span className="font-medium text-gray-900 truncate">{event.venue}</span>
               <span className="text-gray-400 flex-shrink-0">&middot; {event.city}</span>
             </p>
+            {/* Date */}
             <p className="text-gray-500 text-sm flex items-center gap-1.5">
               <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -71,6 +100,7 @@ export default function EventCard({ event }: Props) {
             </div>
           </div>
         </div>
+
       </div>
     </Link>
   );

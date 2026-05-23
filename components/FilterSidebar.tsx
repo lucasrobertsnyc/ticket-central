@@ -35,7 +35,7 @@ export default function FilterSidebar({ filters, onChange, absoluteMin, absolute
     filters.minQuantity !== 1 ||
     filters.sectionTypes.length > 0;
 
-  // Guard against zero-range (all listings same price)
+  // Percentage positions for the visual fill + thumbs
   const range = absoluteMax > absoluteMin ? absoluteMax - absoluteMin : 1;
   const minPct = ((filters.minPrice - absoluteMin) / range) * 100;
   const maxPct = ((filters.maxPrice - absoluteMin) / range) * 100;
@@ -58,21 +58,28 @@ export default function FilterSidebar({ filters, onChange, absoluteMin, absolute
           <div className="space-y-2">
             <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider">All-in price</p>
 
-            {/* Current values */}
+            {/* Live price display */}
             <div className="flex items-center justify-between">
               <span className="text-gray-900 font-semibold text-sm tabular-nums">${filters.minPrice}</span>
               <span className="text-gray-300 text-xs">–</span>
               <span className="text-gray-900 font-semibold text-sm tabular-nums">${filters.maxPrice}</span>
             </div>
 
-            {/* Dual-handle range slider */}
+            {/*
+              Dual-handle range slider.
+              Both <input type="range"> elements share the same absolute container.
+              pointer-events: none on the input track is set in globals.css via
+              .dual-range-input; pointer-events: all is set only on the thumb
+              pseudo-element, so each handle is independently draggable.
+              The coloured track fill + endpoint labels are rendered as plain divs.
+            */}
             <div className="relative" style={{ height: 20 }}>
-              {/* Track background */}
+              {/* Grey track */}
               <div
                 className="absolute rounded-full bg-gray-200 pointer-events-none"
                 style={{ top: "50%", transform: "translateY(-50%)", left: 0, right: 0, height: 4 }}
               />
-              {/* Active fill */}
+              {/* Blue fill between the two thumbs */}
               <div
                 className="absolute rounded-full bg-blue-500 pointer-events-none"
                 style={{
@@ -83,59 +90,34 @@ export default function FilterSidebar({ filters, onChange, absoluteMin, absolute
                   height: 4,
                 }}
               />
-              {/* Min thumb */}
-              <div
-                className="absolute rounded-full bg-white border-2 border-blue-500 shadow-sm pointer-events-none"
-                style={{
-                  width: 16, height: 16,
-                  top: "50%",
-                  left: `${minPct}%`,
-                  transform: "translate(-50%, -50%)",
-                }}
-              />
-              {/* Max thumb */}
-              <div
-                className="absolute rounded-full bg-white border-2 border-blue-500 shadow-sm pointer-events-none"
-                style={{
-                  width: 16, height: 16,
-                  top: "50%",
-                  left: `${maxPct}%`,
-                  transform: "translate(-50%, -50%)",
-                }}
-              />
 
-              {/* Min input — transparent, handles interaction */}
+              {/* Min input — thumb is the only interactive part (see .dual-range-input CSS) */}
               <input
                 type="range"
+                className="dual-range-input"
                 min={absoluteMin}
                 max={absoluteMax}
                 step={1}
                 value={filters.minPrice}
+                style={{ zIndex: minPct >= maxPct ? 5 : 3 }}
                 onChange={(e) => {
                   const v = Number(e.target.value);
                   onChange({ ...filters, minPrice: Math.min(v, filters.maxPrice) });
                 }}
-                style={{
-                  position: "absolute", width: "100%", height: "100%",
-                  opacity: 0, cursor: "pointer", margin: 0, padding: 0,
-                  zIndex: minPct > 90 ? 5 : 3,
-                }}
               />
-              {/* Max input — transparent, handles interaction */}
+
+              {/* Max input — sits above min by default so it is draggable */}
               <input
                 type="range"
+                className="dual-range-input"
                 min={absoluteMin}
                 max={absoluteMax}
                 step={1}
                 value={filters.maxPrice}
+                style={{ zIndex: 4 }}
                 onChange={(e) => {
                   const v = Number(e.target.value);
                   onChange({ ...filters, maxPrice: Math.max(v, filters.minPrice) });
-                }}
-                style={{
-                  position: "absolute", width: "100%", height: "100%",
-                  opacity: 0, cursor: "pointer", margin: 0, padding: 0,
-                  zIndex: 4,
                 }}
               />
             </div>
@@ -156,13 +138,10 @@ export default function FilterSidebar({ filters, onChange, absoluteMin, absolute
                 className="w-full bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition appearance-none cursor-pointer"
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
-                  <option key={n} value={n}>
-                    {n === 1 ? "Any quantity" : `${n}+ tickets`}
-                  </option>
+                  <option key={n} value={n}>{n}</option>
                 ))}
-                <option value={10}>10+ tickets</option>
+                <option value={10}>10+</option>
               </select>
-              {/* Custom chevron */}
               <div className="absolute inset-y-0 right-2.5 flex items-center pointer-events-none">
                 <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
