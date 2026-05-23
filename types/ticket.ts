@@ -9,6 +9,9 @@ export type Platform =
 
 export type SectionType = "floor" | "lower" | "club" | "upper" | "suite";
 
+export type SortField = "price" | "section" | "row" | "quantity";
+export type SortDir = "asc" | "desc";
+
 export interface TicketListing {
   id: string;
   platform: Platform;

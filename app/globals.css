@@ -7,11 +7,10 @@
 }
 
 body {
-  background-color: #0f0f11;
-  color: #ffffff;
+  background-color: #080c15;
+  color: #f1f5f9;
 }
 
-/* Smooth number input arrows hide on non-focus */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   opacity: 0.4;
