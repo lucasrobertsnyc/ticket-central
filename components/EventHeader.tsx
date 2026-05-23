@@ -3,13 +3,26 @@
 import Link from "next/link";
 import type { Event } from "@/types/ticket";
 
-const GENRE_BG: Record<string, string> = {
-  "R&B / Pop":         "from-violet-900 via-purple-800 to-rose-900",
-  "Pop / R&B":         "from-amber-900 via-orange-800 to-yellow-900",
-  "Pop / Country":     "from-blue-900 via-indigo-800 to-slate-900",
-  "Hip-Hop":           "from-gray-900 via-zinc-800 to-neutral-900",
-  "Latin / Reggaeton": "from-emerald-900 via-teal-800 to-cyan-900",
-  "Rock / Pop":        "from-sky-900 via-blue-800 to-indigo-900",
+// Very dark single-color backgrounds — looks like a real venue/concert photo
+// taken in low light, not a generated gradient. Same approach used by
+// Ticketmaster, StubHub, and AXS when no artist photo is available.
+const GENRE_DARK_BG: Record<string, string> = {
+  "R&B / Pop":         "#0f0a1a",   // near-black with very faint purple cast
+  "Pop / R&B":         "#150e05",   // near-black with very faint warm cast
+  "Pop / Country":     "#060d1c",   // near-black navy
+  "Hip-Hop":           "#0d0d0d",   // pure near-black
+  "Latin / Reggaeton": "#061410",   // near-black with very faint green cast
+  "Rock / Pop":        "#070e18",   // near-black with very faint blue cast
+};
+
+// Accent line color at the bottom edge of the header (thin, not dominant)
+const GENRE_ACCENT: Record<string, string> = {
+  "R&B / Pop":         "#7c3aed",
+  "Pop / R&B":         "#d97706",
+  "Pop / Country":     "#2563eb",
+  "Hip-Hop":           "#374151",
+  "Latin / Reggaeton": "#059669",
+  "Rock / Pop":        "#0284c7",
 };
 
 interface Props {
@@ -18,42 +31,47 @@ interface Props {
 }
 
 export default function EventHeader({ event, totalListings }: Props) {
-  const bg = GENRE_BG[event.genre] ?? "from-gray-900 via-gray-800 to-gray-900";
+  const bg   = GENRE_DARK_BG[event.genre]  ?? "#0d0d0d";
+  const line = GENRE_ACCENT[event.genre]   ?? "#374151";
 
   return (
-    <div className={`bg-gradient-to-r ${bg} relative`}>
-      <div className="absolute inset-0 bg-black/30" />
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-7">
+    <div style={{ backgroundColor: bg }} className="relative">
+      {/* Thin accent line at the bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-px" style={{ backgroundColor: line, opacity: 0.6 }} />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-7">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-1.5 text-white/50 text-xs mb-4">
-          <Link href="/" className="hover:text-white/80 transition">Home</Link>
+        <div className="flex items-center gap-1.5 text-white/30 text-xs mb-4">
+          <Link href="/" className="hover:text-white/60 transition">Home</Link>
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <Link href="/" className="hover:text-white/80 transition">Concerts</Link>
+          <Link href="/" className="hover:text-white/60 transition">Concerts</Link>
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <span className="text-white/70">{event.artist}</span>
+          <span className="text-white/50">{event.artist}</span>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-end gap-5">
           <div className="flex-1 min-w-0">
-            <p className="text-white/60 text-sm font-medium mb-1">{event.genre}</p>
+            <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-1.5">
+              {event.genre}
+            </p>
             <h1 className="text-white font-extrabold text-3xl sm:text-4xl leading-tight">
               {event.artist}
             </h1>
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-2.5 text-white/70 text-sm">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-3 text-white/50 text-sm">
               <span className="flex items-center gap-1.5">
-                <svg className="w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-3.5 h-3.5 text-white/30 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span className="text-white font-medium">{event.venue}</span>
+                <span className="text-white/80 font-medium">{event.venue}</span>
                 <span>&middot; {event.city}</span>
               </span>
               <span className="flex items-center gap-1.5">
-                <svg className="w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-3.5 h-3.5 text-white/30 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 {event.date} &middot; {event.time}
@@ -61,11 +79,12 @@ export default function EventHeader({ event, totalListings }: Props) {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 sm:text-right flex-shrink-0">
-            <div>
-              <p className="text-white/50 text-xs uppercase tracking-wider">Available</p>
-              <p className="text-white font-extrabold text-2xl tabular-nums">{totalListings} <span className="text-base font-medium text-white/60">listings</span></p>
-            </div>
+          <div className="flex-shrink-0 sm:text-right">
+            <p className="text-white/30 text-xs uppercase tracking-wider mb-0.5">Available</p>
+            <p className="text-white font-extrabold text-2xl tabular-nums leading-tight">
+              {totalListings}
+              <span className="text-base font-medium text-white/40 ml-1">listings</span>
+            </p>
           </div>
         </div>
       </div>

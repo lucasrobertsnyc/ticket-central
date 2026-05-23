@@ -3,14 +3,15 @@
 import Link from "next/link";
 import type { Event } from "@/types/ticket";
 
-// Photo-style gradient backgrounds — dark enough for white text overlay
-const GENRE_BG: Record<string, string> = {
-  "R&B / Pop":         "from-violet-900 via-purple-800 to-rose-900",
-  "Pop / R&B":         "from-amber-900 via-orange-800 to-yellow-900",
-  "Pop / Country":     "from-blue-900 via-indigo-800 to-slate-900",
-  "Hip-Hop":           "from-gray-900 via-zinc-800 to-neutral-900",
-  "Latin / Reggaeton": "from-emerald-900 via-teal-800 to-cyan-900",
-  "Rock / Pop":        "from-sky-900 via-blue-800 to-indigo-900",
+// Single accent color per genre — used only as a 4px top border stripe.
+// Everything else is neutral so the card looks designed, not generated.
+const GENRE_ACCENT: Record<string, string> = {
+  "R&B / Pop":         "#7c3aed",
+  "Pop / R&B":         "#d97706",
+  "Pop / Country":     "#2563eb",
+  "Hip-Hop":           "#374151",
+  "Latin / Reggaeton": "#059669",
+  "Rock / Pop":        "#0284c7",
 };
 
 interface Props {
@@ -18,35 +19,32 @@ interface Props {
 }
 
 export default function EventCard({ event }: Props) {
-  const bg = GENRE_BG[event.genre] ?? "from-gray-900 via-gray-800 to-gray-900";
+  const accent = GENRE_ACCENT[event.genre] ?? "#6b7280";
 
   return (
     <Link href={`/events/${event.id}`} className="group block">
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-150 hover:shadow-md hover:border-gray-300">
-        {/* Photo-style header */}
-        <div className={`h-32 bg-gradient-to-br ${bg} relative overflow-hidden flex flex-col justify-end p-4`}>
-          {/* Subtle texture overlay */}
-          <div className="absolute inset-0 bg-black/20" />
-          <div className="relative z-10">
-            <span className="text-white/60 text-xs font-medium uppercase tracking-wider block mb-1">
-              {event.genre}
-            </span>
-            <h3 className="text-white font-extrabold text-xl leading-tight drop-shadow">
+        {/* Thin genre accent stripe — the only color on the card */}
+        <div className="h-1" style={{ backgroundColor: accent }} />
+
+        <div className="p-4">
+          {/* Artist + genre */}
+          <div className="mb-3">
+            <h3 className="text-gray-900 font-bold text-lg leading-snug group-hover:text-blue-600 transition-colors">
               {event.artist}
             </h3>
+            <span className="text-xs text-gray-400 font-medium">{event.genre}</span>
           </div>
-        </div>
 
-        {/* Card body */}
-        <div className="p-4">
+          {/* Venue + date */}
           <div className="space-y-1.5 mb-4">
-            <p className="text-gray-700 text-sm flex items-center gap-1.5 truncate">
+            <p className="text-gray-600 text-sm flex items-center gap-1.5 truncate">
               <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span className="font-medium text-gray-900">{event.venue}</span>
-              <span className="text-gray-400">&middot; {event.city}</span>
+              <span className="font-medium text-gray-900 truncate">{event.venue}</span>
+              <span className="text-gray-400 flex-shrink-0">&middot; {event.city}</span>
             </p>
             <p className="text-gray-500 text-sm flex items-center gap-1.5">
               <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -56,6 +54,7 @@ export default function EventCard({ event }: Props) {
             </p>
           </div>
 
+          {/* Price + CTA */}
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
             <div>
               <p className="text-gray-400 text-xs">Tickets from</p>
