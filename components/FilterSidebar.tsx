@@ -10,8 +10,6 @@ const SECTION_TYPES: { value: SectionType; label: string }[] = [
   { value: "suite", label: "Suite"       },
 ];
 
-const QUANTITY_OPTIONS = [1, 2, 3, 4];
-
 interface Props {
   filters: FilterState;
   onChange: (filters: FilterState) => void;
@@ -37,6 +35,11 @@ export default function FilterSidebar({ filters, onChange, absoluteMin, absolute
     filters.minQuantity !== 1 ||
     filters.sectionTypes.length > 0;
 
+  // Guard against zero-range (all listings same price)
+  const range = absoluteMax > absoluteMin ? absoluteMax - absoluteMin : 1;
+  const minPct = ((filters.minPrice - absoluteMin) / range) * 100;
+  const maxPct = ((filters.maxPrice - absoluteMin) / range) * 100;
+
   return (
     <aside className="w-full lg:w-52 flex-shrink-0">
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -50,73 +53,125 @@ export default function FilterSidebar({ filters, onChange, absoluteMin, absolute
         </div>
 
         <div className="p-4 space-y-5">
-          {/* Price */}
-          <div className="space-y-2.5">
+
+          {/* ── Price ──────────────────────────────── */}
+          <div className="space-y-2">
             <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider">All-in price</p>
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
-                <label className="text-gray-400 text-xs mb-1 block">Min</label>
-                <div className="relative">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                  <input
-                    type="number"
-                    min={absoluteMin} max={filters.maxPrice}
-                    value={filters.minPrice}
-                    onChange={(e) => onChange({ ...filters, minPrice: Number(e.target.value) })}
-                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg pl-6 pr-2 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition"
-                  />
-                </div>
-              </div>
-              <span className="text-gray-300 mt-5">–</span>
-              <div className="flex-1">
-                <label className="text-gray-400 text-xs mb-1 block">Max</label>
-                <div className="relative">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                  <input
-                    type="number"
-                    min={filters.minPrice} max={absoluteMax}
-                    value={filters.maxPrice}
-                    onChange={(e) => onChange({ ...filters, maxPrice: Number(e.target.value) })}
-                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg pl-6 pr-2 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition"
-                  />
-                </div>
-              </div>
+
+            {/* Current values */}
+            <div className="flex items-center justify-between">
+              <span className="text-gray-900 font-semibold text-sm tabular-nums">${filters.minPrice}</span>
+              <span className="text-gray-300 text-xs">–</span>
+              <span className="text-gray-900 font-semibold text-sm tabular-nums">${filters.maxPrice}</span>
             </div>
-            <div className="relative h-1 bg-gray-200 rounded-full">
+
+            {/* Dual-handle range slider */}
+            <div className="relative" style={{ height: 20 }}>
+              {/* Track background */}
               <div
-                className="absolute h-1 bg-blue-500 rounded-full"
+                className="absolute rounded-full bg-gray-200 pointer-events-none"
+                style={{ top: "50%", transform: "translateY(-50%)", left: 0, right: 0, height: 4 }}
+              />
+              {/* Active fill */}
+              <div
+                className="absolute rounded-full bg-blue-500 pointer-events-none"
                 style={{
-                  left: `${((filters.minPrice - absoluteMin) / (absoluteMax - absoluteMin)) * 100}%`,
-                  right: `${100 - ((filters.maxPrice - absoluteMin) / (absoluteMax - absoluteMin)) * 100}%`,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  left: `${minPct}%`,
+                  right: `${100 - maxPct}%`,
+                  height: 4,
+                }}
+              />
+              {/* Min thumb */}
+              <div
+                className="absolute rounded-full bg-white border-2 border-blue-500 shadow-sm pointer-events-none"
+                style={{
+                  width: 16, height: 16,
+                  top: "50%",
+                  left: `${minPct}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+              />
+              {/* Max thumb */}
+              <div
+                className="absolute rounded-full bg-white border-2 border-blue-500 shadow-sm pointer-events-none"
+                style={{
+                  width: 16, height: 16,
+                  top: "50%",
+                  left: `${maxPct}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+              />
+
+              {/* Min input — transparent, handles interaction */}
+              <input
+                type="range"
+                min={absoluteMin}
+                max={absoluteMax}
+                step={1}
+                value={filters.minPrice}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  onChange({ ...filters, minPrice: Math.min(v, filters.maxPrice) });
+                }}
+                style={{
+                  position: "absolute", width: "100%", height: "100%",
+                  opacity: 0, cursor: "pointer", margin: 0, padding: 0,
+                  zIndex: minPct > 90 ? 5 : 3,
+                }}
+              />
+              {/* Max input — transparent, handles interaction */}
+              <input
+                type="range"
+                min={absoluteMin}
+                max={absoluteMax}
+                step={1}
+                value={filters.maxPrice}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  onChange({ ...filters, maxPrice: Math.max(v, filters.minPrice) });
+                }}
+                style={{
+                  position: "absolute", width: "100%", height: "100%",
+                  opacity: 0, cursor: "pointer", margin: 0, padding: 0,
+                  zIndex: 4,
                 }}
               />
             </div>
+
             <div className="flex justify-between text-gray-400 text-xs tabular-nums">
-              <span>${absoluteMin}</span><span>${absoluteMax}</span>
+              <span>${absoluteMin}</span>
+              <span>${absoluteMax}</span>
             </div>
           </div>
 
-          {/* Quantity */}
-          <div className="space-y-2.5">
-            <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider">Min tickets</p>
-            <div className="grid grid-cols-4 gap-1">
-              {QUANTITY_OPTIONS.map((qty) => (
-                <button
-                  key={qty}
-                  onClick={() => onChange({ ...filters, minQuantity: qty })}
-                  className={`py-1.5 rounded-lg text-sm font-medium border transition ${
-                    filters.minQuantity === qty
-                      ? "bg-blue-600 border-blue-600 text-white"
-                      : "bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900"
-                  }`}
-                >
-                  {qty}+
-                </button>
-              ))}
+          {/* ── Tickets ────────────────────────────── */}
+          <div className="space-y-2">
+            <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider">Tickets</p>
+            <div className="relative">
+              <select
+                value={filters.minQuantity}
+                onChange={(e) => onChange({ ...filters, minQuantity: Number(e.target.value) })}
+                className="w-full bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition appearance-none cursor-pointer"
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                  <option key={n} value={n}>
+                    {n === 1 ? "Any quantity" : `${n}+ tickets`}
+                  </option>
+                ))}
+                <option value={10}>10+ tickets</option>
+              </select>
+              {/* Custom chevron */}
+              <div className="absolute inset-y-0 right-2.5 flex items-center pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
           </div>
 
-          {/* Section type */}
+          {/* ── Section type ───────────────────────── */}
           <div className="space-y-1">
             <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Section</p>
             {SECTION_TYPES.map(({ value, label }) => {
@@ -141,6 +196,7 @@ export default function FilterSidebar({ filters, onChange, absoluteMin, absolute
               );
             })}
           </div>
+
         </div>
       </div>
     </aside>
