@@ -18,32 +18,28 @@ const OPTIONS: { field: SortField; label: string }[] = [
 
 export default function SortBar({ field, dir, onChange, count }: Props) {
   function handleClick(f: SortField) {
-    if (f === field) {
-      onChange(f, dir === "asc" ? "desc" : "asc");
-    } else {
-      onChange(f, "asc");
-    }
+    onChange(f, f === field ? (dir === "asc" ? "desc" : "asc") : "asc");
   }
 
   return (
-    <div className="flex items-center justify-between mb-3">
-      <p className="text-slate-500 text-xs">
-        <span className="text-slate-300 font-medium tabular-nums">{count}</span>{" "}
+    <div className="flex items-center justify-between mb-3 bg-white border border-gray-200 rounded-xl px-4 py-2.5">
+      <p className="text-gray-500 text-sm">
+        <span className="text-gray-900 font-semibold tabular-nums">{count}</span>{" "}
         listing{count !== 1 ? "s" : ""}
       </p>
 
-      <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg p-0.5">
-        <span className="text-slate-600 text-xs pl-2 pr-1 select-none">Sort:</span>
+      <div className="flex items-center gap-1">
+        <span className="text-gray-400 text-xs mr-1 hidden sm:block">Sort:</span>
         {OPTIONS.map(({ field: f, label }) => {
           const active = field === f;
           return (
             <button
               key={f}
               onClick={() => handleClick(f)}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition ${
                 active
-                  ? "bg-slate-700 text-slate-100"
-                  : "text-slate-500 hover:text-slate-300"
+                  ? "bg-blue-50 text-blue-700 border border-blue-200"
+                  : "text-gray-500 hover:text-gray-800 hover:bg-gray-50 border border-transparent"
               }`}
             >
               {label}

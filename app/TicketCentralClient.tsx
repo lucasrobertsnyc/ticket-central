@@ -28,10 +28,9 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
   });
 
   const [sortField, setSortField] = useState<SortField>("price");
-  const [sortDir, setSortDir]   = useState<SortDir>("asc");
-  const [showMap, setShowMap]   = useState(true);
+  const [sortDir, setSortDir]     = useState<SortDir>("asc");
+  const [showMap, setShowMap]     = useState(true);
 
-  // Toggle a section type — shared between sidebar and venue map
   function toggleSectionType(type: (typeof filters.sectionTypes)[number]) {
     setFilters((f) => ({
       ...f,
@@ -43,7 +42,6 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
 
   const filtered = useMemo(() => {
     const q = filters.search.toLowerCase().trim();
-
     const result = initialListings.filter((l) => {
       if (l.allInTotal < filters.minPrice || l.allInTotal > filters.maxPrice) return false;
       if (l.quantity < filters.minQuantity) return false;
@@ -66,7 +64,6 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
     return result;
   }, [initialListings, filters, sortField, sortDir]);
 
-  // Best deal = cheapest all-in regardless of current sort order
   const cheapestId = useMemo(() => {
     if (filtered.length === 0) return null;
     return filtered.reduce((best, l) =>
@@ -75,54 +72,52 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
   }, [filtered]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Nav */}
-      <nav className="bg-[#070b14] border-b border-slate-800/80 px-4 sm:px-6 py-3 flex items-center gap-4">
-        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-          </svg>
-          <span className="text-slate-100 font-black text-lg tracking-tight">
-            Ticket<span className="text-blue-500">Central</span>
-          </span>
-        </Link>
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* ── Nav ────────────────────────────────────────────── */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-1.5 flex-shrink-0">
+            <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+            </svg>
+            <span className="text-gray-900 font-extrabold text-lg tracking-tight leading-none">
+              Ticket<span className="text-blue-600">Central</span>
+            </span>
+          </Link>
 
-        <span className="text-slate-700">|</span>
+          <span className="text-gray-200 hidden sm:block">|</span>
 
-        <Link
-          href="/"
-          className="flex items-center gap-1 text-slate-500 hover:text-slate-300 text-sm transition"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          All events
-        </Link>
+          <Link
+            href="/"
+            className="flex items-center gap-1 text-gray-500 hover:text-gray-800 text-sm transition hidden sm:flex"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            All events
+          </Link>
 
-        <span className="ml-auto text-slate-700 text-xs hidden sm:block">
-          Prices updated in real time
-        </span>
-      </nav>
+          <div className="ml-auto">
+            <SearchBar
+              value={filters.search}
+              onChange={(search) => setFilters((f) => ({ ...f, search }))}
+              resultCount={filtered.length}
+            />
+          </div>
+        </div>
+      </header>
 
-      {/* Event header */}
+      {/* ── Event header ────────────────────────────────────── */}
       <EventHeader event={event} totalListings={filtered.length} />
 
-      {/* Main content */}
+      {/* ── Main content ────────────────────────────────────── */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-5">
-        {/* Search */}
-        <div className="mb-5">
-          <SearchBar
-            value={filters.search}
-            onChange={(search) => setFilters((f) => ({ ...f, search }))}
-            resultCount={filtered.length}
-          />
-        </div>
 
         {/* Seat map toggle */}
         <div className="mb-4">
           <button
             onClick={() => setShowMap((v) => !v)}
-            className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition"
+            className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium transition"
           >
             <svg
               className={`w-4 h-4 transition-transform ${showMap ? "rotate-90" : ""}`}
@@ -139,9 +134,7 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
                 listings={initialListings}
                 activeSectionTypes={filters.sectionTypes}
                 onSectionTypeToggle={toggleSectionType}
-                onClearSectionTypes={() =>
-                  setFilters((f) => ({ ...f, sectionTypes: [] }))
-                }
+                onClearSectionTypes={() => setFilters((f) => ({ ...f, sectionTypes: [] }))}
               />
             </div>
           )}
@@ -151,7 +144,7 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
         <div className="flex flex-col lg:flex-row gap-5">
           <FilterSidebar
             filters={filters}
-            onChange={(f) => setFilters({ ...f, sectionTypes: f.sectionTypes })}
+            onChange={setFilters}
             absoluteMin={absoluteMin}
             absoluteMax={absoluteMax}
           />
@@ -168,8 +161,13 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
         </div>
       </main>
 
-      <footer className="border-t border-slate-800 mt-8 px-6 py-4 text-center text-slate-700 text-xs">
-        TicketCentral &middot; All prices include fees and taxes &middot; Not affiliated with any ticketing platform
+      <footer className="border-t border-gray-200 bg-white mt-8 px-6 py-5">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span className="text-gray-900 font-bold text-sm">Ticket<span className="text-blue-600">Central</span></span>
+          <p className="text-gray-400 text-xs">
+            All prices include fees and taxes &middot; Not affiliated with any ticketing platform
+          </p>
+        </div>
       </footer>
     </div>
   );

@@ -2,16 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: dark;
-}
-
 body {
-  background-color: #080c15;
-  color: #f1f5f9;
+  background-color: #F3F4F6;
+  color: #111827;
 }
 
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
-  opacity: 0.4;
+  opacity: 0.5;
 }

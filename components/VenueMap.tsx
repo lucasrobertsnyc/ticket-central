@@ -127,10 +127,10 @@ export default function VenueMap({ listings, activeSectionTypes, onSectionTypeTo
   const fmt = (n: number) => `$${n}`;
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
-      <div className="px-4 py-2.5 border-b border-slate-800 flex items-center justify-between">
-        <span className="text-slate-300 text-sm font-semibold">Seat Map</span>
-        <span className="text-slate-500 text-xs">Click a zone to filter</span>
+    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+      <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
+        <span className="text-gray-700 text-sm font-semibold">Seat Map</span>
+        <span className="text-gray-400 text-xs">Click a zone to filter</span>
       </div>
 
       <div className="flex flex-col sm:flex-row">
@@ -253,14 +253,14 @@ export default function VenueMap({ listings, activeSectionTypes, onSectionTypeTo
         </svg>
 
         {/* ── Legend + prices ──────────────────────── */}
-        <div className="flex-1 p-4 flex flex-col justify-center gap-1.5">
-          <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-1">Zones</p>
+        <div className="flex-1 p-4 flex flex-col justify-center gap-1">
+          <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1.5">Zones</p>
 
           {([
-            { type: "floor" as SectionType,  label: "GA Floor",    color: "#3b82f6" },
-            { type: "lower" as SectionType,  label: "Lower Bowl",  color: "#2563eb" },
+            { type: "floor" as SectionType,  label: "GA Floor",    color: "#2563eb" },
+            { type: "lower" as SectionType,  label: "Lower Bowl",  color: "#1d4ed8" },
             { type: "club"  as SectionType,  label: "Club Level",  color: "#7c3aed" },
-            { type: "upper" as SectionType,  label: "Upper Level", color: "#475569" },
+            { type: "upper" as SectionType,  label: "Upper Level", color: "#6b7280" },
             { type: "suite" as SectionType,  label: "Suite",       color: "#8b5cf6" },
           ]).map(({ type, label, color }) => {
             const min = minByType[type];
@@ -273,22 +273,22 @@ export default function VenueMap({ listings, activeSectionTypes, onSectionTypeTo
                 onClick={() => onSectionTypeToggle(type)}
                 className={`flex items-center justify-between w-full px-3 py-2 rounded-lg text-left transition-all ${
                   active
-                    ? "bg-slate-700/70 border border-slate-600"
+                    ? "bg-blue-50 border border-blue-200"
                     : dimmed
                     ? "border border-transparent opacity-40"
-                    : "border border-transparent hover:bg-slate-800"
+                    : "border border-transparent hover:bg-gray-50"
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: color }} />
-                  <span className={`text-sm ${dimmed ? "text-slate-500" : "text-slate-200"}`}>{label}</span>
+                  <span className={`text-sm font-medium ${active ? "text-blue-700" : dimmed ? "text-gray-400" : "text-gray-700"}`}>{label}</span>
                 </div>
                 {min !== null ? (
-                  <span className={`text-xs font-semibold tabular-nums ${dimmed ? "text-slate-600" : "text-slate-300"}`}>
+                  <span className={`text-xs font-semibold tabular-nums ${active ? "text-blue-600" : dimmed ? "text-gray-300" : "text-gray-500"}`}>
                     from {fmt(min)}
                   </span>
                 ) : (
-                  <span className="text-xs text-slate-600">—</span>
+                  <span className="text-xs text-gray-300">—</span>
                 )}
               </button>
             );
@@ -297,7 +297,7 @@ export default function VenueMap({ listings, activeSectionTypes, onSectionTypeTo
           {activeSectionTypes.length > 0 && (
             <button
               onClick={onClearSectionTypes}
-              className="mt-1 text-xs text-blue-400 hover:text-blue-300 transition text-left"
+              className="mt-1 text-xs text-blue-600 hover:text-blue-700 font-medium transition text-left"
             >
               Clear zone filter
             </button>
