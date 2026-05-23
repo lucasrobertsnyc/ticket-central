@@ -4,27 +4,32 @@
  * Today this returns mock data. To wire up a real API, replace the
  * body of each function — the call sites and types stay the same.
  *
- * Example real implementation:
- *   const res = await fetch(`https://api.seatgeek.com/2/events/${eventId}/listings`, {
- *     headers: { Authorization: `Bearer ${process.env.SEATGEEK_API_KEY}` },
- *   });
- *   const json = await res.json();
- *   return json.listings.map(normalizeListing);
+ * Artist images are automatically upgraded to real Spotify photos when
+ * SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET are present in .env.local.
+ * Without those vars the stock photos from data/tickets.ts are used instead.
  */
 
 import { MOCK_EVENTS, MOCK_LISTINGS } from "@/data/tickets";
 import type { Event, TicketListing } from "@/types/ticket";
+import { getSpotifyArtistImage } from "@/lib/spotify";
+
+/** Enrich a single event with a Spotify artist image if available. */
+async function withImage(event: Event): Promise<Event> {
+  const spotifyUrl = await getSpotifyArtistImage(event.artist);
+  if (!spotifyUrl) return event;          // fall back to imageUrl from data
+  return { ...event, imageUrl: spotifyUrl };
+}
 
 export async function getEvents(): Promise<Event[]> {
-  await Promise.resolve();
-  return MOCK_EVENTS;
+  // Fetch all Spotify images in parallel
+  return Promise.all(MOCK_EVENTS.map(withImage));
 }
 
 export async function searchEvents(query: string): Promise<Event[]> {
-  await Promise.resolve();
-  if (!query.trim()) return MOCK_EVENTS;
+  const events = await getEvents();
+  if (!query.trim()) return events;
   const q = query.toLowerCase();
-  return MOCK_EVENTS.filter(
+  return events.filter(
     (e) =>
       e.artist.toLowerCase().includes(q) ||
       e.venue.toLowerCase().includes(q) ||
@@ -34,8 +39,9 @@ export async function searchEvents(query: string): Promise<Event[]> {
 }
 
 export async function getEvent(eventId: string): Promise<Event | null> {
-  await Promise.resolve();
-  return MOCK_EVENTS.find((e) => e.id === eventId) ?? null;
+  const event = MOCK_EVENTS.find((e) => e.id === eventId) ?? null;
+  if (!event) return null;
+  return withImage(event);
 }
 
 export async function getListings(eventId: string): Promise<TicketListing[]> {

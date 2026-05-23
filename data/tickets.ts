@@ -11,6 +11,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "R&B / Pop",
     lowestAllInPrice: 92,
     listingCount: 15,
+    imageUrl: "https://picsum.photos/seed/weeknd-msg/800/400",
   },
   {
     id: "evt-002",
@@ -22,6 +23,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop / R&B",
     lowestAllInPrice: 118,
     listingCount: 12,
+    imageUrl: "https://picsum.photos/seed/beyonce-sofi/800/400",
   },
   {
     id: "evt-003",
@@ -33,6 +35,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop / Country",
     lowestAllInPrice: 87,
     listingCount: 14,
+    imageUrl: "https://picsum.photos/seed/taylor-atttstadium/800/400",
   },
   {
     id: "evt-004",
@@ -44,6 +47,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Hip-Hop",
     lowestAllInPrice: 76,
     listingCount: 11,
+    imageUrl: "https://picsum.photos/seed/kendrick-chase/800/400",
   },
   {
     id: "evt-005",
@@ -55,6 +59,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Latin / Reggaeton",
     lowestAllInPrice: 93,
     listingCount: 10,
+    imageUrl: "https://picsum.photos/seed/badbunny-hardrock/800/400",
   },
   {
     id: "evt-006",
@@ -66,6 +71,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Rock / Pop",
     lowestAllInPrice: 108,
     listingCount: 10,
+    imageUrl: "https://picsum.photos/seed/coldplay-rosebowl/800/400",
   },
 ];
 

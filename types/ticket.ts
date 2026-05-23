@@ -36,6 +36,8 @@ export interface Event {
   genre: string;
   lowestAllInPrice: number;
   listingCount: number;
+  /** Hero image URL — stock photo by default, replaced by Spotify when creds are set */
+  imageUrl: string;
 }
 
 export interface FilterState {

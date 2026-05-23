@@ -3,19 +3,18 @@
 import Link from "next/link";
 import type { Event } from "@/types/ticket";
 
-// Very dark single-color backgrounds — looks like a real venue/concert photo
-// taken in low light, not a generated gradient. Same approach used by
-// Ticketmaster, StubHub, and AXS when no artist photo is available.
+// Very dark single-color backgrounds — used as the base colour so the header
+// looks great even before the image loads or when no image is available.
 const GENRE_DARK_BG: Record<string, string> = {
-  "R&B / Pop":         "#0f0a1a",   // near-black with very faint purple cast
-  "Pop / R&B":         "#150e05",   // near-black with very faint warm cast
-  "Pop / Country":     "#060d1c",   // near-black navy
-  "Hip-Hop":           "#0d0d0d",   // pure near-black
-  "Latin / Reggaeton": "#061410",   // near-black with very faint green cast
-  "Rock / Pop":        "#070e18",   // near-black with very faint blue cast
+  "R&B / Pop":         "#0f0a1a",
+  "Pop / R&B":         "#150e05",
+  "Pop / Country":     "#060d1c",
+  "Hip-Hop":           "#0d0d0d",
+  "Latin / Reggaeton": "#061410",
+  "Rock / Pop":        "#070e18",
 };
 
-// Accent line color at the bottom edge of the header (thin, not dominant)
+// Accent line at the bottom edge of the header
 const GENRE_ACCENT: Record<string, string> = {
   "R&B / Pop":         "#7c3aed",
   "Pop / R&B":         "#d97706",
@@ -31,15 +30,33 @@ interface Props {
 }
 
 export default function EventHeader({ event, totalListings }: Props) {
-  const bg   = GENRE_DARK_BG[event.genre]  ?? "#0d0d0d";
-  const line = GENRE_ACCENT[event.genre]   ?? "#374151";
+  const bg   = GENRE_DARK_BG[event.genre] ?? "#0d0d0d";
+  const line = GENRE_ACCENT[event.genre]  ?? "#374151";
 
   return (
-    <div style={{ backgroundColor: bg }} className="relative">
-      {/* Thin accent line at the bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-px" style={{ backgroundColor: line, opacity: 0.6 }} />
+    <div style={{ backgroundColor: bg }} className="relative overflow-hidden">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-7">
+      {/* ── Artist photo (blurred, dimmed) ────────── */}
+      <img
+        src={event.imageUrl}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover object-center"
+        style={{ opacity: 0.18, filter: "blur(2px) saturate(0.6)", transform: "scale(1.05)" }}
+      />
+
+      {/* Dark gradient overlay — keeps text readable regardless of photo content */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+
+      {/* Thin accent line at the bottom */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-px"
+        style={{ backgroundColor: line, opacity: 0.6 }}
+      />
+
+      {/* ── Content ───────────────────────────────── */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-7">
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-white/30 text-xs mb-4">
           <Link href="/" className="hover:text-white/60 transition">Home</Link>

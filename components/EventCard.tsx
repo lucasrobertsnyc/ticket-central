@@ -3,17 +3,6 @@
 import Link from "next/link";
 import type { Event } from "@/types/ticket";
 
-// Picsum seed → deterministic photo per artist (replace seeds with real CDN
-// URLs when you have actual artist images from Spotify / Ticketmaster API).
-const ARTIST_SEED: Record<string, string> = {
-  "evt-001": "weeknd-msg",
-  "evt-002": "beyonce-sofi",
-  "evt-003": "taylor-atttstadium",
-  "evt-004": "kendrick-chase",
-  "evt-005": "badbunny-hardrock",
-  "evt-006": "coldplay-rosebowl",
-};
-
 // Dark fallback shown behind the image while it loads / if it 404s
 const GENRE_FALLBACK_BG: Record<string, string> = {
   "R&B / Pop":         "#0f0a1a",
@@ -29,7 +18,6 @@ interface Props {
 }
 
 export default function EventCard({ event }: Props) {
-  const seed = ARTIST_SEED[event.id] ?? event.id;
   const fallback = GENRE_FALLBACK_BG[event.genre] ?? "#111";
 
   return (
@@ -38,9 +26,8 @@ export default function EventCard({ event }: Props) {
 
         {/* ── Artist image ─────────────────────────── */}
         <div className="relative h-40 overflow-hidden" style={{ backgroundColor: fallback }}>
-          {/* Photo */}
           <img
-            src={`https://picsum.photos/seed/${seed}/480/200`}
+            src={event.imageUrl}
             alt={event.artist}
             className="w-full h-full object-cover opacity-75 group-hover:opacity-85 group-hover:scale-105 transition-all duration-500"
           />
@@ -65,7 +52,6 @@ export default function EventCard({ event }: Props) {
         {/* ── Event details ────────────────────────── */}
         <div className="px-3.5 pt-3 pb-3.5">
           <div className="space-y-1 mb-3">
-            {/* Venue */}
             <p className="text-sm flex items-center gap-1.5 truncate">
               <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -74,7 +60,6 @@ export default function EventCard({ event }: Props) {
               <span className="font-medium text-gray-900 truncate">{event.venue}</span>
               <span className="text-gray-400 flex-shrink-0">&middot; {event.city}</span>
             </p>
-            {/* Date */}
             <p className="text-gray-500 text-sm flex items-center gap-1.5">
               <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -83,7 +68,6 @@ export default function EventCard({ event }: Props) {
             </p>
           </div>
 
-          {/* Price + CTA */}
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
             <div>
               <p className="text-gray-400 text-xs">Tickets from</p>
