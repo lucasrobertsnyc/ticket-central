@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Read(//Users/lucasroberts/.nvm/**)",
+      "Read(//Users/lucasroberts/**)",
+      "Bash(find /usr /opt /Users/lucasroberts -name \"node\" -type f 2>/dev/null | head -10 *)",
+      "Bash(mdfind -name \"node\" -onlyin /usr/local)",
+      "Bash(mdfind -name \"node\" -onlyin /Applications)",
+      "Bash(mkdir -p \"/Users/lucasroberts/Downloads/Ticket Central/app/events/[id]\")"
+    ]
+  }
+}
