@@ -125,7 +125,11 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
-            {showMap ? "Hide" : "Show"} Seat Map
+            {showMap ? "Hide" : "Show"}{" "}
+            {event.genre === "NFL" ? "Stadium Map"
+              : event.genre === "MLB" ? "Ballpark Map"
+              : event.genre === "NBA" || event.genre === "NHL" ? "Arena Map"
+              : "Seat Map"}
           </button>
 
           {showMap && (
