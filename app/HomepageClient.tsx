@@ -36,6 +36,7 @@ export default function HomepageClient({ events }: Props) {
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState<Category>("all");
   const [league, setLeague]     = useState<League | "">("");
+  const [genre, setGenre]       = useState<string>("");
 
   const locationOptions = useMemo(() => extractLocations(events), [events]);
 
@@ -45,13 +46,27 @@ export default function HomepageClient({ events }: Props) {
     [events]
   );
 
+  // Which concert genres actually have events in the data?
+  const availableGenres = useMemo(() => {
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const e of events) {
+      if (!SPORT_GENRES.has(e.genre) && !seen.has(e.genre)) {
+        seen.add(e.genre);
+        result.push(e.genre);
+      }
+    }
+    return result;
+  }, [events]);
+
   const filtered = useMemo(() => {
     const a = artist.toLowerCase().trim();
     const l = location;
     return events.filter((e) => {
       if (category === "concerts" && SPORT_GENRES.has(e.genre)) return false;
       if (category === "sports"   && !SPORT_GENRES.has(e.genre)) return false;
-      if (category === "sports" && league && e.genre !== league) return false;
+      if (category === "sports"   && league && e.genre !== league) return false;
+      if (category === "concerts" && genre  && e.genre !== genre)  return false;
       if (l && !e.city.includes(l)) return false;
       if (!a) return true;
       return (
@@ -61,17 +76,18 @@ export default function HomepageClient({ events }: Props) {
         e.genre.toLowerCase().includes(a)
       );
     });
-  }, [events, artist, location, category, league]);
+  }, [events, artist, location, category, league, genre]);
 
   const hasSearchFilter = !!artist || !!location;
-  const hasFilter = hasSearchFilter || category !== "all" || !!league;
+  const hasFilter = hasSearchFilter || category !== "all" || !!league || !!genre;
 
   // Heading computed outside JSX so TypeScript doesn't narrow category away
   const sectionTitle = hasSearchFilter
     ? `${filtered.length} event${filtered.length !== 1 ? "s" : ""} found`
-    : category === "sports" && league ? `Upcoming ${league} Games`
-    : category === "sports"   ? "Upcoming Games"
-    : category === "concerts" ? "Upcoming Concerts"
+    : category === "sports"   && league ? `Upcoming ${league} Games`
+    : category === "sports"             ? "Upcoming Games"
+    : category === "concerts" && genre  ? `Upcoming ${genre} Concerts`
+    : category === "concerts"           ? "Upcoming Concerts"
     : "Upcoming Events";
 
   function clearAll() {
@@ -79,6 +95,7 @@ export default function HomepageClient({ events }: Props) {
     setLocation("");
     setCategory("all");
     setLeague("");
+    setGenre("");
   }
 
   return (
@@ -172,7 +189,7 @@ export default function HomepageClient({ events }: Props) {
           {(["all", "concerts", "sports"] as Category[]).map((cat) => (
             <button
               key={cat}
-              onClick={() => { setCategory(cat); setLeague(""); }}
+              onClick={() => { setCategory(cat); setLeague(""); setGenre(""); }}
               className={`px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
                 category === cat
                   ? "border-blue-600 text-blue-600"
@@ -186,7 +203,7 @@ export default function HomepageClient({ events }: Props) {
 
         {/* League sub-filter pills — only visible when Sports tab is active */}
         {category === "sports" && availableLeagues.length > 0 && (
-          <div className="flex items-center gap-2 py-3 border-b border-gray-100">
+          <div className="flex items-center gap-2 py-3 border-b border-gray-100 flex-wrap">
             <span className="text-xs text-gray-400 font-medium mr-1">League:</span>
             <button
               onClick={() => setLeague("")}
@@ -209,6 +226,36 @@ export default function HomepageClient({ events }: Props) {
                 }`}
               >
                 {lg}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Genre sub-filter pills — only visible when Concerts tab is active */}
+        {category === "concerts" && availableGenres.length > 0 && (
+          <div className="flex items-center gap-2 py-3 border-b border-gray-100 flex-wrap">
+            <span className="text-xs text-gray-400 font-medium mr-1">Genre:</span>
+            <button
+              onClick={() => setGenre("")}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                genre === ""
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              All
+            </button>
+            {availableGenres.map((g) => (
+              <button
+                key={g}
+                onClick={() => setGenre(genre === g ? "" : g)}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                  genre === g
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {g}
               </button>
             ))}
           </div>
