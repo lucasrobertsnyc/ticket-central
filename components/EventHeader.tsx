@@ -185,36 +185,6 @@ function SportsHeader({ event, totalListings }: { event: Event; totalListings: n
         </>
       )}
 
-      {/* ── Large background team logos (fully visible watermarks) ─────────── */}
-      {/* Team 1 — left side, large watermark. brightness(0) invert(1) renders any
-          logo as a white silhouette so dark-on-dark logos (e.g. Yankees) are visible. */}
-      {logo1 && (
-        <img
-          src={logo1} alt="" aria-hidden="true"
-          className="absolute top-1/2 -translate-y-1/2 object-contain pointer-events-none select-none"
-          style={{
-            left: "6%",
-            width: "clamp(120px, 18vw, 220px)",
-            height: "clamp(120px, 18vw, 220px)",
-            opacity: 0.18,
-            filter: "brightness(0) invert(1)",
-          }}
-        />
-      )}
-      {/* Team 2 — right side */}
-      {logo2 && (
-        <img
-          src={logo2} alt="" aria-hidden="true"
-          className="absolute top-1/2 -translate-y-1/2 object-contain pointer-events-none select-none"
-          style={{
-            right: "6%",
-            width: "clamp(120px, 18vw, 220px)",
-            height: "clamp(120px, 18vw, 220px)",
-            opacity: 0.18,
-            filter: "brightness(0) invert(1)",
-          }}
-        />
-      )}
 
       {/* ── Diagonal texture ───────────────────────────────────────────────── */}
       <div className="absolute inset-0 pointer-events-none"
