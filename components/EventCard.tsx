@@ -20,41 +20,172 @@ const GENRE_FALLBACK_BG: Record<string, string> = {
   "MLS":               "#070f0a",
 };
 
+interface TeamInfo {
+  abbr: string;
+  primary: string;
+  secondary: string;
+}
+
+const TEAM_INFO: Record<string, TeamInfo> = {
+  // NFL
+  "Chiefs":   { abbr: "KC",  primary: "#E31837", secondary: "#FFB612" },
+  "49ers":    { abbr: "SF",  primary: "#AA0000", secondary: "#B3995D" },
+  "Cowboys":  { abbr: "DAL", primary: "#003594", secondary: "#869397" },
+  "Packers":  { abbr: "GB",  primary: "#203731", secondary: "#FFB612" },
+  // NBA
+  "Lakers":   { abbr: "LAL", primary: "#552583", secondary: "#FDB927" },
+  "Warriors": { abbr: "GSW", primary: "#1D428A", secondary: "#FFC72C" },
+  "Knicks":   { abbr: "NYK", primary: "#006BB6", secondary: "#F58426" },
+  "Celtics":  { abbr: "BOS", primary: "#007A33", secondary: "#FFFFFF" },
+  // MLB
+  "Yankees":  { abbr: "NYY", primary: "#003087", secondary: "#FFFFFF" },
+  "Red Sox":  { abbr: "BOS", primary: "#BD3039", secondary: "#0D2B56" },
+  // NHL
+  "Rangers":  { abbr: "NYR", primary: "#0038A8", secondary: "#CE1126" },
+  "Penguins": { abbr: "PIT", primary: "#000000", secondary: "#FCB514" },
+};
+
+const SPORT_GENRES = new Set(["NFL", "NBA", "MLB", "NHL", "MLS"]);
+
+function parseMatchup(artist: string): [string, string] | null {
+  const parts = artist.split(/ vs\.? /i);
+  if (parts.length === 2) return [parts[0].trim(), parts[1].trim()];
+  return null;
+}
+
+function getTeam(name: string): TeamInfo {
+  if (TEAM_INFO[name]) return TEAM_INFO[name];
+  for (const key of Object.keys(TEAM_INFO)) {
+    if (name.includes(key) || key.includes(name)) return TEAM_INFO[key];
+  }
+  return { abbr: name.slice(0, 3).toUpperCase(), primary: "#1e293b", secondary: "#94a3b8" };
+}
+
+function SportHero({ event }: { event: Event }) {
+  const matchup = parseMatchup(event.artist);
+  const team1 = matchup ? getTeam(matchup[0]) : { abbr: "HM", primary: "#1e293b", secondary: "#94a3b8" };
+  const team2 = matchup ? getTeam(matchup[1]) : { abbr: "AW", primary: "#374151", secondary: "#94a3b8" };
+
+  return (
+    <div className="relative h-40 overflow-hidden flex">
+      {/* Left team */}
+      <div
+        className="flex-1 flex flex-col items-center justify-center relative overflow-hidden"
+        style={{ backgroundColor: team1.primary }}
+      >
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: "repeating-linear-gradient(45deg,rgba(255,255,255,.1) 0,rgba(255,255,255,.1) 1px,transparent 0,transparent 50%)",
+            backgroundSize: "8px 8px",
+          }}
+        />
+        <span
+          className="relative text-3xl font-black tracking-tight leading-none"
+          style={{ color: team1.secondary, textShadow: "0 2px 10px rgba(0,0,0,0.6)" }}
+        >
+          {team1.abbr}
+        </span>
+        {matchup && (
+          <span
+            className="relative text-[9px] font-semibold uppercase tracking-wider mt-1 opacity-70"
+            style={{ color: team1.secondary }}
+          >
+            {matchup[0]}
+          </span>
+        )}
+      </div>
+
+      {/* VS badge */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+        <div className="w-9 h-9 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 flex items-center justify-center shadow-xl">
+          <span className="text-white text-[10px] font-black tracking-tight">VS</span>
+        </div>
+      </div>
+
+      {/* Right team */}
+      <div
+        className="flex-1 flex flex-col items-center justify-center relative overflow-hidden"
+        style={{ backgroundColor: team2.primary }}
+      >
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: "repeating-linear-gradient(-45deg,rgba(255,255,255,.1) 0,rgba(255,255,255,.1) 1px,transparent 0,transparent 50%)",
+            backgroundSize: "8px 8px",
+          }}
+        />
+        <span
+          className="relative text-3xl font-black tracking-tight leading-none"
+          style={{ color: team2.secondary, textShadow: "0 2px 10px rgba(0,0,0,0.6)" }}
+        >
+          {team2.abbr}
+        </span>
+        {matchup && (
+          <span
+            className="relative text-[9px] font-semibold uppercase tracking-wider mt-1 opacity-70"
+            style={{ color: team2.secondary }}
+          >
+            {matchup[1]}
+          </span>
+        )}
+      </div>
+
+      {/* Bottom gradient */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent pointer-events-none" />
+
+      {/* League badge */}
+      <div className="absolute top-3 left-3 z-10">
+        <span className="inline-block bg-black/50 backdrop-blur-sm text-white/90 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">
+          {event.genre}
+        </span>
+      </div>
+
+      {/* Matchup name */}
+      <div className="absolute bottom-0 left-0 right-0 px-3.5 pb-2.5 pointer-events-none">
+        <h3 className="text-white font-extrabold text-base leading-tight drop-shadow">
+          {event.artist}
+        </h3>
+      </div>
+    </div>
+  );
+}
+
 interface Props {
   event: Event;
 }
 
 export default function EventCard({ event }: Props) {
   const fallback = GENRE_FALLBACK_BG[event.genre] ?? "#111";
+  const isSport = SPORT_GENRES.has(event.genre);
 
   return (
     <Link href={`/events/${event.id}`} className="group block">
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-150 hover:shadow-lg hover:-translate-y-0.5">
 
-        {/* ── Artist image ─────────────────────────── */}
-        <div className="relative h-40 overflow-hidden" style={{ backgroundColor: fallback }}>
-          <img
-            src={event.imageUrl}
-            alt={event.artist}
-            className="w-full h-full object-cover opacity-75 group-hover:opacity-85 group-hover:scale-105 transition-all duration-500"
-          />
-          {/* Bottom-fade gradient so text is always legible */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-          {/* Genre tag — top left */}
-          <div className="absolute top-3 left-3">
-            <span className="inline-block bg-black/50 backdrop-blur-sm text-white/80 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded">
-              {event.genre}
-            </span>
+        {isSport ? (
+          <SportHero event={event} />
+        ) : (
+          /* ── Concert image ─────────────────────────── */
+          <div className="relative h-40 overflow-hidden" style={{ backgroundColor: fallback }}>
+            <img
+              src={event.imageUrl}
+              alt={event.artist}
+              className="w-full h-full object-cover opacity-75 group-hover:opacity-85 group-hover:scale-105 transition-all duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute top-3 left-3">
+              <span className="inline-block bg-black/50 backdrop-blur-sm text-white/80 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded">
+                {event.genre}
+              </span>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 px-3.5 pb-3 pt-6">
+              <h3 className="text-white font-extrabold text-xl leading-tight drop-shadow">
+                {event.artist}
+              </h3>
+            </div>
           </div>
-
-          {/* Artist name — anchored to bottom of image */}
-          <div className="absolute bottom-0 left-0 right-0 px-3.5 pb-3 pt-6">
-            <h3 className="text-white font-extrabold text-xl leading-tight drop-shadow">
-              {event.artist}
-            </h3>
-          </div>
-        </div>
+        )}
 
         {/* ── Event details ────────────────────────── */}
         <div className="px-3.5 pt-3 pb-3.5">

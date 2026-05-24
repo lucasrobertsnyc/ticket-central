@@ -13,6 +13,7 @@ function extractLocations(events: Event[]): { label: string; match: string }[] {
   const locs: { label: string; match: string }[] = [];
   const stateNames: Record<string, string> = {
     NY: "New York", CA: "California", TX: "Texas", FL: "Florida",
+    MO: "Missouri",
   };
   for (const e of events) {
     const state = e.city.split(", ")[1];
@@ -25,15 +26,24 @@ function extractLocations(events: Event[]): { label: string; match: string }[] {
 }
 
 const SPORT_GENRES = new Set(["NFL", "NBA", "MLB", "NHL", "MLS"]);
+const LEAGUES = ["NFL", "NBA", "MLB", "NHL"] as const;
+type League = (typeof LEAGUES)[number];
 
 type Category = "all" | "concerts" | "sports";
 
 export default function HomepageClient({ events }: Props) {
-  const [artist, setArtist]       = useState("");
-  const [location, setLocation]   = useState("");
-  const [category, setCategory]   = useState<Category>("all");
+  const [artist, setArtist]     = useState("");
+  const [location, setLocation] = useState("");
+  const [category, setCategory] = useState<Category>("all");
+  const [league, setLeague]     = useState<League | "">("");
 
   const locationOptions = useMemo(() => extractLocations(events), [events]);
+
+  // Which leagues actually have events in the data?
+  const availableLeagues = useMemo(
+    () => LEAGUES.filter((lg) => events.some((e) => e.genre === lg)),
+    [events]
+  );
 
   const filtered = useMemo(() => {
     const a = artist.toLowerCase().trim();
@@ -41,6 +51,7 @@ export default function HomepageClient({ events }: Props) {
     return events.filter((e) => {
       if (category === "concerts" && SPORT_GENRES.has(e.genre)) return false;
       if (category === "sports"   && !SPORT_GENRES.has(e.genre)) return false;
+      if (category === "sports" && league && e.genre !== league) return false;
       if (l && !e.city.includes(l)) return false;
       if (!a) return true;
       return (
@@ -50,17 +61,25 @@ export default function HomepageClient({ events }: Props) {
         e.genre.toLowerCase().includes(a)
       );
     });
-  }, [events, artist, location, category]);
+  }, [events, artist, location, category, league]);
 
   const hasSearchFilter = !!artist || !!location;
-  const hasFilter = hasSearchFilter || category !== "all";
+  const hasFilter = hasSearchFilter || category !== "all" || !!league;
 
   // Heading computed outside JSX so TypeScript doesn't narrow category away
   const sectionTitle = hasSearchFilter
     ? `${filtered.length} event${filtered.length !== 1 ? "s" : ""} found`
+    : category === "sports" && league ? `Upcoming ${league} Games`
     : category === "sports"   ? "Upcoming Games"
     : category === "concerts" ? "Upcoming Concerts"
     : "Upcoming Events";
+
+  function clearAll() {
+    setArtist("");
+    setLocation("");
+    setCategory("all");
+    setLeague("");
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -94,7 +113,7 @@ export default function HomepageClient({ events }: Props) {
             We show the real all-in price across SeatGeek, StubHub, TickPick, Vivid Seats, and more.
           </p>
 
-          {/* Two-part search — SeatGeek style */}
+          {/* Two-part search */}
           <div className="flex flex-col sm:flex-row max-w-2xl mx-auto gap-0 shadow-sm rounded-xl overflow-hidden border border-gray-300 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition">
             <div className="flex-1 flex items-center bg-white px-4 py-3 gap-2 border-b sm:border-b-0 sm:border-r border-gray-200">
               <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -104,7 +123,7 @@ export default function HomepageClient({ events }: Props) {
                 type="text"
                 value={artist}
                 onChange={(e) => setArtist(e.target.value)}
-                placeholder="Artist, band, or venue"
+                placeholder="Artist, team, or venue"
                 autoFocus
                 className="flex-1 bg-transparent text-gray-900 placeholder-gray-400 text-sm outline-none"
               />
@@ -149,12 +168,12 @@ export default function HomepageClient({ events }: Props) {
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-7">
 
         {/* Category tabs */}
-        <div className="flex items-center gap-1 mb-5 border-b border-gray-200">
+        <div className="flex items-center gap-1 mb-0 border-b border-gray-200">
           {(["all", "concerts", "sports"] as Category[]).map((cat) => (
             <button
               key={cat}
-              onClick={() => setCategory(cat)}
-              className={`px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors capitalize ${
+              onClick={() => { setCategory(cat); setLeague(""); }}
+              className={`px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
                 category === cat
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-gray-500 hover:text-gray-800"
@@ -165,11 +184,41 @@ export default function HomepageClient({ events }: Props) {
           ))}
         </div>
 
-        <div className="flex items-center justify-between mb-4">
+        {/* League sub-filter pills — only visible when Sports tab is active */}
+        {category === "sports" && availableLeagues.length > 0 && (
+          <div className="flex items-center gap-2 py-3 border-b border-gray-100">
+            <span className="text-xs text-gray-400 font-medium mr-1">League:</span>
+            <button
+              onClick={() => setLeague("")}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                league === ""
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              All
+            </button>
+            {availableLeagues.map((lg) => (
+              <button
+                key={lg}
+                onClick={() => setLeague(league === lg ? "" : lg)}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                  league === lg
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {lg}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between mt-4 mb-4">
           <h2 className="text-gray-900 font-bold text-base">{sectionTitle}</h2>
           {hasFilter && (
             <button
-              onClick={() => { setArtist(""); setLocation(""); setCategory("all"); }}
+              onClick={clearAll}
               className="text-sm text-blue-600 hover:text-blue-700 font-medium transition"
             >
               Clear filters
@@ -185,7 +234,7 @@ export default function HomepageClient({ events }: Props) {
               </svg>
             </div>
             <p className="text-gray-700 font-semibold mb-1">No events found</p>
-            <p className="text-gray-400 text-sm">Try a different artist or location.</p>
+            <p className="text-gray-400 text-sm">Try a different artist, team, or location.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
