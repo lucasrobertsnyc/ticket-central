@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition, useCallback } from "react";
 import Link from "next/link";
 import type { Event, TicketListing, FilterState, SortField, SortDir } from "@/types/ticket";
 import EventHeader from "@/components/EventHeader";
@@ -31,14 +31,29 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
   const [sortDir, setSortDir]     = useState<SortDir>("asc");
   const [showMap, setShowMap]     = useState(true);
 
-  function toggleSectionType(type: (typeof filters.sectionTypes)[number]) {
-    setFilters((f) => ({
-      ...f,
-      sectionTypes: f.sectionTypes.includes(type)
-        ? f.sectionTypes.filter((t) => t !== type)
-        : [...f.sectionTypes, type],
-    }));
-  }
+  // startTransition marks filter/sort updates as non-urgent so React can
+  // yield to user input (clicks, typing) before committing the heavy re-render.
+  const [, startTransition] = useTransition();
+
+  const toggleSectionType = useCallback((type: (typeof filters.sectionTypes)[number]) => {
+    startTransition(() => {
+      setFilters((f) => ({
+        ...f,
+        sectionTypes: f.sectionTypes.includes(type)
+          ? f.sectionTypes.filter((t) => t !== type)
+          : [...f.sectionTypes, type],
+      }));
+    });
+  }, []);
+
+  const handleFilterChange = useCallback((next: FilterState) => {
+    // Keep search input immediate; defer everything else
+    startTransition(() => setFilters(next));
+  }, []);
+
+  const handleSortChange = useCallback((f: SortField, d: SortDir) => {
+    startTransition(() => { setSortField(f); setSortDir(d); });
+  }, []);
 
   const filtered = useMemo(() => {
     const q = filters.search.toLowerCase().trim();
@@ -138,7 +153,7 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
                 listings={initialListings}
                 activeSectionTypes={filters.sectionTypes}
                 onSectionTypeToggle={toggleSectionType}
-                onClearSectionTypes={() => setFilters((f) => ({ ...f, sectionTypes: [] }))}
+                onClearSectionTypes={() => startTransition(() => setFilters((f) => ({ ...f, sectionTypes: [] })))}
                 genre={event.genre}
               />
             </div>
@@ -149,7 +164,7 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
         <div className="flex flex-col lg:flex-row gap-5">
           <FilterSidebar
             filters={filters}
-            onChange={setFilters}
+            onChange={handleFilterChange}
             absoluteMin={absoluteMin}
             absoluteMax={absoluteMax}
           />
@@ -159,7 +174,7 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
               field={sortField}
               dir={sortDir}
               count={filtered.length}
-              onChange={(f, d) => { setSortField(f); setSortDir(d); }}
+              onChange={handleSortChange}
             />
             <TicketList listings={filtered} cheapestId={cheapestId} />
           </div>

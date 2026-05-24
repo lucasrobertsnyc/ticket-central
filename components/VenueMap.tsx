@@ -1067,11 +1067,34 @@ export default function VenueMap({ listings, activeSectionTypes, onSectionTypeTo
   const { minByType, countByType } = useZoneData(listings);
 
   const [expanded, setExpanded] = useState(false);
+  // hoveredZone changes rarely (only on zone boundary cross), so state is fine here
   const [hoveredZone, setHoveredZone] = useState<SectionType | null>(null);
-  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
   const svgContainerRef = useRef<HTMLDivElement>(null);
+  // Tooltip positioned via direct DOM ref — zero re-renders on mousemove
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
-  const onZoneHover = useCallback((t: SectionType | null) => setHoveredZone(t), []);
+  const onZoneHover = useCallback((t: SectionType | null) => {
+    setHoveredZone(t);
+    // Show/hide the tooltip imperatively; position is updated in handleMouseMove
+    if (tooltipRef.current) {
+      tooltipRef.current.style.visibility = (t && countByType[t] > 0) ? "visible" : "hidden";
+    }
+  }, [countByType]);
+
+  // Update tooltip position directly in the DOM — no setState, no re-render
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = svgContainerRef.current?.getBoundingClientRect();
+    if (!rect || !tooltipRef.current) return;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    tooltipRef.current.style.left = `${Math.min(x + 14, 180)}px`;
+    tooltipRef.current.style.top  = `${Math.max(y - 52, 4)}px`;
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setHoveredZone(null);
+    if (tooltipRef.current) tooltipRef.current.style.visibility = "hidden";
+  }, []);
 
   const isNFL = genre === "NFL", isMLB = genre === "MLB";
   const title = isNFL ? "Stadium Map" : isMLB ? "Ballpark Map" : "Seat Map";
@@ -1099,15 +1122,12 @@ export default function VenueMap({ listings, activeSectionTypes, onSectionTypeTo
 
         {/* Map + legend */}
         <div className="flex flex-col sm:flex-row">
-          {/* SVG container with hover tooltip */}
+          {/* SVG container — mousemove updates tooltip position via DOM ref only */}
           <div
             ref={svgContainerRef}
             className="w-full sm:w-72 flex-shrink-0 relative"
-            onMouseMove={(e) => {
-              const rect = svgContainerRef.current?.getBoundingClientRect();
-              if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-            }}
-            onMouseLeave={() => { setMousePos(null); setHoveredZone(null); }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
           >
             {isNFL ? (
               <NFLMap activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
@@ -1120,28 +1140,25 @@ export default function VenueMap({ listings, activeSectionTypes, onSectionTypeTo
                 onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
             )}
 
-            {/* Hover tooltip */}
-            {hoveredZone && mousePos && countByType[hoveredZone] > 0 && (
-              <div
-                style={{
-                  position: "absolute",
-                  left: Math.min(mousePos.x + 14, 180),
-                  top: Math.max(mousePos.y - 52, 4),
-                  pointerEvents: "none",
-                  zIndex: 10,
-                }}
-                className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 shadow-xl whitespace-nowrap"
-              >
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: CLR[hoveredZone].act }} />
-                  <span className="text-white font-semibold text-sm">{getZoneLabel(hoveredZone, genre)}</span>
-                </div>
-                <div className="text-gray-400 text-xs">
-                  {countByType[hoveredZone]} listings · from {fmt(minByType[hoveredZone] ?? 0)}
-                </div>
-                <div className="text-gray-600 text-xs mt-0.5">Click to filter · Expand to browse</div>
-              </div>
-            )}
+            {/* Tooltip — always rendered, shown/hidden + positioned via ref (no re-renders) */}
+            <div
+              ref={tooltipRef}
+              style={{ position: "absolute", pointerEvents: "none", zIndex: 10, visibility: "hidden" }}
+              className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 shadow-xl whitespace-nowrap"
+            >
+              {hoveredZone && (
+                <>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: CLR[hoveredZone].act }} />
+                    <span className="text-white font-semibold text-sm">{getZoneLabel(hoveredZone, genre)}</span>
+                  </div>
+                  <div className="text-gray-400 text-xs">
+                    {countByType[hoveredZone]} listings · from {fmt(minByType[hoveredZone] ?? 0)}
+                  </div>
+                  <div className="text-gray-600 text-xs mt-0.5">Click to filter · Expand to browse</div>
+                </>
+              )}
+            </div>
           </div>
 
           <LegendPanel
