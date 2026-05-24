@@ -52,7 +52,15 @@ export default function HomepageClient({ events }: Props) {
     });
   }, [events, artist, location, category]);
 
-  const hasFilter = !!artist || !!location || category !== "all";
+  const hasSearchFilter = !!artist || !!location;
+  const hasFilter = hasSearchFilter || category !== "all";
+
+  // Heading computed outside JSX so TypeScript doesn't narrow category away
+  const sectionTitle = hasSearchFilter
+    ? `${filtered.length} event${filtered.length !== 1 ? "s" : ""} found`
+    : category === "sports"   ? "Upcoming Games"
+    : category === "concerts" ? "Upcoming Concerts"
+    : "Upcoming Events";
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -158,13 +166,7 @@ export default function HomepageClient({ events }: Props) {
         </div>
 
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-gray-900 font-bold text-base">
-            {hasFilter ? (
-              <>{filtered.length} event{filtered.length !== 1 ? "s" : ""} found</>
-            ) : (
-              category === "sports" ? "Upcoming Games" : category === "concerts" ? "Upcoming Concerts" : "Upcoming Events"
-            )}
-          </h2>
+          <h2 className="text-gray-900 font-bold text-base">{sectionTitle}</h2>
           {hasFilter && (
             <button
               onClick={() => { setArtist(""); setLocation(""); setCategory("all"); }}
