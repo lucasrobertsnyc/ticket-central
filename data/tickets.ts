@@ -11,7 +11,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "R&B / Pop",
     lowestAllInPrice: 92,
     listingCount: 23,
-    imageUrl: "https://picsum.photos/seed/weeknd-msg/800/400",
+    imageUrl: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800&h=400&fit=crop",
   },
   {
     id: "evt-002",
@@ -23,7 +23,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop / R&B",
     lowestAllInPrice: 118,
     listingCount: 20,
-    imageUrl: "https://picsum.photos/seed/beyonce-sofi/800/400",
+    imageUrl: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&h=400&fit=crop",
   },
   {
     id: "evt-003",
@@ -35,7 +35,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop / Country",
     lowestAllInPrice: 87,
     listingCount: 22,
-    imageUrl: "https://picsum.photos/seed/taylor-atttstadium/800/400",
+    imageUrl: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&h=400&fit=crop",
   },
   {
     id: "evt-004",
@@ -47,7 +47,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Hip-Hop",
     lowestAllInPrice: 76,
     listingCount: 19,
-    imageUrl: "https://picsum.photos/seed/kendrick-chase/800/400",
+    imageUrl: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&h=400&fit=crop",
   },
   {
     id: "evt-005",
@@ -59,7 +59,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Latin / Reggaeton",
     lowestAllInPrice: 93,
     listingCount: 18,
-    imageUrl: "https://picsum.photos/seed/badbunny-hardrock/800/400",
+    imageUrl: "https://images.unsplash.com/photo-1493676304819-0d7a8d026dcf?w=800&h=400&fit=crop",
   },
   {
     id: "evt-006",
@@ -71,7 +71,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Rock / Pop",
     lowestAllInPrice: 108,
     listingCount: 18,
-    imageUrl: "https://picsum.photos/seed/coldplay-rosebowl/800/400",
+    imageUrl: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800&h=400&fit=crop",
   },
 
   // ── Sports ──────────────────────────────────────────────────────────────────

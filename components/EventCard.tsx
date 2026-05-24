@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import type { Event } from "@/types/ticket";
 import { SPORT_GENRES, TEAM_INFO, parseMatchup, getTeam, logoUrl, type TeamInfo } from "@/lib/teams";
@@ -126,7 +127,7 @@ interface Props {
   event: Event;
 }
 
-export default function EventCard({ event }: Props) {
+export default memo(function EventCard({ event }: Props) {
   const fallback = GENRE_FALLBACK_BG[event.genre] ?? "#111";
   const isSport = SPORT_GENRES.has(event.genre);
 
@@ -197,4 +198,4 @@ export default function EventCard({ event }: Props) {
       </div>
     </Link>
   );
-}
+});

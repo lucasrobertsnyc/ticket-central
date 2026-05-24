@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
 import type { Event } from "@/types/ticket";
 import EventCard from "@/components/EventCard";
 
@@ -32,6 +32,7 @@ type League = (typeof LEAGUES)[number];
 type Category = "all" | "concerts" | "sports";
 
 export default function HomepageClient({ events }: Props) {
+  const [isPending, startTransition] = useTransition();
   const [artist, setArtist]     = useState("");
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState<Category>("all");
@@ -91,11 +92,13 @@ export default function HomepageClient({ events }: Props) {
     : "Upcoming Events";
 
   function clearAll() {
-    setArtist("");
-    setLocation("");
-    setCategory("all");
-    setLeague("");
-    setGenre("");
+    startTransition(() => {
+      setArtist("");
+      setLocation("");
+      setCategory("all");
+      setLeague("");
+      setGenre("");
+    });
   }
 
   return (
@@ -189,7 +192,7 @@ export default function HomepageClient({ events }: Props) {
           {(["all", "concerts", "sports"] as Category[]).map((cat) => (
             <button
               key={cat}
-              onClick={() => { setCategory(cat); setLeague(""); setGenre(""); }}
+              onClick={() => startTransition(() => { setCategory(cat); setLeague(""); setGenre(""); })}
               className={`px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
                 category === cat
                   ? "border-blue-600 text-blue-600"
@@ -206,7 +209,7 @@ export default function HomepageClient({ events }: Props) {
           <div className="flex items-center gap-2 py-3 border-b border-gray-100 flex-wrap">
             <span className="text-xs text-gray-400 font-medium mr-1">League:</span>
             <button
-              onClick={() => setLeague("")}
+              onClick={() => startTransition(() => setLeague(""))}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
                 league === ""
                   ? "bg-blue-600 text-white"
@@ -218,7 +221,7 @@ export default function HomepageClient({ events }: Props) {
             {availableLeagues.map((lg) => (
               <button
                 key={lg}
-                onClick={() => setLeague(league === lg ? "" : lg)}
+                onClick={() => startTransition(() => setLeague(league === lg ? "" : lg))}
                 className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
                   league === lg
                     ? "bg-blue-600 text-white"
@@ -236,7 +239,7 @@ export default function HomepageClient({ events }: Props) {
           <div className="flex items-center gap-2 py-3 border-b border-gray-100 flex-wrap">
             <span className="text-xs text-gray-400 font-medium mr-1">Genre:</span>
             <button
-              onClick={() => setGenre("")}
+              onClick={() => startTransition(() => setGenre(""))}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
                 genre === ""
                   ? "bg-blue-600 text-white"
@@ -248,7 +251,7 @@ export default function HomepageClient({ events }: Props) {
             {availableGenres.map((g) => (
               <button
                 key={g}
-                onClick={() => setGenre(genre === g ? "" : g)}
+                onClick={() => startTransition(() => setGenre(genre === g ? "" : g))}
                 className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
                   genre === g
                     ? "bg-blue-600 text-white"
@@ -284,7 +287,7 @@ export default function HomepageClient({ events }: Props) {
             <p className="text-gray-400 text-sm">Try a different artist, team, or location.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 transition-opacity duration-150 ${isPending ? "opacity-50" : "opacity-100"}`}>
             {filtered.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
