@@ -5,12 +5,19 @@ import type { Event } from "@/types/ticket";
 
 // Dark fallback shown behind the image while it loads / if it 404s
 const GENRE_FALLBACK_BG: Record<string, string> = {
+  // Concerts
   "R&B / Pop":         "#0f0a1a",
   "Pop / R&B":         "#150e05",
   "Pop / Country":     "#060d1c",
   "Hip-Hop":           "#0d0d0d",
   "Latin / Reggaeton": "#061410",
   "Rock / Pop":        "#070e18",
+  // Sports
+  "NFL":               "#060f08",
+  "NBA":               "#160800",
+  "MLB":               "#060a18",
+  "NHL":               "#060c18",
+  "MLS":               "#070f0a",
 };
 
 interface Props {

@@ -6,22 +6,36 @@ import type { Event } from "@/types/ticket";
 // Very dark single-color backgrounds — used as the base colour so the header
 // looks great even before the image loads or when no image is available.
 const GENRE_DARK_BG: Record<string, string> = {
+  // Concerts
   "R&B / Pop":         "#0f0a1a",
   "Pop / R&B":         "#150e05",
   "Pop / Country":     "#060d1c",
   "Hip-Hop":           "#0d0d0d",
   "Latin / Reggaeton": "#061410",
   "Rock / Pop":        "#070e18",
+  // Sports
+  "NFL":               "#060f08",
+  "NBA":               "#160800",
+  "MLB":               "#060a18",
+  "NHL":               "#060c18",
+  "MLS":               "#070f0a",
 };
 
 // Accent line at the bottom edge of the header
 const GENRE_ACCENT: Record<string, string> = {
+  // Concerts
   "R&B / Pop":         "#7c3aed",
   "Pop / R&B":         "#d97706",
   "Pop / Country":     "#2563eb",
   "Hip-Hop":           "#374151",
   "Latin / Reggaeton": "#059669",
   "Rock / Pop":        "#0284c7",
+  // Sports
+  "NFL":               "#15803d",
+  "NBA":               "#c2410c",
+  "MLB":               "#1d4ed8",
+  "NHL":               "#0369a1",
+  "MLS":               "#166534",
 };
 
 interface Props {

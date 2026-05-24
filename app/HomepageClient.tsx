@@ -24,9 +24,14 @@ function extractLocations(events: Event[]): { label: string; match: string }[] {
   return locs;
 }
 
+const SPORT_GENRES = new Set(["NFL", "NBA", "MLB", "NHL", "MLS"]);
+
+type Category = "all" | "concerts" | "sports";
+
 export default function HomepageClient({ events }: Props) {
-  const [artist, setArtist]   = useState("");
-  const [location, setLocation] = useState("");
+  const [artist, setArtist]       = useState("");
+  const [location, setLocation]   = useState("");
+  const [category, setCategory]   = useState<Category>("all");
 
   const locationOptions = useMemo(() => extractLocations(events), [events]);
 
@@ -34,6 +39,8 @@ export default function HomepageClient({ events }: Props) {
     const a = artist.toLowerCase().trim();
     const l = location;
     return events.filter((e) => {
+      if (category === "concerts" && SPORT_GENRES.has(e.genre)) return false;
+      if (category === "sports"   && !SPORT_GENRES.has(e.genre)) return false;
       if (l && !e.city.includes(l)) return false;
       if (!a) return true;
       return (
@@ -43,9 +50,9 @@ export default function HomepageClient({ events }: Props) {
         e.genre.toLowerCase().includes(a)
       );
     });
-  }, [events, artist, location]);
+  }, [events, artist, location, category]);
 
-  const hasFilter = !!artist || !!location;
+  const hasFilter = !!artist || !!location || category !== "all";
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -132,19 +139,35 @@ export default function HomepageClient({ events }: Props) {
 
       {/* ── Events grid ─────────────────────────────────────── */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-7">
+
+        {/* Category tabs */}
+        <div className="flex items-center gap-1 mb-5 border-b border-gray-200">
+          {(["all", "concerts", "sports"] as Category[]).map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setCategory(cat)}
+              className={`px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors capitalize ${
+                category === cat
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-800"
+              }`}
+            >
+              {cat === "all" ? "All Events" : cat === "concerts" ? "Concerts" : "Sports"}
+            </button>
+          ))}
+        </div>
+
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-gray-900 font-bold text-base">
             {hasFilter ? (
-              <>
-                {filtered.length} event{filtered.length !== 1 ? "s" : ""} found
-              </>
+              <>{filtered.length} event{filtered.length !== 1 ? "s" : ""} found</>
             ) : (
-              "Upcoming Events"
+              category === "sports" ? "Upcoming Games" : category === "concerts" ? "Upcoming Concerts" : "Upcoming Events"
             )}
           </h2>
           {hasFilter && (
             <button
-              onClick={() => { setArtist(""); setLocation(""); }}
+              onClick={() => { setArtist(""); setLocation(""); setCategory("all"); }}
               className="text-sm text-blue-600 hover:text-blue-700 font-medium transition"
             >
               Clear filters
