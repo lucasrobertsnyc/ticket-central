@@ -874,7 +874,7 @@ function ExpandedModal({
   const panelMin = panelListings.length > 0 ? panelListings[0].allInTotal : null;
 
   const isNFL = genre === "NFL", isMLB = genre === "MLB";
-  const mapTitle = isNFL ? "Stadium Map" : isMLB ? "Ballpark Map" : "Seat Map";
+  const mapTitle = isNFL ? "Stadium Map" : isMLB ? "Ballpark Map" : (genre === "NBA" || genre === "NHL") ? "Arena Map" : "Seat Map";
 
   // Close on backdrop click
   const backdropRef = useRef<HTMLDivElement>(null);
@@ -1097,7 +1097,8 @@ export default function VenueMap({ listings, activeSectionTypes, onSectionTypeTo
   }, []);
 
   const isNFL = genre === "NFL", isMLB = genre === "MLB";
-  const title = isNFL ? "Stadium Map" : isMLB ? "Ballpark Map" : "Seat Map";
+  const isArena = genre === "NBA" || genre === "NHL";
+  const title = isNFL ? "Stadium Map" : isMLB ? "Ballpark Map" : isArena ? "Arena Map" : "Seat Map";
 
   return (
     <>
