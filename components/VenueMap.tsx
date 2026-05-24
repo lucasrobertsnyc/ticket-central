@@ -322,9 +322,6 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
         </>
       )}
 
-      {/* Compass */}
-      <text x={AR.CX} y={13} textAnchor="middle" fontSize="9" fill="#9ca3af" fontWeight="700" fontFamily="system-ui">N</text>
-      <line x1={AR.CX} y1={16} x2={AR.CX} y2={22} stroke="#9ca3af" strokeWidth="0.7" strokeDasharray="2,3" />
     </svg>
   );
 }
@@ -504,7 +501,6 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         </>
       )}
 
-      <text x={NF.CX} y={13} textAnchor="middle" fontSize="9" fill="#9ca3af" fontWeight="700" fontFamily="system-ui">N</text>
     </svg>
   );
 }
