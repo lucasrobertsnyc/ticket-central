@@ -86,6 +86,7 @@ function ConcertHeader({ event, totalListings }: { event: Event; totalListings: 
         <img
           src={event.imageUrl}
           alt={event.artist}
+          referrerPolicy="no-referrer"
           className="w-full h-full object-cover object-center"
           style={{ opacity: 0.85 }}
         />
@@ -103,6 +104,7 @@ function ConcertHeader({ event, totalListings }: { event: Event; totalListings: 
         src={event.imageUrl}
         alt=""
         aria-hidden="true"
+        referrerPolicy="no-referrer"
         className="absolute inset-0 w-full h-full object-cover object-center sm:hidden"
         style={{ opacity: 0.18, filter: "blur(4px)", transform: "scale(1.06)" }}
       />
