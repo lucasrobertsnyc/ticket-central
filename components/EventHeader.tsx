@@ -84,12 +84,10 @@ function ConcertHeader({ event, totalListings }: { event: Event; totalListings: 
           Shown at real size/opacity — matches how EventCard displays it.
           Width: 45% on sm+, hidden on mobile (image would be tiny).         */}
       <div className="absolute inset-y-0 right-0 w-[45%] hidden sm:block">
-        <Image
-          src={event.imageUrl}
+        <img
+          src={`/api/image?url=${encodeURIComponent(event.imageUrl)}`}
           alt={event.artist}
-          fill
-          sizes="45vw"
-          className="object-cover object-center"
+          className="absolute inset-0 w-full h-full object-cover object-center"
           style={{ opacity: 0.85 }}
         />
         {/* Gradient: bg colour bleeds from left into the image */}
@@ -103,13 +101,11 @@ function ConcertHeader({ event, totalListings }: { event: Event; totalListings: 
 
       {/* ── Full-bleed dim copy for mobile (fills entire bg at low opacity) ── */}
       <div className="absolute inset-0 sm:hidden">
-        <Image
-          src={event.imageUrl}
+        <img
+          src={`/api/image?url=${encodeURIComponent(event.imageUrl)}`}
           alt=""
-          fill
-          sizes="100vw"
           aria-hidden="true"
-          className="object-cover object-center"
+          className="absolute inset-0 w-full h-full object-cover object-center"
           style={{ opacity: 0.18, filter: "blur(4px)", transform: "scale(1.06)" }}
         />
       </div>

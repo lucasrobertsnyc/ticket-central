@@ -141,9 +141,8 @@ export default memo(function EventCard({ event }: Props) {
           /* ── Concert image ─────────────────────────── */
           <div className="relative h-40 overflow-hidden" style={{ backgroundColor: fallback }}>
             <img
-              src={event.imageUrl}
+              src={`/api/image?url=${encodeURIComponent(event.imageUrl)}`}
               alt={event.artist}
-              referrerPolicy="no-referrer"
               className="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:opacity-85 group-hover:scale-105 transition-all duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
