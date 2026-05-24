@@ -11,7 +11,21 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
-      "Bash(gh auth *)"
+      "Bash(gh auth *)",
+      "Bash(git commit -m 'Redesign UI to match professional ticketing sites *)",
+      "Bash(git commit -m 'Replace AI-looking gradient banners with minimal professional design *)",
+      "Bash(git commit -m 'Replace ticket buttons with dropdown, add dual-handle price slider *)",
+      "Bash(git commit -m 'Fix dual-range slider, clean up ticket dropdown, redesign event cards *)",
+      "Bash(git commit -m 'Add real artist images via Spotify API with stock photo fallback *)",
+      "Bash(git commit -m 'Add ~8 listings per event with realistic venue sections and pricing *)",
+      "Bash(git commit -m 'Add sports events across 4 leagues with listings and category tabs *)",
+      "Bash(git commit -m 'Fix TypeScript error in HomepageClient heading logic *)",
+      "Bash(npx tsc *)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git commit *)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "Bash(curl -s \"https://itunes.apple.com/search?term=The+Weeknd&entity=musicArtist&limit=1\")",
+      "Bash(python3 -c \"import sys,json; print\\(json.dumps\\(json.load\\(sys.stdin\\), indent=2\\)\\)\")"
     ]
   }
 }

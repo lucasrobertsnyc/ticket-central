@@ -11,7 +11,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "R&B / Pop",
     lowestAllInPrice: 92,
     listingCount: 23,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/The_Weeknd_Portrait_by_Brian_Ziff.jpg/800px-The_Weeknd_Portrait_by_Brian_Ziff.jpg",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/581693b4724a7fcfa754455101e13a44/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-002",
@@ -23,7 +23,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop / R&B",
     lowestAllInPrice: 118,
     listingCount: 20,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Beyonc%C3%A9_-_Tottenham_Hotspur_Stadium_-_1st_June_2023_%2810_of_118%29_%2852946364598%29_%28best_crop%29.jpg/800px-Beyonc%C3%A9_-_Tottenham_Hotspur_Stadium_-_1st_June_2023_%2810_of_118%29_%2852946364598%29_%28best_crop%29.jpg",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/0aa9d669be4e7310b8647afae37ffaab/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-003",
@@ -35,7 +35,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop / Country",
     lowestAllInPrice: 87,
     listingCount: 22,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_%283%29.png/800px-Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_%283%29.png",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/e528e270424103b527f8a27ac625563b/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-004",
@@ -47,7 +47,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Hip-Hop",
     lowestAllInPrice: 76,
     listingCount: 19,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg/800px-KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/be0a7c550567f4af0ed202d7235b74d6/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-005",
@@ -59,7 +59,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Latin / Reggaeton",
     lowestAllInPrice: 93,
     listingCount: 18,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Bad_Bunny_2019_by_Glenn_Francis_%28cropped%29.jpg/800px-Bad_Bunny_2019_by_Glenn_Francis_%28cropped%29.jpg",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/45aaf836629158d714432ae37e552ee7/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-006",
@@ -71,7 +71,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Rock / Pop",
     lowestAllInPrice: 108,
     listingCount: 18,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/ColdplayWembley120925_%28cropped%29.jpg/800px-ColdplayWembley120925_%28cropped%29.jpg",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/3087954bca22f306324912e5ac8375c3/1000x1000-000000-80-0-0.jpg",
   },
 
   // ── Sports ──────────────────────────────────────────────────────────────────

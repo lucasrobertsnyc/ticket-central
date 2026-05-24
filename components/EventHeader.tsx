@@ -85,7 +85,7 @@ function ConcertHeader({ event, totalListings }: { event: Event; totalListings: 
           Width: 45% on sm+, hidden on mobile (image would be tiny).         */}
       <div className="absolute inset-y-0 right-0 w-[45%] hidden sm:block">
         <img
-          src={`/api/image?url=${encodeURIComponent(event.imageUrl)}`}
+          src={event.imageUrl}
           alt={event.artist}
           className="absolute inset-0 w-full h-full object-cover object-center"
           style={{ opacity: 0.85 }}
@@ -102,7 +102,7 @@ function ConcertHeader({ event, totalListings }: { event: Event; totalListings: 
       {/* ── Full-bleed dim copy for mobile (fills entire bg at low opacity) ── */}
       <div className="absolute inset-0 sm:hidden">
         <img
-          src={`/api/image?url=${encodeURIComponent(event.imageUrl)}`}
+          src={event.imageUrl}
           alt=""
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover object-center"
