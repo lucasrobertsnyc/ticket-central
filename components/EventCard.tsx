@@ -45,9 +45,12 @@ function SportHero({ event }: { event: Event }) {
           }}
         />
         {logo1 ? (
-          <div className="relative bg-white rounded-xl p-1.5 shadow-lg flex items-center justify-center">
-            <img src={logo1} alt={matchup?.[0] ?? ""} className="w-12 h-12 object-contain" />
-          </div>
+          <img
+            src={logo1}
+            alt={matchup?.[0] ?? ""}
+            className="relative w-16 h-16 object-contain drop-shadow-lg"
+            style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))" }}
+          />
         ) : (
           <span className="relative text-3xl font-black" style={{ color: team1.secondary }}>{team1.abbr}</span>
         )}
@@ -80,9 +83,12 @@ function SportHero({ event }: { event: Event }) {
           }}
         />
         {logo2 ? (
-          <div className="relative bg-white rounded-xl p-1.5 shadow-lg flex items-center justify-center">
-            <img src={logo2} alt={matchup?.[1] ?? ""} className="w-12 h-12 object-contain" />
-          </div>
+          <img
+            src={logo2}
+            alt={matchup?.[1] ?? ""}
+            className="relative w-16 h-16 object-contain drop-shadow-lg"
+            style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))" }}
+          />
         ) : (
           <span className="relative text-3xl font-black" style={{ color: team2.secondary }}>{team2.abbr}</span>
         )}

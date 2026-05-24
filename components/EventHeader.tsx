@@ -179,7 +179,8 @@ function SportsHeader({ event, totalListings }: { event: Event; totalListings: n
       )}
 
       {/* ── Large background team logos (fully visible watermarks) ─────────── */}
-      {/* Team 1 — left side, large, reasonable opacity */}
+      {/* Team 1 — left side, large watermark. brightness(0) invert(1) renders any
+          logo as a white silhouette so dark-on-dark logos (e.g. Yankees) are visible. */}
       {logo1 && (
         <img
           src={logo1} alt="" aria-hidden="true"
@@ -188,8 +189,8 @@ function SportsHeader({ event, totalListings }: { event: Event; totalListings: n
             left: "6%",
             width: "clamp(120px, 18vw, 220px)",
             height: "clamp(120px, 18vw, 220px)",
-            opacity: 0.22,
-            filter: "saturate(0.6)",
+            opacity: 0.18,
+            filter: "brightness(0) invert(1)",
           }}
         />
       )}
@@ -202,8 +203,8 @@ function SportsHeader({ event, totalListings }: { event: Event; totalListings: n
             right: "6%",
             width: "clamp(120px, 18vw, 220px)",
             height: "clamp(120px, 18vw, 220px)",
-            opacity: 0.22,
-            filter: "saturate(0.6)",
+            opacity: 0.18,
+            filter: "brightness(0) invert(1)",
           }}
         />
       )}
@@ -246,9 +247,7 @@ function SportsHeader({ event, totalListings }: { event: Event; totalListings: n
                 style={{ backgroundColor: team1.primary }}
               >
                 {logo1
-                  ? <div className="bg-white rounded-xl p-1.5 flex items-center justify-center shadow-sm">
-                      <img src={logo1} alt={matchup?.[0] ?? ""} className="w-9 h-9 sm:w-11 sm:h-11 object-contain" />
-                    </div>
+                  ? <img src={logo1} alt={matchup?.[0] ?? ""} className="w-11 h-11 sm:w-14 sm:h-14 object-contain drop-shadow-xl" />
                   : <span className="text-white font-black text-xl">{team1.abbr}</span>
                 }
               </div>
@@ -265,9 +264,7 @@ function SportsHeader({ event, totalListings }: { event: Event; totalListings: n
                 style={{ backgroundColor: team2.primary }}
               >
                 {logo2
-                  ? <div className="bg-white rounded-xl p-1.5 flex items-center justify-center shadow-sm">
-                      <img src={logo2} alt={matchup?.[1] ?? ""} className="w-9 h-9 sm:w-11 sm:h-11 object-contain" />
-                    </div>
+                  ? <img src={logo2} alt={matchup?.[1] ?? ""} className="w-11 h-11 sm:w-14 sm:h-14 object-contain drop-shadow-xl" />
                   : <span className="text-white font-black text-xl">{team2.abbr}</span>
                 }
               </div>
