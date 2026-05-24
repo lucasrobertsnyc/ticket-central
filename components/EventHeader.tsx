@@ -169,27 +169,45 @@ function SportsHeader({ event, totalListings }: { event: Event; totalListings: n
   return (
     <div className="relative overflow-hidden" style={{ backgroundColor: bg }}>
 
-      {/* ── Split colour background ─────────────────────────────────────────── */}
+      {/* ── Split team-colour halves ─── */}
       {team1 && team2 && (
         <>
-          <div className="absolute inset-y-0 left-0 w-1/2" style={{ backgroundColor: team1.primary, opacity: 0.4 }} />
-          <div className="absolute inset-y-0 right-0 w-1/2" style={{ backgroundColor: team2.primary, opacity: 0.4 }} />
-          {/* Centre shadow so the split doesn't look harsh */}
-          <div className="absolute inset-0"
-            style={{ background: "linear-gradient(90deg, transparent 30%, rgba(0,0,0,0.6) 50%, transparent 70%)" }}
-          />
+          <div className="absolute inset-y-0 left-0 w-1/2" style={{ backgroundColor: team1.primary, opacity: 0.55 }} />
+          <div className="absolute inset-y-0 right-0 w-1/2" style={{ backgroundColor: team2.primary, opacity: 0.55 }} />
         </>
       )}
 
+      {/* ── Background logo watermarks ─────────────────────────────────────────
+          Each logo sits inside a solid team-colour circle. mix-blend-mode:multiply
+          on the <img> makes white pixels invisible (white × color = color), so
+          only the logo mark shows. The outer div at opacity:0.25 fades the whole
+          thing into the background without a bright white box.               */}
+      {logo1 && team1 && (
+        <div className="absolute left-[4%] top-1/2 -translate-y-1/2 w-56 h-56 pointer-events-none" style={{ opacity: 0.25 }}>
+          <div className="w-full h-full rounded-full flex items-center justify-center" style={{ backgroundColor: team1.primary }}>
+            <img src={logo1} alt="" aria-hidden className="w-44 h-44 object-contain" style={{ mixBlendMode: "multiply" }} />
+          </div>
+        </div>
+      )}
+      {logo2 && team2 && (
+        <div className="absolute right-[4%] top-1/2 -translate-y-1/2 w-56 h-56 pointer-events-none" style={{ opacity: 0.25 }}>
+          <div className="w-full h-full rounded-full flex items-center justify-center" style={{ backgroundColor: team2.primary }}>
+            <img src={logo2} alt="" aria-hidden className="w-44 h-44 object-contain" style={{ mixBlendMode: "multiply" }} />
+          </div>
+        </div>
+      )}
 
-      {/* ── Diagonal texture ───────────────────────────────────────────────── */}
+      {/* ── Centre shadow + diagonal texture ─── */}
+      <div className="absolute inset-0"
+        style={{ background: "linear-gradient(90deg, transparent 25%, rgba(0,0,0,0.65) 50%, transparent 75%)" }}
+      />
       <div className="absolute inset-0 pointer-events-none"
         style={{ backgroundImage: "repeating-linear-gradient(135deg,rgba(0,0,0,0.05) 0,rgba(0,0,0,0.05) 1px,transparent 0,transparent 10px)" }}
       />
 
-      {/* ── Readability overlays ───────────────────────────────────────────── */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-black/55" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+      {/* ── Readability overlays ─── */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-black/40" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
 
       {/* ── Accent line ───────────────────────────────────────────────────── */}
       <div className="absolute bottom-0 left-0 right-0 h-px" style={{ backgroundColor: accent, opacity: 0.6 }} />
