@@ -5,6 +5,7 @@ const nextConfig = {
       { protocol: "https", hostname: "a.espncdn.com" },
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "upload.wikimedia.org" },
       { protocol: "https", hostname: "i.scdn.co" }, // Spotify CDN
     ],
   },
