@@ -24,26 +24,33 @@ interface TeamInfo {
   abbr: string;
   primary: string;
   secondary: string;
+  espnId: string;   // ESPN CDN team ID for logo image
+  league: string;   // "nfl" | "nba" | "mlb" | "nhl"
 }
 
 const TEAM_INFO: Record<string, TeamInfo> = {
   // NFL
-  "Chiefs":   { abbr: "KC",  primary: "#E31837", secondary: "#FFB612" },
-  "49ers":    { abbr: "SF",  primary: "#AA0000", secondary: "#B3995D" },
-  "Cowboys":  { abbr: "DAL", primary: "#003594", secondary: "#869397" },
-  "Packers":  { abbr: "GB",  primary: "#203731", secondary: "#FFB612" },
+  "Chiefs":   { abbr: "KC",  primary: "#E31837", secondary: "#FFB612", espnId: "kc",  league: "nfl" },
+  "49ers":    { abbr: "SF",  primary: "#AA0000", secondary: "#B3995D", espnId: "sf",  league: "nfl" },
+  "Cowboys":  { abbr: "DAL", primary: "#003594", secondary: "#C0C0C0", espnId: "dal", league: "nfl" },
+  "Packers":  { abbr: "GB",  primary: "#203731", secondary: "#FFB612", espnId: "gb",  league: "nfl" },
   // NBA
-  "Lakers":   { abbr: "LAL", primary: "#552583", secondary: "#FDB927" },
-  "Warriors": { abbr: "GSW", primary: "#1D428A", secondary: "#FFC72C" },
-  "Knicks":   { abbr: "NYK", primary: "#006BB6", secondary: "#F58426" },
-  "Celtics":  { abbr: "BOS", primary: "#007A33", secondary: "#FFFFFF" },
+  "Lakers":   { abbr: "LAL", primary: "#552583", secondary: "#FDB927", espnId: "lal", league: "nba" },
+  "Warriors": { abbr: "GSW", primary: "#1D428A", secondary: "#FFC72C", espnId: "gs",  league: "nba" },
+  "Knicks":   { abbr: "NYK", primary: "#006BB6", secondary: "#F58426", espnId: "ny",  league: "nba" },
+  "Celtics":  { abbr: "BOS", primary: "#007A33", secondary: "#FFFFFF", espnId: "bos", league: "nba" },
   // MLB
-  "Yankees":  { abbr: "NYY", primary: "#003087", secondary: "#FFFFFF" },
-  "Red Sox":  { abbr: "BOS", primary: "#BD3039", secondary: "#0D2B56" },
+  "Yankees":  { abbr: "NYY", primary: "#003087", secondary: "#FFFFFF", espnId: "nyy", league: "mlb" },
+  "Red Sox":  { abbr: "BOS", primary: "#BD3039", secondary: "#FFFFFF", espnId: "bos", league: "mlb" },
   // NHL
-  "Rangers":  { abbr: "NYR", primary: "#0038A8", secondary: "#CE1126" },
-  "Penguins": { abbr: "PIT", primary: "#000000", secondary: "#FCB514" },
+  "Rangers":  { abbr: "NYR", primary: "#0038A8", secondary: "#CE1126", espnId: "nyr", league: "nhl" },
+  "Penguins": { abbr: "PIT", primary: "#000000", secondary: "#FCB514", espnId: "pit", league: "nhl" },
 };
+
+/** ESPN CDN logo URL — transparent PNG, works without auth */
+function logoUrl(team: TeamInfo) {
+  return `https://a.espncdn.com/i/teamlogos/${team.league}/500/${team.espnId}.png`;
+}
 
 const SPORT_GENRES = new Set(["NFL", "NBA", "MLB", "NHL", "MLS"]);
 
@@ -58,37 +65,45 @@ function getTeam(name: string): TeamInfo {
   for (const key of Object.keys(TEAM_INFO)) {
     if (name.includes(key) || key.includes(name)) return TEAM_INFO[key];
   }
-  return { abbr: name.slice(0, 3).toUpperCase(), primary: "#1e293b", secondary: "#94a3b8" };
+  return { abbr: name.slice(0, 3).toUpperCase(), primary: "#1e293b", secondary: "#94a3b8", espnId: "", league: "" };
 }
 
 function SportHero({ event }: { event: Event }) {
   const matchup = parseMatchup(event.artist);
-  const team1 = matchup ? getTeam(matchup[0]) : { abbr: "HM", primary: "#1e293b", secondary: "#94a3b8" };
-  const team2 = matchup ? getTeam(matchup[1]) : { abbr: "AW", primary: "#374151", secondary: "#94a3b8" };
+  const team1 = matchup ? getTeam(matchup[0]) : { abbr: "HM", primary: "#1e293b", secondary: "#94a3b8", espnId: "", league: "" };
+  const team2 = matchup ? getTeam(matchup[1]) : { abbr: "AW", primary: "#374151", secondary: "#94a3b8", espnId: "", league: "" };
+
+  const logo1 = team1.espnId ? logoUrl(team1) : null;
+  const logo2 = team2.espnId ? logoUrl(team2) : null;
 
   return (
     <div className="relative h-40 overflow-hidden flex">
+
       {/* Left team */}
       <div
         className="flex-1 flex flex-col items-center justify-center relative overflow-hidden"
         style={{ backgroundColor: team1.primary }}
       >
+        {/* Subtle diagonal texture */}
         <div
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0"
           style={{
-            backgroundImage: "repeating-linear-gradient(45deg,rgba(255,255,255,.1) 0,rgba(255,255,255,.1) 1px,transparent 0,transparent 50%)",
-            backgroundSize: "8px 8px",
+            backgroundImage: "repeating-linear-gradient(135deg,rgba(0,0,0,0.06) 0,rgba(0,0,0,0.06) 1px,transparent 0,transparent 8px)",
           }}
         />
-        <span
-          className="relative text-3xl font-black tracking-tight leading-none"
-          style={{ color: team1.secondary, textShadow: "0 2px 10px rgba(0,0,0,0.6)" }}
-        >
-          {team1.abbr}
-        </span>
+        {logo1 ? (
+          <img
+            src={logo1}
+            alt={matchup?.[0] ?? ""}
+            className="relative w-16 h-16 object-contain drop-shadow-lg"
+            style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))" }}
+          />
+        ) : (
+          <span className="relative text-3xl font-black" style={{ color: team1.secondary }}>{team1.abbr}</span>
+        )}
         {matchup && (
           <span
-            className="relative text-[9px] font-semibold uppercase tracking-wider mt-1 opacity-70"
+            className="relative text-[9px] font-bold uppercase tracking-wider mt-1.5 opacity-80"
             style={{ color: team1.secondary }}
           >
             {matchup[0]}
@@ -98,8 +113,8 @@ function SportHero({ event }: { event: Event }) {
 
       {/* VS badge */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-        <div className="w-9 h-9 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 flex items-center justify-center shadow-xl">
-          <span className="text-white text-[10px] font-black tracking-tight">VS</span>
+        <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl">
+          <span className="text-white text-[9px] font-black tracking-tight">VS</span>
         </div>
       </div>
 
@@ -109,21 +124,24 @@ function SportHero({ event }: { event: Event }) {
         style={{ backgroundColor: team2.primary }}
       >
         <div
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0"
           style={{
-            backgroundImage: "repeating-linear-gradient(-45deg,rgba(255,255,255,.1) 0,rgba(255,255,255,.1) 1px,transparent 0,transparent 50%)",
-            backgroundSize: "8px 8px",
+            backgroundImage: "repeating-linear-gradient(-135deg,rgba(0,0,0,0.06) 0,rgba(0,0,0,0.06) 1px,transparent 0,transparent 8px)",
           }}
         />
-        <span
-          className="relative text-3xl font-black tracking-tight leading-none"
-          style={{ color: team2.secondary, textShadow: "0 2px 10px rgba(0,0,0,0.6)" }}
-        >
-          {team2.abbr}
-        </span>
+        {logo2 ? (
+          <img
+            src={logo2}
+            alt={matchup?.[1] ?? ""}
+            className="relative w-16 h-16 object-contain drop-shadow-lg"
+            style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))" }}
+          />
+        ) : (
+          <span className="relative text-3xl font-black" style={{ color: team2.secondary }}>{team2.abbr}</span>
+        )}
         {matchup && (
           <span
-            className="relative text-[9px] font-semibold uppercase tracking-wider mt-1 opacity-70"
+            className="relative text-[9px] font-bold uppercase tracking-wider mt-1.5 opacity-80"
             style={{ color: team2.secondary }}
           >
             {matchup[1]}
@@ -132,11 +150,11 @@ function SportHero({ event }: { event: Event }) {
       </div>
 
       {/* Bottom gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
 
       {/* League badge */}
       <div className="absolute top-3 left-3 z-10">
-        <span className="inline-block bg-black/50 backdrop-blur-sm text-white/90 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">
+        <span className="inline-block bg-black/55 backdrop-blur-sm text-white/90 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">
           {event.genre}
         </span>
       </div>
