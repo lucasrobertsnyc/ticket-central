@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { Event } from "@/types/ticket";
 import { SPORT_GENRES, parseMatchup, getTeam, logoUrl } from "@/lib/teams";
@@ -83,11 +84,12 @@ function ConcertHeader({ event, totalListings }: { event: Event; totalListings: 
           Shown at real size/opacity — matches how EventCard displays it.
           Width: 45% on sm+, hidden on mobile (image would be tiny).         */}
       <div className="absolute inset-y-0 right-0 w-[45%] hidden sm:block">
-        <img
+        <Image
           src={event.imageUrl}
           alt={event.artist}
-          referrerPolicy="no-referrer"
-          className="w-full h-full object-cover object-center"
+          fill
+          sizes="45vw"
+          className="object-cover object-center"
           style={{ opacity: 0.85 }}
         />
         {/* Gradient: bg colour bleeds from left into the image */}
@@ -100,14 +102,17 @@ function ConcertHeader({ event, totalListings }: { event: Event; totalListings: 
       </div>
 
       {/* ── Full-bleed dim copy for mobile (fills entire bg at low opacity) ── */}
-      <img
-        src={event.imageUrl}
-        alt=""
-        aria-hidden="true"
-        referrerPolicy="no-referrer"
-        className="absolute inset-0 w-full h-full object-cover object-center sm:hidden"
-        style={{ opacity: 0.18, filter: "blur(4px)", transform: "scale(1.06)" }}
-      />
+      <div className="absolute inset-0 sm:hidden">
+        <Image
+          src={event.imageUrl}
+          alt=""
+          fill
+          sizes="100vw"
+          aria-hidden="true"
+          className="object-cover object-center"
+          style={{ opacity: 0.18, filter: "blur(4px)", transform: "scale(1.06)" }}
+        />
+      </div>
 
       {/* ── Global overlays ──────────────────────────────────────────────────── */}
       {/* Left-side readability gradient (covers text area) */}

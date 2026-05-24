@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import type { Event } from "@/types/ticket";
 import { SPORT_GENRES, TEAM_INFO, parseMatchup, getTeam, logoUrl, type TeamInfo } from "@/lib/teams";
@@ -140,11 +141,12 @@ export default memo(function EventCard({ event }: Props) {
         ) : (
           /* ── Concert image ─────────────────────────── */
           <div className="relative h-40 overflow-hidden" style={{ backgroundColor: fallback }}>
-            <img
+            <Image
               src={event.imageUrl}
               alt={event.artist}
-              referrerPolicy="no-referrer"
-              className="w-full h-full object-cover opacity-75 group-hover:opacity-85 group-hover:scale-105 transition-all duration-500"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover opacity-75 group-hover:opacity-85 group-hover:scale-105 transition-all duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             <div className="absolute top-3 left-3">
