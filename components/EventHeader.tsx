@@ -246,7 +246,9 @@ function SportsHeader({ event, totalListings }: { event: Event; totalListings: n
                 style={{ backgroundColor: team1.primary }}
               >
                 {logo1
-                  ? <img src={logo1} alt={matchup?.[0] ?? ""} className="w-11 h-11 sm:w-14 sm:h-14 object-contain drop-shadow-xl" />
+                  ? <div className="bg-white rounded-xl p-1.5 flex items-center justify-center shadow-sm">
+                      <img src={logo1} alt={matchup?.[0] ?? ""} className="w-9 h-9 sm:w-11 sm:h-11 object-contain" />
+                    </div>
                   : <span className="text-white font-black text-xl">{team1.abbr}</span>
                 }
               </div>
@@ -263,7 +265,9 @@ function SportsHeader({ event, totalListings }: { event: Event; totalListings: n
                 style={{ backgroundColor: team2.primary }}
               >
                 {logo2
-                  ? <img src={logo2} alt={matchup?.[1] ?? ""} className="w-11 h-11 sm:w-14 sm:h-14 object-contain drop-shadow-xl" />
+                  ? <div className="bg-white rounded-xl p-1.5 flex items-center justify-center shadow-sm">
+                      <img src={logo2} alt={matchup?.[1] ?? ""} className="w-9 h-9 sm:w-11 sm:h-11 object-contain" />
+                    </div>
                   : <span className="text-white font-black text-xl">{team2.abbr}</span>
                 }
               </div>
