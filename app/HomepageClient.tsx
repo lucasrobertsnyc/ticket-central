@@ -19,11 +19,19 @@ function extractLocations(events: Event[]): { label: string; match: string }[] {
   const seen = new Set<string>();
   const locs: { label: string; match: string }[] = [];
   const stateNames: Record<string, string> = {
-    CA: "California", CO: "Colorado", DC: "Washington D.C.", FL: "Florida",
-    GA: "Georgia",    IL: "Illinois", MA: "Massachusetts",   MD: "Maryland",
-    MO: "Missouri",   NC: "North Carolina", NJ: "New Jersey", NV: "Nevada",
-    NY: "New York",   PA: "Pennsylvania",   TN: "Tennessee",  TX: "Texas",
-    WA: "Washington",
+    AL: "Alabama",        AK: "Alaska",         AZ: "Arizona",        AR: "Arkansas",
+    CA: "California",     CO: "Colorado",       CT: "Connecticut",    DE: "Delaware",
+    DC: "Washington D.C.",FL: "Florida",        GA: "Georgia",        HI: "Hawaii",
+    ID: "Idaho",          IL: "Illinois",       IN: "Indiana",        IA: "Iowa",
+    KS: "Kansas",         KY: "Kentucky",       LA: "Louisiana",      ME: "Maine",
+    MD: "Maryland",       MA: "Massachusetts",  MI: "Michigan",       MN: "Minnesota",
+    MS: "Mississippi",    MO: "Missouri",       MT: "Montana",        NE: "Nebraska",
+    NV: "Nevada",         NH: "New Hampshire",  NJ: "New Jersey",     NM: "New Mexico",
+    NY: "New York",       NC: "North Carolina", ND: "North Dakota",   OH: "Ohio",
+    OK: "Oklahoma",       OR: "Oregon",         PA: "Pennsylvania",   RI: "Rhode Island",
+    SC: "South Carolina", SD: "South Dakota",   TN: "Tennessee",      TX: "Texas",
+    UT: "Utah",           VT: "Vermont",        VA: "Virginia",       WA: "Washington",
+    WV: "West Virginia",  WI: "Wisconsin",      WY: "Wyoming",
   };
   for (const e of events) {
     const state = e.city.split(", ")[1];
