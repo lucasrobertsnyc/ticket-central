@@ -239,7 +239,7 @@ export default function HomepageClient({ events }: Props) {
 
         {/* Category tabs */}
         <div className="flex items-center gap-1 mb-0 border-b border-gray-200">
-          {(["all", "concerts", "sports"] as Category[]).map((cat) => (
+          {(["all", "sports", "concerts"] as Category[]).map((cat) => (
             <button
               key={cat}
               onClick={() => startTransition(() => { setCategory(cat); setLeague(""); setGenre(""); })}
