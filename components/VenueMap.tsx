@@ -30,16 +30,22 @@ interface MapProps {
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 
+// Professional price-tier spectrum (SeatGeek/StubHub style)
 const CLR: Record<SectionType, { base: string; act: string; dim: string }> = {
-  floor: { base: "#4ade80", act: "#16a34a", dim: "#dcfce7" },
-  lower: { base: "#93c5fd", act: "#2563eb", dim: "#dbeafe" },
-  club:  { base: "#5eead4", act: "#0d9488", dim: "#ccfbf1" },
-  upper: { base: "#cbd5e1", act: "#475569", dim: "#f1f5f9" },
-  suite: { base: "#fcd34d", act: "#d97706", dim: "#fef3c7" },
+  floor: { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.25)" },
+  lower: { base: "#3b82f6", act: "#2563eb", dim: "rgba(59,130,246,0.25)" },
+  club:  { base: "#06b6d4", act: "#0891b2", dim: "rgba(6,182,212,0.25)"  },
+  upper: { base: "#8b5cf6", act: "#7c3aed", dim: "rgba(139,92,246,0.25)" },
+  suite: { base: "#f59e0b", act: "#d97706", dim: "rgba(245,158,11,0.25)" },
 };
 
-const INK = "rgba(15,23,42,0.72)";
-const GRS = { base: "#4ade80", act: "#16a34a", dim: "#dcfce7" };
+// Dark map background (matches SeatGeek's dark map)
+const MAP_BG = "#0f172a";
+const SECTION_STROKE = "#0f172a";
+const INK = "rgba(255,255,255,0.85)";
+const INK_DIM = "rgba(255,255,255,0.4)";
+
+const GRS = { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.25)" };
 
 function fieldFill(hov: SectionType | null, active: SectionType[]): string {
   if (hov === "floor") return GRS.act;
@@ -53,6 +59,28 @@ function zoneFill(type: SectionType, hov: SectionType | null, active: SectionTyp
   if (active.length > 0 && !active.includes(type)) return CLR[type].dim;
   if (active.includes(type)) return CLR[type].act;
   return CLR[type].base;
+}
+
+/** Build a curved trapezoid SVG path for a section between two elliptic rings */
+function sectionPolygonPath(
+  cx: number, cy: number,
+  iRx: number, iRy: number,
+  oRx: number, oRy: number,
+  startRad: number, endRad: number
+): string {
+  const ix1 = cx + iRx * Math.sin(startRad), iy1 = cy - iRy * Math.cos(startRad);
+  const ix2 = cx + iRx * Math.sin(endRad),   iy2 = cy - iRy * Math.cos(endRad);
+  const ox1 = cx + oRx * Math.sin(startRad), oy1 = cy - oRy * Math.cos(startRad);
+  const ox2 = cx + oRx * Math.sin(endRad),   oy2 = cy - oRy * Math.cos(endRad);
+  // Large arc flag — always 0 for sections < 180°
+  return [
+    `M ${ix1} ${iy1}`,
+    `L ${ox1} ${oy1}`,
+    `A ${oRx} ${oRy} 0 0 1 ${ox2} ${oy2}`,
+    `L ${ix2} ${iy2}`,
+    `A ${iRx} ${iRy} 0 0 0 ${ix1} ${iy1}`,
+    "Z",
+  ].join(" ");
 }
 
 // ── Data helpers ──────────────────────────────────────────────────────────────
@@ -135,13 +163,6 @@ function ringPath(cx: number, cy: number, iRx: number, iRy: number, oRx: number,
     `M ${cx} ${cy - iRy} A ${iRx} ${iRy} 0 0 0 ${cx} ${cy + iRy} A ${iRx} ${iRy} 0 0 0 ${cx} ${cy - iRy} Z`,
   ].join(" ");
 }
-function divLine(cx: number, cy: number, iRx: number, iRy: number, oRx: number, oRy: number, deg: number) {
-  const r = toRad(deg);
-  return {
-    x1: cx + iRx * Math.sin(r), y1: cy - iRy * Math.cos(r),
-    x2: cx + oRx * Math.sin(r), y2: cy - oRy * Math.cos(r),
-  };
-}
 
 const SB = { w: 14, h: 9, gap: 3, count: 5 };
 const sbTotalH = SB.count * SB.h + (SB.count - 1) * SB.gap;
@@ -201,79 +222,79 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
   const floorDimmed = activeSectionTypes.length > 0 && !floorActive;
   const baseColor   = isNBA ? "#d4a96a" : isNHL ? "#cce8f8" : "#1e293b";
   const activeColor = isNBA ? "#b8883a" : isNHL ? "#99cef0" : CLR.floor.act;
-  const dimColor    = isNBA ? "#ede8d8" : isNHL ? "#e8f5fd" : CLR.floor.dim;
+  const dimColor    = isNBA ? "rgba(212,169,106,0.3)" : isNHL ? "rgba(204,232,248,0.3)" : CLR.floor.dim;
   const floorColor  = hoveredZone === "floor" ? activeColor : floorDimmed ? dimColor : floorActive ? activeColor : baseColor;
-  const floorInk    = isNHL ? INK : "rgba(255,255,255,0.92)";
-  const floorStroke = hoveredZone === "floor" || floorActive ? "#2563eb" : "#e2e8f0";
+  const floorInk    = isNHL ? "rgba(15,23,42,0.8)" : "rgba(255,255,255,0.92)";
+  const floorStroke = hoveredZone === "floor" || floorActive ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.15)";
 
   return (
-    <svg viewBox={`0 0 ${AR.W} ${AR.H}`} className="w-full" style={{ background: "#f8fafc" }}>
+    <svg viewBox={`0 0 ${AR.W} ${AR.H}`} className="w-full" style={{ background: MAP_BG }}>
 
-      {/* Subtle background circle */}
-      <ellipse cx={AR.CX} cy={AR.CY} rx={outerRx + 18} ry={outerRy + 14}
-        fill="#f1f5f9" stroke="#e2e8f0" strokeWidth="1" />
+      {/* Outer stadium silhouette */}
+      <ellipse cx={AR.CX} cy={AR.CY} rx={outerRx + 14} ry={outerRy + 10}
+        fill="#1e293b" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
 
-      {/* Seating rings — outer to inner */}
+      {/* Seating rings — each section is its own polygon */}
       {[...ARENA_RINGS].reverse().map((ring) => {
-        const f = zoneFill(ring.type, hoveredZone, activeSectionTypes);
-        const midRy = (ring.iRy + ring.oRy) / 2;
-        const midRx = (ring.iRx + ring.oRx) / 2;
-        const isAct = activeSectionTypes.includes(ring.type) || hoveredZone === ring.type;
-        // Aisle dividers every 4th line; thinner lines between
-        const aisleMod = ring.divs <= 14 ? 2 : 4;
+        const fill     = zoneFill(ring.type, hoveredZone, activeSectionTypes);
+        const isActive = activeSectionTypes.includes(ring.type) || hoveredZone === ring.type;
+        const midRy    = (ring.iRy + ring.oRy) / 2;
+        const midRx    = (ring.iRx + ring.oRx) / 2;
+        const step     = (2 * Math.PI) / ring.divs;
+        // Section number: lower uses lowerSecBase, upper uses upperSecBase
+        const secBase  = ring.type === "upper" ? upperSecBase : lowerSecBase;
+        // Show section labels: lower every-other, upper every-other, club none (too narrow)
+        const showLabels = ring.type !== "club";
+        const labelSkip  = ring.type === "lower" && ring.divs > 24 ? 2 : ring.type === "upper" && ring.divs > 32 ? 2 : 1;
+
         return (
           <g key={ring.type}>
-            <path
-              d={ringPath(AR.CX, AR.CY, ring.iRx, ring.iRy, ring.oRx, ring.oRy)}
-              fill={f} fillRule="evenodd"
-              stroke={isAct ? CLR[ring.type].act : "#d1d5db"} strokeWidth={ring.type === "lower" ? "1.2" : "0.8"}
-              style={{ cursor: "pointer", transition: "fill 0.12s" }}
-              onClick={() => onSectionTypeToggle(ring.type)}
-              onMouseEnter={() => onZoneHover(ring.type)}
-              onMouseLeave={() => onZoneHover(null)}
-            />
-            {/* Section dividers */}
+            {/* Individual section polygons */}
             {Array.from({ length: ring.divs }, (_, i) => {
-              const l = divLine(AR.CX, AR.CY, ring.iRx, ring.iRy, ring.oRx, ring.oRy, i * (360 / ring.divs));
-              const isAisle = i % aisleMod === 0;
-              return <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
-                stroke={isAisle ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.45)"}
-                strokeWidth={isAisle ? "1.1" : "0.45"}
-                style={{ pointerEvents: "none" }} />;
-            })}
-            {/* Section numbers — lower bowl (every other section to avoid crowding) */}
-            {ring.type === "lower" && Array.from({ length: ring.divs }, (_, i) => {
-              if (i % 2 !== 0) return null;
-              const angle = (i + 0.5) * (360 / ring.divs);
-              const rad = toRad(angle);
-              const x = AR.CX + midRx * Math.sin(rad);
-              const y = AR.CY - midRy * Math.cos(rad);
+              const startRad = i * step;
+              const endRad   = (i + 1) * step;
+              const d = sectionPolygonPath(AR.CX, AR.CY, ring.iRx, ring.iRy, ring.oRx, ring.oRy, startRad, endRad);
               return (
-                <text key={i} x={x} y={y + 2.5} textAnchor="middle" fontSize="5.5"
-                  fill={INK} fontFamily="system-ui" fontWeight="700"
-                  style={{ pointerEvents: "none", userSelect: "none" }}
-                >{lowerSecBase + i}</text>
+                <path
+                  key={i}
+                  d={d}
+                  fill={fill}
+                  stroke={SECTION_STROKE}
+                  strokeWidth="1"
+                  strokeLinejoin="round"
+                  style={{ cursor: "pointer", transition: "fill 0.12s, filter 0.12s",
+                    filter: isActive ? "brightness(1.15)" : "none" }}
+                  onClick={() => onSectionTypeToggle(ring.type)}
+                  onMouseEnter={() => onZoneHover(ring.type)}
+                  onMouseLeave={() => onZoneHover(null)}
+                />
               );
             })}
-            {/* Section numbers — upper ring (every other) */}
-            {ring.type === "upper" && Array.from({ length: ring.divs }, (_, i) => {
-              if (i % 2 !== 0) return null;
-              const angle = (i + 0.5) * (360 / ring.divs);
-              const rad = toRad(angle);
-              const x = AR.CX + midRx * Math.sin(rad);
-              const y = AR.CY - midRy * Math.cos(rad);
+            {/* Active zone glow ring */}
+            {isActive && (
+              <path
+                d={ringPath(AR.CX, AR.CY, ring.iRx, ring.iRy, ring.oRx, ring.oRy)}
+                fill="none" fillRule="evenodd"
+                stroke="rgba(255,255,255,0.35)" strokeWidth="1.5"
+                style={{ pointerEvents: "none" }}
+              />
+            )}
+            {/* Section number labels centered inside each polygon */}
+            {showLabels && Array.from({ length: ring.divs }, (_, i) => {
+              if (i % labelSkip !== 0) return null;
+              const midAngle = (i + 0.5) * step;
+              const x = AR.CX + midRx * Math.sin(midAngle);
+              const y = AR.CY - midRy * Math.cos(midAngle);
+              const isDimmed = activeSectionTypes.length > 0 && !activeSectionTypes.includes(ring.type) && hoveredZone !== ring.type;
               return (
-                <text key={i} x={x} y={y + 2.5} textAnchor="middle" fontSize="5"
-                  fill={INK} fontFamily="system-ui" fontWeight="600"
+                <text key={i} x={x} y={y + 2.5} textAnchor="middle"
+                  fontSize={ring.type === "lower" ? "5.5" : "4.8"}
+                  fill={isDimmed ? INK_DIM : INK}
+                  fontFamily="system-ui" fontWeight="700"
                   style={{ pointerEvents: "none", userSelect: "none" }}
-                >{upperSecBase + i}</text>
+                >{secBase + i}</text>
               );
             })}
-            {/* Zone label */}
-            <text x={AR.CX} y={AR.CY + midRy + 5} textAnchor="middle" fontSize="6"
-              fill={INK} fontFamily="system-ui,sans-serif"
-              fontWeight="700" letterSpacing="0.8"
-              style={{ pointerEvents: "none", userSelect: "none" }}>{ring.label}</text>
           </g>
         );
       })}
@@ -282,7 +303,8 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
       <path
         d={ellipsePath(AR.CX, AR.CY, floorRx, floorRy)}
         fill={floorColor} stroke={floorStroke} strokeWidth="1.5"
-        style={{ cursor: "pointer", transition: "fill 0.12s" }}
+        style={{ cursor: "pointer", transition: "fill 0.12s",
+          filter: (floorActive || hoveredZone === "floor") ? "brightness(1.12)" : "none" }}
         onClick={() => onSectionTypeToggle("floor")}
         onMouseEnter={() => onZoneHover("floor")}
         onMouseLeave={() => onZoneHover(null)}
@@ -440,12 +462,12 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
       {!isNBA && !isNHL && (
         <g style={{ pointerEvents: "none" }}>
           <rect x={AR.CX - 38} y={AR.CY + 8} width={76} height={22} rx={3}
-            fill="#1e293b" stroke="#334155" strokeWidth="0.9" />
-          <rect x={AR.CX - 32} y={AR.CY + 7} width={64} height={4} rx={1} fill="#0f172a" />
+            fill="#0f172a" stroke="rgba(255,255,255,0.2)" strokeWidth="0.9" />
+          <rect x={AR.CX - 32} y={AR.CY + 7} width={64} height={4} rx={1} fill="#1e293b" />
           <text x={AR.CX} y={AR.CY + 22} textAnchor="middle" fontSize="6"
             fill="rgba(255,255,255,0.5)" fontFamily="system-ui" letterSpacing="2">STAGE</text>
-          <rect x={AR.CX - 42} y={AR.CY + 12} width={5} height={12} rx={1} fill="#334155" />
-          <rect x={AR.CX + 37} y={AR.CY + 12} width={5} height={12} rx={1} fill="#334155" />
+          <rect x={AR.CX - 42} y={AR.CY + 12} width={5} height={12} rx={1} fill="rgba(255,255,255,0.1)" />
+          <rect x={AR.CX + 37} y={AR.CY + 12} width={5} height={12} rx={1} fill="rgba(255,255,255,0.1)" />
         </g>
       )}
 
@@ -462,26 +484,31 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
       )}
 
       {/* Suite boxes */}
-      {[{ x: suiteX1 }, { x: suiteX2 }].map((set, si) => (
-        <g key={si} style={{ cursor: "pointer" }}
-          onClick={() => onSectionTypeToggle("suite")}
-          onMouseEnter={() => onZoneHover("suite")}
-          onMouseLeave={() => onZoneHover(null)}
-        >
-          {Array.from({ length: SB.count }, (_, i) => (
-            <rect key={i} x={set.x} y={sbTop + i * (SB.h + SB.gap)}
-              width={SB.w} height={SB.h} rx={2}
-              fill={zoneFill("suite", hoveredZone, activeSectionTypes)}
-              stroke="#e2e8f0" strokeWidth="0.7"
-              style={{ transition: "fill 0.12s" }}
-            />
-          ))}
-          <text x={set.x + SB.w / 2} y={sbTop - 5}
-            textAnchor="middle" fontSize="4.5" fill={INK}
-            fontFamily="system-ui" fontWeight="600"
-            style={{ pointerEvents: "none", userSelect: "none" }}>SUITES</text>
-        </g>
-      ))}
+      {[{ x: suiteX1 }, { x: suiteX2 }].map((set, si) => {
+        const suiteActive = activeSectionTypes.includes("suite") || hoveredZone === "suite";
+        const suiteFill = zoneFill("suite", hoveredZone, activeSectionTypes);
+        return (
+          <g key={si} style={{ cursor: "pointer" }}
+            onClick={() => onSectionTypeToggle("suite")}
+            onMouseEnter={() => onZoneHover("suite")}
+            onMouseLeave={() => onZoneHover(null)}
+          >
+            {Array.from({ length: SB.count }, (_, i) => (
+              <rect key={i} x={set.x} y={sbTop + i * (SB.h + SB.gap)}
+                width={SB.w} height={SB.h} rx={2}
+                fill={suiteFill}
+                stroke={SECTION_STROKE} strokeWidth="1"
+                style={{ transition: "fill 0.12s",
+                  filter: suiteActive ? "brightness(1.15)" : "none" }}
+              />
+            ))}
+            <text x={set.x + SB.w / 2} y={sbTop - 5}
+              textAnchor="middle" fontSize="4.5" fill="rgba(255,255,255,0.6)"
+              fontFamily="system-ui" fontWeight="600"
+              style={{ pointerEvents: "none", userSelect: "none" }}>SUITES</text>
+          </g>
+        );
+      })}
 
       {showBadges && minByType && countByType && (
         <>
@@ -540,98 +567,153 @@ const NFL_VENUE: Record<string, { top: number[]; bot: number[]; openEndLeft?: bo
 const DEFAULT_NFL = { top: [103, 110, 118, 126, 133], bot: [310, 318, 326, 334, 342] };
 
 function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, venue = "", showBadges, minByType, countByType }: MapProps) {
-  const lowerMidY_top = NFY - 14;
-  const lowerMidY_bot = NFY + NFL_FIELD.h + 14;
   const nflCfg = NFL_VENUE[venue] ?? DEFAULT_NFL;
   const topSecNums = nflCfg.top;
   const botSecNums = nflCfg.bot;
   const isOpenEndLeft = nflCfg.openEndLeft ?? false;   // Lumen Field open north end
-  const sideSecX = topSecNums.map((_, i) => NFX + EZ_W + playW * (i + 1) / (topSecNums.length + 1));
+
+  // Section block gap (creates visual separation between sections)
+  const SEC_GAP = 1.5;
 
   return (
-    <svg viewBox={`0 0 ${NF.W} ${NF.H}`} className="w-full" style={{ background: "#f8fafc" }}>
+    <svg viewBox={`0 0 ${NF.W} ${NF.H}`} className="w-full" style={{ background: MAP_BG }}>
 
-      {/* Seating bands — outer to inner */}
+      {/* Outer stadium silhouette */}
+      <rect x={NFX - 90} y={NFY - 90} width={NFL_FIELD.w + 180} height={NFL_FIELD.h + 180} rx={22}
+        fill="#1e293b" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+
+      {/* Individual section blocks for each band — top sideline, bottom sideline, end zones */}
       {[...NFL_BANDS].reverse().map((band) => {
+        const fill    = zoneFill(band.type, hoveredZone, activeSectionTypes);
+        const isAct   = activeSectionTypes.includes(band.type) || hoveredZone === band.type;
         const bx = NFX - band.pad, by = NFY - band.pad;
         const bw = NFL_FIELD.w + band.pad * 2, bh = NFL_FIELD.h + band.pad * 2;
-        const f = zoneFill(band.type, hoveredZone, activeSectionTypes);
-        const isAct = activeSectionTypes.includes(band.type) || hoveredZone === band.type;
+        // How thick the band is on each side
+        const prevPad = band.pad === 28 ? 0 : band.pad === 46 ? 28 : 46;
+        const thickness = band.pad - prevPad;
+        // Number of sections along each sideline
+        const numSide = band.type === "lower" ? 12 : band.type === "club" ? 8 : 10;
+        // Number of sections along each end zone
+        const numEnd  = band.type === "lower" ? 4  : band.type === "club" ? 3 : 4;
+        const sectionProps = {
+          fill, stroke: SECTION_STROKE, strokeWidth: "1",
+          style: { cursor: "pointer" as const, transition: "fill 0.12s",
+            filter: isAct ? "brightness(1.15)" : "none" },
+          onClick: () => onSectionTypeToggle(band.type),
+          onMouseEnter: () => onZoneHover(band.type),
+          onMouseLeave: () => onZoneHover(null),
+        };
 
-        // Section dividers along the sidelines
-        const numDivs = band.type === "lower" ? 12 : band.type === "club" ? 8 : 10;
+        // Top sideline sections
+        const topSections = Array.from({ length: numSide }, (_, i) => {
+          const secW = (bw - 2 * thickness) / numSide;
+          const sx = bx + thickness + i * secW + SEC_GAP / 2;
+          const sy = by;
+          const sw = secW - SEC_GAP;
+          const sh = thickness;
+          return <rect key={`top-${i}`} x={sx} y={sy} width={sw} height={sh} rx={1} {...sectionProps} />;
+        });
+
+        // Bottom sideline sections
+        const botSections = Array.from({ length: numSide }, (_, i) => {
+          const secW = (bw - 2 * thickness) / numSide;
+          const sx = bx + thickness + i * secW + SEC_GAP / 2;
+          const sy = by + bh - thickness;
+          const sw = secW - SEC_GAP;
+          const sh = thickness;
+          return <rect key={`bot-${i}`} x={sx} y={sy} width={sw} height={sh} rx={1} {...sectionProps} />;
+        });
+
+        // Left end zone sections
+        const leftSections = Array.from({ length: numEnd }, (_, i) => {
+          const secH = bh / numEnd;
+          const sx = bx;
+          const sy = by + i * secH + SEC_GAP / 2;
+          const sw = thickness;
+          const sh = secH - SEC_GAP;
+          return <rect key={`lft-${i}`} x={sx} y={sy} width={sw} height={sh} rx={1} {...sectionProps} />;
+        });
+
+        // Right end zone sections
+        const rightSections = Array.from({ length: numEnd }, (_, i) => {
+          const secH = bh / numEnd;
+          const sx = bx + bw - thickness;
+          const sy = by + i * secH + SEC_GAP / 2;
+          const sw = thickness;
+          const sh = secH - SEC_GAP;
+          return <rect key={`rgt-${i}`} x={sx} y={sy} width={sw} height={sh} rx={1} {...sectionProps} />;
+        });
+
         return (
           <g key={band.type}>
-            <rect x={bx} y={by} width={bw} height={bh} rx={band.rx}
-              fill={f}
-              stroke={isAct ? CLR[band.type].act : "#d1d5db"} strokeWidth="1.2"
-              style={{ cursor: "pointer", transition: "fill 0.12s" }}
-              onClick={() => onSectionTypeToggle(band.type)}
-              onMouseEnter={() => onZoneHover(band.type)}
-              onMouseLeave={() => onZoneHover(null)}
-            />
-            {/* Sideline section dividers */}
-            {Array.from({ length: numDivs - 1 }, (_, i) => {
-              const x = bx + (bw * (i + 1)) / numDivs;
-              // Only draw dividers along the long sides, not through the field
-              return (
-                <g key={i} style={{ pointerEvents: "none" }}>
-                  <line x1={x} y1={by} x2={x} y2={by + (band.pad - (i === 0 ? 0 : 0))}
-                    stroke="rgba(255,255,255,0.6)" strokeWidth="0.6" />
-                  <line x1={x} y1={by + bh} x2={x} y2={by + bh - band.pad}
-                    stroke="rgba(255,255,255,0.6)" strokeWidth="0.6" />
-                </g>
-              );
-            })}
+            {topSections}{botSections}{leftSections}{rightSections}
           </g>
         );
       })}
 
-      {/* Zone labels */}
-      {NFL_BANDS.map((band) => {
-        const prevPad = band.pad === 28 ? 0 : band.pad === 46 ? 28 : 46;
-        const labelY = NFY - prevPad - (band.pad - prevPad) / 2 + 3;
+      {/* Section number labels on lower sideline sections */}
+      {topSecNums.map((num, i) => {
+        const band = NFL_BANDS[0]; // lower
+        const bx = NFX - band.pad;
+        const bw = NFL_FIELD.w + band.pad * 2;
+        const numSide = 12;
+        const secW = (bw - 2 * band.pad) / numSide;
+        const sx = bx + band.pad + i * secW + secW / 2;
+        const sy = NFY - band.pad + band.pad / 2;
+        const isDimmed = activeSectionTypes.length > 0 && !activeSectionTypes.includes("lower") && hoveredZone !== "lower";
         return (
-          <text key={band.type} x={NF.CX} y={labelY}
-            textAnchor="middle" fontSize="6.5" fill={INK}
-            fontFamily="system-ui" fontWeight="700" letterSpacing="0.7"
+          <text key={i} x={sx} y={sy + 2} textAnchor="middle" fontSize="5.5"
+            fill={isDimmed ? INK_DIM : INK} fontFamily="system-ui" fontWeight="700"
             style={{ pointerEvents: "none", userSelect: "none" }}
-          >{band.label}</text>
+          >{num}</text>
+        );
+      })}
+      {botSecNums.map((num, i) => {
+        const band = NFL_BANDS[0]; // lower
+        const bx = NFX - band.pad;
+        const bw = NFL_FIELD.w + band.pad * 2;
+        const numSide = 12;
+        const secW = (bw - 2 * band.pad) / numSide;
+        const sx = bx + band.pad + i * secW + secW / 2;
+        const sy = NFY + NFL_FIELD.h + band.pad + band.pad / 2;
+        const isDimmed = activeSectionTypes.length > 0 && !activeSectionTypes.includes("lower") && hoveredZone !== "lower";
+        return (
+          <text key={i} x={sx} y={sy + 2} textAnchor="middle" fontSize="5.5"
+            fill={isDimmed ? INK_DIM : INK} fontFamily="system-ui" fontWeight="700"
+            style={{ pointerEvents: "none", userSelect: "none" }}
+          >{num}</text>
         );
       })}
 
-      {/* Section numbers */}
-      {topSecNums.map((num, i) => (
-        <text key={i} x={sideSecX[i]} y={lowerMidY_top + 3}
-          textAnchor="middle" fontSize="6" fill={INK}
-          fontFamily="system-ui" fontWeight="700"
-          style={{ pointerEvents: "none", userSelect: "none" }}
-        >{num}</text>
-      ))}
-      {botSecNums.map((num, i) => (
-        <text key={i} x={sideSecX[i]} y={lowerMidY_bot + 3}
-          textAnchor="middle" fontSize="6" fill={INK}
-          fontFamily="system-ui" fontWeight="700"
-          style={{ pointerEvents: "none", userSelect: "none" }}
-        >{num}</text>
-      ))}
-
-      {/* Suite strips */}
-      {[
-        { x: NFX - 28, y: NFY - 10, w: NFL_FIELD.w + 56, h: 9 },
-        { x: NFX - 28, y: NFY + NFL_FIELD.h + 1, w: NFL_FIELD.w + 56, h: 9 },
-      ].map((s, i) => (
-        <rect key={i} x={s.x} y={s.y} width={s.w} height={s.h} rx={2}
-          fill={zoneFill("suite", hoveredZone, activeSectionTypes)}
-          stroke="#e2e8f0" strokeWidth="0.8"
-          style={{ cursor: "pointer", transition: "fill 0.12s" }}
-          onClick={() => onSectionTypeToggle("suite")}
-          onMouseEnter={() => onZoneHover("suite")}
-          onMouseLeave={() => onZoneHover(null)}
-        />
-      ))}
-      <text x={NF.CX} y={NFY - 14} textAnchor="middle" fontSize="5.5"
-        fill={INK} fontFamily="system-ui" fontWeight="600"
+      {/* Suite strips — two thin horizontal strips between lower and club */}
+      {(() => {
+        const suiteFill = zoneFill("suite", hoveredZone, activeSectionTypes);
+        const suiteActive = activeSectionTypes.includes("suite") || hoveredZone === "suite";
+        const numSuiteSecs = 14;
+        const stripW = NFL_FIELD.w + 56 + 2;
+        const secW = stripW / numSuiteSecs;
+        return [
+          { y: NFY - 28 - 9 },
+          { y: NFY + NFL_FIELD.h + 28 },
+        ].map((s, si) => (
+          <g key={si}>
+            {Array.from({ length: numSuiteSecs }, (_, i) => (
+              <rect key={i}
+                x={NFX - 28 + i * secW + SEC_GAP / 2}
+                y={s.y} width={secW - SEC_GAP} height={9} rx={1}
+                fill={suiteFill} stroke={SECTION_STROKE} strokeWidth="1"
+                style={{ cursor: "pointer", transition: "fill 0.12s",
+                  filter: suiteActive ? "brightness(1.15)" : "none" }}
+                onClick={() => onSectionTypeToggle("suite")}
+                onMouseEnter={() => onZoneHover("suite")}
+                onMouseLeave={() => onZoneHover(null)}
+              />
+            ))}
+          </g>
+        ));
+      })()}
+      <text x={NF.CX} y={NFY - 28 - 13} textAnchor="middle" fontSize="5.5"
+        fill="rgba(255,255,255,0.5)" fontFamily="system-ui" fontWeight="600"
         style={{ pointerEvents: "none", userSelect: "none" }}>SUITES</text>
 
       {/* Field */}
@@ -691,18 +773,18 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         const openW = maxPad + EZ_W;
         return (
           <g style={{ pointerEvents: "none" }}>
-            {/* Wash out the left endzone seating bands */}
+            {/* Wash out the left endzone seating bands with dark overlay */}
             <rect x={bx} y={by} width={openW} height={bh} rx={4}
-              fill="#f8fafc" opacity={0.75} />
+              fill={MAP_BG} opacity={0.85} />
             {/* Diagonal hatch marks to indicate "no seating" */}
             {Array.from({ length: 8 }, (_, i) => {
               const yy = by + (bh * i) / 7;
               return <line key={i} x1={bx} y1={yy} x2={bx + openW} y2={yy - 28}
-                stroke="#94a3b8" strokeWidth="0.8" opacity={0.5} />;
+                stroke="rgba(255,255,255,0.15)" strokeWidth="0.8" opacity={0.5} />;
             })}
             {/* Label */}
             <text x={bx + openW / 2} y={NF.CY} textAnchor="middle" fontSize="5.5"
-              fill="#64748b" fontFamily="system-ui" fontWeight="700" letterSpacing="0.5"
+              fill="rgba(255,255,255,0.35)" fontFamily="system-ui" fontWeight="700" letterSpacing="0.5"
               transform={`rotate(-90, ${bx + openW / 2}, ${NF.CY})`}
               style={{ userSelect: "none" }}>OPEN END</text>
           </g>
@@ -781,14 +863,6 @@ const BALLPARK_DATA: Record<string, BallparkCfg> = {
 };
 const DEFAULT_BALLPARK: BallparkCfg = { lf: "—", lcf: "—", cf: "—", rcf: "—", rf: "—", secCount: 25, showMonumentPark: false, hasGreenMonster: false, hasIvyWall: false };
 
-// section dividers are computed per-venue based on secCount
-function getMlbDivs(secCount: number) {
-  return Array.from({ length: secCount + 1 }, (_, i) => FAN_S + i * (FAN_E - FAN_S) / secCount);
-}
-
-// 25 sections — default (overridden per-venue via BALLPARK_DATA)
-const MLB_SEC_COUNT = 25;
-const MLB_DIVS = Array.from({ length: MLB_SEC_COUNT + 1 }, (_, i) => FAN_S + i * (FAN_E - FAN_S) / MLB_SEC_COUNT);
 
 function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, venue = "", showBadges, minByType, countByType }: MapProps) {
   const cx = BL.HX, cy = BL.HY;
@@ -799,89 +873,109 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
   const b3 = { x: cx - d, y: cy - d };
   const pm = { x: cx,     y: cy - 38 };
 
-  const bp     = BALLPARK_DATA[venue] ?? DEFAULT_BALLPARK;
-  const divs   = getMlbDivs(bp.secCount);
+  const bp = BALLPARK_DATA[venue] ?? DEFAULT_BALLPARK;
 
-  const mkZoneStroke = (t: SectionType) =>
-    activeSectionTypes.includes(t) || hoveredZone === t ? CLR[t].act : "#d1d5db";
+  // Helper: build a single MLB fan-wedge section path (circular arc band, not ellipse)
+  function mlbSectionPath(r1: number, r2: number, startDeg: number, endDeg: number): string {
+    // Add tiny inset gap on each side to create visual separation
+    const GAP_DEG = 0.8;
+    const s  = arcPoint(cx, cy, r1, startDeg + GAP_DEG);
+    const e  = arcPoint(cx, cy, r1, endDeg   - GAP_DEG);
+    const s2 = arcPoint(cx, cy, r2, startDeg + GAP_DEG);
+    const e2 = arcPoint(cx, cy, r2, endDeg   - GAP_DEG);
+    const large = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
+    return [
+      `M ${s.x} ${s.y}`,
+      `A ${r1} ${r1} 0 ${large} 1 ${e.x} ${e.y}`,
+      `L ${e2.x} ${e2.y}`,
+      `A ${r2} ${r2} 0 ${large} 0 ${s2.x} ${s2.y}`,
+      "Z",
+    ].join(" ");
+  }
+
+  // Section counts per ring
+  const lowerCount = bp.secCount;
+  const clubCount  = Math.round(bp.secCount * 0.6);
+  const upperCount = bp.secCount;
+  // Suite is a thin continuous band — split into a few blocks
+  const suiteCount = Math.round(bp.secCount * 0.4);
+
+  const TOTAL_ARC = FAN_E - FAN_S; // total degrees of arc (typically 130°)
+
+  function renderZone(
+    type: SectionType,
+    r1: number, r2: number,
+    count: number
+  ) {
+    const fill    = zoneFill(type, hoveredZone, activeSectionTypes);
+    const isAct   = activeSectionTypes.includes(type) || hoveredZone === type;
+    const isInact = activeSectionTypes.length > 0 && !activeSectionTypes.includes(type) && hoveredZone !== type;
+    const secStep = TOTAL_ARC / count;
+    return (
+      <g key={type}>
+        {Array.from({ length: count }, (_, i) => {
+          const startDeg = FAN_S + i * secStep;
+          const endDeg   = FAN_S + (i + 1) * secStep;
+          return (
+            <path
+              key={i}
+              d={mlbSectionPath(r1, r2, startDeg, endDeg)}
+              fill={fill}
+              stroke="none"
+              style={{ cursor: "pointer", transition: "fill 0.12s",
+                filter: isAct ? "brightness(1.18)" : "none" }}
+              onClick={() => onSectionTypeToggle(type)}
+              onMouseEnter={() => onZoneHover(type)}
+              onMouseLeave={() => onZoneHover(null)}
+            />
+          );
+        })}
+        {/* Active glow border */}
+        {isAct && (
+          <path
+            d={arcBandPath(cx, cy, r1, r2, FAN_S, FAN_E)}
+            fill="none"
+            stroke="rgba(255,255,255,0.3)"
+            strokeWidth="1.5"
+            style={{ pointerEvents: "none" }}
+          />
+        )}
+        {/* Section number labels — lower and upper only, every other */}
+        {(type === "lower" || type === "upper") && Array.from({ length: count }, (_, i) => {
+          if (i % 2 !== 0) return null;
+          const midDeg = FAN_S + (i + 0.5) * secStep;
+          const midR = (r1 + r2) / 2;
+          const pt = arcPoint(cx, cy, midR, midDeg);
+          const secNum = type === "lower" ? 100 + i + 1 : 200 + i + 1;
+          return (
+            <text key={i} x={pt.x} y={pt.y + 2.5} textAnchor="middle" fontSize="5.5"
+              fill={isInact ? INK_DIM : INK} fontFamily="system-ui" fontWeight="700"
+              style={{ pointerEvents: "none", userSelect: "none" }}
+            >{secNum}</text>
+          );
+        })}
+      </g>
+    );
+  }
 
   return (
-    <svg viewBox={`0 0 ${BL.W} ${BL.H}`} className="w-full" style={{ background: "#f8fafc" }}>
+    <svg viewBox={`0 0 ${BL.W} ${BL.H}`} className="w-full" style={{ background: MAP_BG }}>
 
-      {/* ── Seating zones ── */}
-      <path d={arcBandPath(cx, cy, MLB_R.upperIn, MLB_R.upperOut, FAN_S, FAN_E)}
-        fill={zoneFill("upper", hoveredZone, activeSectionTypes)}
-        stroke={mkZoneStroke("upper")} strokeWidth="1.2"
-        style={{ cursor: "pointer", transition: "fill 0.12s" }}
-        onClick={() => onSectionTypeToggle("upper")}
-        onMouseEnter={() => onZoneHover("upper")}
-        onMouseLeave={() => onZoneHover(null)}
-      />
-      <path d={arcBandPath(cx, cy, MLB_R.clubIn, MLB_R.clubOut, FAN_S, FAN_E)}
-        fill={zoneFill("club", hoveredZone, activeSectionTypes)}
-        stroke={mkZoneStroke("club")} strokeWidth="1.2"
-        style={{ cursor: "pointer", transition: "fill 0.12s" }}
-        onClick={() => onSectionTypeToggle("club")}
-        onMouseEnter={() => onZoneHover("club")}
-        onMouseLeave={() => onZoneHover(null)}
-      />
-      <path d={arcBandPath(cx, cy, MLB_R.suiteIn, MLB_R.suiteOut, FAN_S, FAN_E)}
-        fill={zoneFill("suite", hoveredZone, activeSectionTypes)}
-        stroke={mkZoneStroke("suite")} strokeWidth="0.8"
-        style={{ cursor: "pointer", transition: "fill 0.12s" }}
-        onClick={() => onSectionTypeToggle("suite")}
-        onMouseEnter={() => onZoneHover("suite")}
-        onMouseLeave={() => onZoneHover(null)}
-      />
-      <path d={arcBandPath(cx, cy, MLB_R.lowerIn, MLB_R.lowerOut, FAN_S, FAN_E)}
-        fill={zoneFill("lower", hoveredZone, activeSectionTypes)}
-        stroke={mkZoneStroke("lower")} strokeWidth="1.2"
-        style={{ cursor: "pointer", transition: "fill 0.12s" }}
-        onClick={() => onSectionTypeToggle("lower")}
-        onMouseEnter={() => onZoneHover("lower")}
-        onMouseLeave={() => onZoneHover(null)}
-      />
+      {/* Outer ballpark silhouette */}
+      <path d={sectorPath(cx, cy, MLB_R.upperOut + 16, FAN_S - 4, FAN_E + 4)}
+        fill="#1e293b" style={{ pointerEvents: "none" }} />
 
-      {/* Section dividers — all zones, per-venue count */}
-      {divs.map((deg, i) => {
-        const isle = i % 5 === 0;
-        const lIn  = arcPoint(cx, cy, MLB_R.lowerIn,  deg);
-        const lOut = arcPoint(cx, cy, MLB_R.lowerOut, deg);
-        const cIn  = arcPoint(cx, cy, MLB_R.clubIn,   deg);
-        const cOut = arcPoint(cx, cy, MLB_R.clubOut,  deg);
-        const uIn  = arcPoint(cx, cy, MLB_R.upperIn,  deg);
-        const uOut = arcPoint(cx, cy, MLB_R.upperOut, deg);
-        return (
-          <g key={i} style={{ pointerEvents: "none" }}>
-            <line x1={lIn.x} y1={lIn.y} x2={lOut.x} y2={lOut.y}
-              stroke={isle ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.55)"} strokeWidth={isle ? "1.1" : "0.55"} />
-            <line x1={cIn.x} y1={cIn.y} x2={cOut.x} y2={cOut.y}
-              stroke={isle ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.55)"} strokeWidth={isle ? "1.1" : "0.55"} />
-            <line x1={uIn.x} y1={uIn.y} x2={uOut.x} y2={uOut.y}
-              stroke={isle ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.55)"} strokeWidth={isle ? "1.1" : "0.55"} />
-          </g>
-        );
-      })}
-
-      {/* Section numbers — lower bowl, every other */}
-      {Array.from({ length: bp.secCount }, (_, i) => {
-        if (i % 2 !== 0) return null;
-        const deg = FAN_S + (i + 0.5) * (FAN_E - FAN_S) / bp.secCount;
-        const midR = (MLB_R.lowerIn + MLB_R.lowerOut) / 2;
-        const pt = arcPoint(cx, cy, midR, deg);
-        return (
-          <text key={i} x={pt.x} y={pt.y + 2.5} textAnchor="middle" fontSize="5.5"
-            fill={INK} fontFamily="system-ui" fontWeight="700"
-            style={{ pointerEvents: "none", userSelect: "none" }}
-          >{100 + i + 1}</text>
-        );
-      })}
+      {/* ── Individual section polygons — outer to inner ── */}
+      {renderZone("upper", MLB_R.upperIn, MLB_R.upperOut, upperCount)}
+      {renderZone("club",  MLB_R.clubIn,  MLB_R.clubOut,  clubCount)}
+      {renderZone("suite", MLB_R.suiteIn, MLB_R.suiteOut, suiteCount)}
+      {renderZone("lower", MLB_R.lowerIn, MLB_R.lowerOut, lowerCount)}
 
       {/* ── Playing field ── */}
       <path d={arcBandPath(cx, cy, MLB_R.trackIn, MLB_R.trackOut, FAN_S, FAN_E)}
-        fill="#c4a96d" stroke="#e5e7eb" strokeWidth="0.8" style={{ pointerEvents: "none" }} />
+        fill="#b8935a" stroke="none" strokeWidth="0.8" style={{ pointerEvents: "none" }} />
       <path d={sectorPath(cx, cy, MLB_R.wall + 2, FAN_S, FAN_E)}
-        fill="none" stroke="#94a3b8" strokeWidth="2.5" style={{ pointerEvents: "none" }} />
+        fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2" style={{ pointerEvents: "none" }} />
 
       {/* Foul poles */}
       {([-135, -45] as number[]).map((deg, i) => {
@@ -1335,7 +1429,7 @@ export default function VenueMap({
       <>
         <div className="h-full flex flex-col">
           {/* Map SVG — fills available space */}
-          <div className="flex-1 min-h-0 overflow-hidden flex items-center justify-center bg-[#f8fafc] rounded-xl border border-gray-100">
+          <div className="flex-1 min-h-0 overflow-hidden flex items-center justify-center bg-[#0f172a] rounded-xl border border-white/10">
             <div className="w-full" ref={svgContainerRef}
               onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}
               style={{ position: "relative" }}
