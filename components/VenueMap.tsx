@@ -31,17 +31,17 @@ interface MapProps {
 // ── Palette ───────────────────────────────────────────────────────────────────
 
 const CLR: Record<SectionType, { base: string; act: string; dim: string }> = {
-  floor: { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.25)"   },
-  lower: { base: "#3b82f6", act: "#2563eb", dim: "rgba(59,130,246,0.25)"  },
-  club:  { base: "#06b6d4", act: "#0891b2", dim: "rgba(6,182,212,0.25)"   },
-  upper: { base: "#8b5cf6", act: "#7c3aed", dim: "rgba(139,92,246,0.25)"  },
-  suite: { base: "#f59e0b", act: "#d97706", dim: "rgba(245,158,11,0.25)"  },
+  floor: { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.3)"    },
+  lower: { base: "#c4cdd6", act: "#8fa0af", dim: "rgba(196,205,214,0.7)"  },
+  club:  { base: "#bfc9d3", act: "#8a9dac", dim: "rgba(191,201,211,0.7)"  },
+  upper: { base: "#d0d8e0", act: "#9daab6", dim: "rgba(208,216,224,0.7)"  },
+  suite: { base: "#c4cdd6", act: "#8fa0af", dim: "rgba(196,205,214,0.7)"  },
 };
 
-const MAP_BG = "#0f172a";
-const SECTION_STROKE = "#0f172a";
-const INK = "rgba(255,255,255,0.85)";
-const INK_DIM = "rgba(255,255,255,0.4)";
+const MAP_BG = "#f0f2f5";
+const SECTION_STROKE = "#ffffff";
+const INK = "rgba(15,23,42,0.72)";
+const INK_DIM = "rgba(15,23,42,0.35)";
 
 const GRS = { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.25)" };
 
@@ -230,7 +230,7 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
 
       {/* Outer stadium silhouette */}
       <ellipse cx={AR.CX} cy={AR.CY} rx={outerRx + 14} ry={outerRy + 10}
-        fill="#1e293b" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+        fill="#e4e8ec" stroke="rgba(0,0,0,0.06)" strokeWidth="1" />
 
       {/* Seating rings — each section is its own polygon */}
       {[...ARENA_RINGS].reverse().map((ring) => {
@@ -460,12 +460,12 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
       {!isNBA && !isNHL && (
         <g style={{ pointerEvents: "none" }}>
           <rect x={AR.CX - 38} y={AR.CY + 8} width={76} height={22} rx={3}
-            fill="#0f172a" stroke="rgba(255,255,255,0.2)" strokeWidth="0.9" />
-          <rect x={AR.CX - 32} y={AR.CY + 7} width={64} height={4} rx={1} fill="#1e293b" />
+            fill="#dde3e9" stroke="rgba(0,0,0,0.1)" strokeWidth="0.9" />
+          <rect x={AR.CX - 32} y={AR.CY + 7} width={64} height={4} rx={1} fill="#c8d0d8" />
           <text x={AR.CX} y={AR.CY + 22} textAnchor="middle" fontSize="6"
-            fill="rgba(255,255,255,0.5)" fontFamily="system-ui" letterSpacing="2">STAGE</text>
-          <rect x={AR.CX - 42} y={AR.CY + 12} width={5} height={12} rx={1} fill="rgba(255,255,255,0.1)" />
-          <rect x={AR.CX + 37} y={AR.CY + 12} width={5} height={12} rx={1} fill="rgba(255,255,255,0.1)" />
+            fill="rgba(15,23,42,0.45)" fontFamily="system-ui" letterSpacing="2">STAGE</text>
+          <rect x={AR.CX - 42} y={AR.CY + 12} width={5} height={12} rx={1} fill="rgba(0,0,0,0.06)" />
+          <rect x={AR.CX + 37} y={AR.CY + 12} width={5} height={12} rx={1} fill="rgba(0,0,0,0.06)" />
         </g>
       )}
 
@@ -578,7 +578,7 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
 
       {/* Outer stadium silhouette */}
       <rect x={NFX - 90} y={NFY - 90} width={NFL_FIELD.w + 180} height={NFL_FIELD.h + 180} rx={22}
-        fill="#1e293b" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+        fill="#e4e8ec" stroke="rgba(0,0,0,0.06)" strokeWidth="1" />
 
       {/* Individual section blocks for each band — top sideline, bottom sideline, end zones */}
       {[...NFL_BANDS].reverse().map((band) => {
@@ -961,7 +961,7 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
 
       {/* Outer ballpark silhouette */}
       <path d={sectorPath(cx, cy, MLB_R.upperOut + 16, FAN_S - 4, FAN_E + 4)}
-        fill="#1e293b" style={{ pointerEvents: "none" }} />
+        fill="#e4e8ec" style={{ pointerEvents: "none" }} />
 
       {/* ── Individual section polygons — outer to inner ── */}
       {renderZone("upper", MLB_R.upperIn, MLB_R.upperOut, upperCount)}
