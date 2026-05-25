@@ -161,7 +161,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Hip-Hop",
     lowestAllInPrice: 82,
     listingCount: 21,
-    imageUrl: "https://cdn-images.dzcdn.net/images/artist/eb0ed5b21d1ea5af021fc074ded0e91f/1000x1000-000000-80-0-0.jpg",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/1/15/Drake_at_The_Carter_Effect_2017_%2836818935200%29_%28cropped%29.jpg",
   },
   {
     id: "evt-014",
@@ -173,7 +173,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Alternative",
     lowestAllInPrice: 74,
     listingCount: 20,
-    imageUrl: "https://cdn-images.dzcdn.net/images/artist/8eab1a9a644889aabaca1e193e05f984/1000x1000-000000-80-0-0.jpg",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/c7/BillieEilishO2140725-39_-_54665577407_%28cropped%29.jpg",
   },
   {
     id: "evt-015",
@@ -197,7 +197,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop",
     lowestAllInPrice: 68,
     listingCount: 18,
-    imageUrl: "https://cdn-images.dzcdn.net/images/artist/4a9cdc7737e2a0e59b4917b47884b859/1000x1000-000000-80-0-0.jpg",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/61/Sabrina_Carpenter_-_O2_Arena_2025_-_086_%28cropped_2%29.jpg",
   },
   {
     id: "evt-017",
@@ -245,7 +245,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop",
     lowestAllInPrice: 84,
     listingCount: 20,
-    imageUrl: "https://cdn-images.dzcdn.net/images/artist/3504ffe2519090026bc359b689d22e20/1000x1000-000000-80-0-0.jpg",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/7/7c/Ariana_Grande_promoting_Wicked_%282024%29.jpg",
   },
 
   // ── More Sports ──────────────────────────────────────────────────────────────
@@ -323,7 +323,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop",
     lowestAllInPrice: 89,
     listingCount: 22,
-    imageUrl: "https://cdn-images.dzcdn.net/images/artist/d6bb84390641d8ae9118228d9544e53d/1000x1000-000000-80-0-0.jpg",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Ed_Sheeran-6886_%28cropped%29.jpg/1280px-Ed_Sheeran-6886_%28cropped%29.jpg",
   },
   {
     id: "evt-027",
