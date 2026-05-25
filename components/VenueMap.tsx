@@ -266,20 +266,22 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
         onMouseLeave={() => onZoneHover(null)}
       />
 
-      {/* ── NBA court markings ── */}
+      {/* ── NBA court markings — court runs HORIZONTALLY, baskets at left & right ── */}
       {isNBA && (() => {
-        // Court is vertical: baselines at CY ± floorRy, width = floorRx*2
-        const top = AR.CY - floorRy;      // top baseline
-        const bot = AR.CY + floorRy;      // bottom baseline
-        const laneW = floorRx * 0.44;     // lane half-width ~35% of floor half-width
-        const laneH = floorRy * 0.44;     // lane depth
-        const ftRad = laneW * 0.82;       // free-throw circle radius
-        const tpRx  = floorRx * 0.88;     // three-point arc x-radius
-        const tpRy  = floorRy * 0.78;     // three-point arc y-radius
-        const tpCY  = floorRy * 0.28;     // arc center offset from baseline
-        const rstRad = laneW * 0.32;      // restricted area radius
-        const strokeClr = "rgba(180,120,40,0.9)";
-        const sw = "0.8";
+        const L      = AR.CX - floorRx;   // left baseline
+        const R      = AR.CX + floorRx;   // right baseline
+        const laneD  = floorRx * 0.38;    // lane depth from each baseline
+        const laneHW = floorRy * 0.58;    // lane half-width
+        const bOff   = floorRx * 0.06;    // basket distance from baseline
+        const rstRad = laneHW * 0.30;     // restricted-area arc radius
+        const ftRx   = laneD  * 0.28;     // free-throw circle x-radius
+        const ftRy   = laneHW * 0.90;     // free-throw circle y-radius
+        const tpCorY = floorRy * 0.88;    // corner-3 distance from center (y)
+        const tpCEnd = floorRx * 0.26;    // corner-3 straight segment length
+        const tpRx   = floorRx * 0.58;    // 3-pt arc x-radius (ellipse)
+        const tpRy   = floorRy * 0.98;    // 3-pt arc y-radius (ellipse)
+        const clr    = "rgba(180,120,40,0.9)";
+        const sw     = "0.8";
         const clipId = "court-clip";
         return (
           <g style={{ pointerEvents: "none" }}>
@@ -289,76 +291,65 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
               </clipPath>
             </defs>
             <g clipPath={`url(#${clipId})`}>
-              {/* Center line */}
-              <line x1={AR.CX - floorRx} y1={AR.CY} x2={AR.CX + floorRx} y2={AR.CY}
-                stroke={strokeClr} strokeWidth={sw} />
+              {/* Vertical center line */}
+              <line x1={AR.CX} y1={AR.CY - floorRy} x2={AR.CX} y2={AR.CY + floorRy}
+                stroke={clr} strokeWidth={sw} />
               {/* Center circle */}
-              <ellipse cx={AR.CX} cy={AR.CY} rx={floorRx * 0.18} ry={floorRy * 0.22}
-                fill="none" stroke={strokeClr} strokeWidth={sw} />
-              <circle cx={AR.CX} cy={AR.CY} r={2} fill={strokeClr} />
+              <ellipse cx={AR.CX} cy={AR.CY} rx={ftRx} ry={floorRy * 0.30}
+                fill="none" stroke={clr} strokeWidth={sw} />
+              <circle cx={AR.CX} cy={AR.CY} r={2} fill={clr} />
 
-              {/* ── TOP END ── */}
-              {/* Paint / lane */}
-              <rect x={AR.CX - laneW} y={top} width={laneW * 2} height={laneH}
-                fill="rgba(180,120,40,0.12)" stroke={strokeClr} strokeWidth={sw} />
-              {/* Free throw circle */}
-              <ellipse cx={AR.CX} cy={top + laneH} rx={ftRad} ry={ftRad * 0.65}
-                fill="none" stroke={strokeClr} strokeWidth={sw} strokeDasharray="3,2" />
-              <ellipse cx={AR.CX} cy={top + laneH} rx={ftRad} ry={ftRad * 0.65}
-                fill="none" stroke={strokeClr} strokeWidth={sw}
-                strokeDasharray="none" clipPath={`url(#${clipId})`}
-                style={{ clipPath: `inset(0 0 50% 0)` }} />
-              {/* Restricted area arc */}
-              <ellipse cx={AR.CX} cy={top + 3.5} rx={rstRad} ry={rstRad * 0.55}
-                fill="none" stroke={strokeClr} strokeWidth={sw} />
-              {/* Basket */}
-              <circle cx={AR.CX} cy={top + 3.5} r={2.2} fill="none" stroke={strokeClr} strokeWidth="1" />
-              <line x1={AR.CX - 3} y1={top + 1.5} x2={AR.CX + 3} y2={top + 1.5}
-                stroke={strokeClr} strokeWidth="1.2" />
-              {/* Three-point arc — full arc clipped to floor */}
-              <path
-                d={`M ${AR.CX - tpRx} ${AR.CY - tpCY}
-                    A ${tpRx} ${tpRy} 0 0 1 ${AR.CX + tpRx} ${AR.CY - tpCY}`}
-                fill="none" stroke={strokeClr} strokeWidth={sw} />
-              {/* Straight three-point sideline segments */}
-              <line x1={AR.CX - tpRx} y1={top} x2={AR.CX - tpRx} y2={AR.CY - tpCY}
-                stroke={strokeClr} strokeWidth={sw} />
-              <line x1={AR.CX + tpRx} y1={top} x2={AR.CX + tpRx} y2={AR.CY - tpCY}
-                stroke={strokeClr} strokeWidth={sw} />
+              {/* ── LEFT basket ── */}
+              <rect x={L} y={AR.CY - laneHW} width={laneD} height={laneHW * 2}
+                fill="rgba(180,120,40,0.12)" stroke={clr} strokeWidth={sw} />
+              <path d={`M ${L+bOff} ${AR.CY-rstRad} A ${rstRad} ${rstRad*0.6} 0 0 1 ${L+bOff} ${AR.CY+rstRad}`}
+                fill="none" stroke={clr} strokeWidth={sw} />
+              <circle cx={L+bOff} cy={AR.CY} r={2.2} fill="none" stroke={clr} strokeWidth="1" />
+              <line x1={L+bOff-0.5} y1={AR.CY-3.5} x2={L+bOff-0.5} y2={AR.CY+3.5}
+                stroke={clr} strokeWidth="1.2" />
+              <ellipse cx={L+laneD} cy={AR.CY} rx={ftRx} ry={ftRy}
+                fill="none" stroke={clr} strokeWidth={sw} strokeDasharray="3,2" />
+              <line x1={L} y1={AR.CY-tpCorY} x2={L+tpCEnd} y2={AR.CY-tpCorY} stroke={clr} strokeWidth={sw} />
+              <line x1={L} y1={AR.CY+tpCorY} x2={L+tpCEnd} y2={AR.CY+tpCorY} stroke={clr} strokeWidth={sw} />
+              <path d={`M ${L+tpCEnd} ${AR.CY-tpCorY} A ${tpRx} ${tpRy} 0 0 1 ${L+tpCEnd} ${AR.CY+tpCorY}`}
+                fill="none" stroke={clr} strokeWidth={sw} />
 
-              {/* ── BOTTOM END ── */}
-              <rect x={AR.CX - laneW} y={bot - laneH} width={laneW * 2} height={laneH}
-                fill="rgba(180,120,40,0.12)" stroke={strokeClr} strokeWidth={sw} />
-              <ellipse cx={AR.CX} cy={bot - laneH} rx={ftRad} ry={ftRad * 0.65}
-                fill="none" stroke={strokeClr} strokeWidth={sw} strokeDasharray="3,2" />
-              <ellipse cx={AR.CX} cy={bot - 3.5} rx={rstRad} ry={rstRad * 0.55}
-                fill="none" stroke={strokeClr} strokeWidth={sw} />
-              <circle cx={AR.CX} cy={bot - 3.5} r={2.2} fill="none" stroke={strokeClr} strokeWidth="1" />
-              <line x1={AR.CX - 3} y1={bot - 1.5} x2={AR.CX + 3} y2={bot - 1.5}
-                stroke={strokeClr} strokeWidth="1.2" />
-              <path
-                d={`M ${AR.CX - tpRx} ${AR.CY + tpCY}
-                    A ${tpRx} ${tpRy} 0 0 0 ${AR.CX + tpRx} ${AR.CY + tpCY}`}
-                fill="none" stroke={strokeClr} strokeWidth={sw} />
-              <line x1={AR.CX - tpRx} y1={bot} x2={AR.CX - tpRx} y2={AR.CY + tpCY}
-                stroke={strokeClr} strokeWidth={sw} />
-              <line x1={AR.CX + tpRx} y1={bot} x2={AR.CX + tpRx} y2={AR.CY + tpCY}
-                stroke={strokeClr} strokeWidth={sw} />
+              {/* ── RIGHT basket ── */}
+              <rect x={R-laneD} y={AR.CY - laneHW} width={laneD} height={laneHW * 2}
+                fill="rgba(180,120,40,0.12)" stroke={clr} strokeWidth={sw} />
+              <path d={`M ${R-bOff} ${AR.CY-rstRad} A ${rstRad} ${rstRad*0.6} 0 0 0 ${R-bOff} ${AR.CY+rstRad}`}
+                fill="none" stroke={clr} strokeWidth={sw} />
+              <circle cx={R-bOff} cy={AR.CY} r={2.2} fill="none" stroke={clr} strokeWidth="1" />
+              <line x1={R-bOff+0.5} y1={AR.CY-3.5} x2={R-bOff+0.5} y2={AR.CY+3.5}
+                stroke={clr} strokeWidth="1.2" />
+              <ellipse cx={R-laneD} cy={AR.CY} rx={ftRx} ry={ftRy}
+                fill="none" stroke={clr} strokeWidth={sw} strokeDasharray="3,2" />
+              <line x1={R} y1={AR.CY-tpCorY} x2={R-tpCEnd} y2={AR.CY-tpCorY} stroke={clr} strokeWidth={sw} />
+              <line x1={R} y1={AR.CY+tpCorY} x2={R-tpCEnd} y2={AR.CY+tpCorY} stroke={clr} strokeWidth={sw} />
+              <path d={`M ${R-tpCEnd} ${AR.CY-tpCorY} A ${tpRx} ${tpRy} 0 0 0 ${R-tpCEnd} ${AR.CY+tpCorY}`}
+                fill="none" stroke={clr} strokeWidth={sw} />
             </g>
           </g>
         );
       })()}
 
-      {/* ── NHL ice markings ── */}
+      {/* ── NHL ice markings — rink runs HORIZONTALLY, goals at left & right ── */}
       {isNHL && (() => {
-        const top = AR.CY - floorRy;
-        const bot = AR.CY + floorRy;
         const redSW = "1.2", blueSW = "0.9";
         const clipId = "ice-clip";
+        // Blue zone lines (vertical) at ±30% from center
+        const zoneOff  = floorRx * 0.30;
+        // Goal lines (vertical) near each end
+        const goalOff  = floorRx * 0.86;
+        const goalL    = AR.CX - goalOff;
+        const goalR    = AR.CX + goalOff;
+        // Goal net & crease dimensions
+        const goalHW   = floorRy * 0.38;  // half-height of goal opening
+        const netD     = floorRx * 0.07;  // depth of net behind goal line
+        const creaseD  = floorRx * 0.14;  // depth of crease toward center
+        const creaseHW = floorRy * 0.38;  // half-height of crease
         // Face-off circle radii
-        const fcRx = floorRx * 0.22, fcRy = floorRy * 0.28;
-        // Goal crease (D-shape in front of goal)
-        const creaseRx = floorRx * 0.14, creaseRy = floorRy * 0.09;
+        const fcRx = floorRx * 0.20, fcRy = floorRy * 0.28;
         return (
           <g style={{ pointerEvents: "none" }}>
             <defs>
@@ -367,20 +358,21 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
               </clipPath>
             </defs>
             <g clipPath={`url(#${clipId})`}>
-              {/* Red center line */}
-              <line x1={AR.CX - floorRx} y1={AR.CY} x2={AR.CX + floorRx} y2={AR.CY}
+              {/* Red center line — VERTICAL */}
+              <line x1={AR.CX} y1={AR.CY - floorRy} x2={AR.CX} y2={AR.CY + floorRy}
                 stroke="#cc0000" strokeWidth={redSW} />
-              {/* Blue zone lines — 1/3 and 2/3 */}
-              {([-0.28, 0.28] as number[]).map((f, i) => (
-                <line key={i} x1={AR.CX - floorRx} y1={AR.CY + floorRy * f}
-                  x2={AR.CX + floorRx} y2={AR.CY + floorRy * f}
+              {/* Blue zone lines — VERTICAL at ±zoneOff */}
+              {([-1, 1] as number[]).map((side, i) => (
+                <line key={i}
+                  x1={AR.CX + side * zoneOff} y1={AR.CY - floorRy}
+                  x2={AR.CX + side * zoneOff} y2={AR.CY + floorRy}
                   stroke="#0055cc" strokeWidth={blueSW} />
               ))}
               {/* Center ice circle */}
-              <ellipse cx={AR.CX} cy={AR.CY} rx={floorRx * 0.2} ry={floorRy * 0.26}
+              <ellipse cx={AR.CX} cy={AR.CY} rx={floorRx * 0.20} ry={floorRy * 0.26}
                 fill="none" stroke="#cc0000" strokeWidth="0.9" />
               <circle cx={AR.CX} cy={AR.CY} r={2} fill="#cc0000" />
-              {/* Face-off circles — 4 spots */}
+              {/* Face-off circles — 4 spots in left & right zones */}
               {([-0.55, 0.55] as number[]).flatMap((dx) =>
                 ([-0.52, 0.52] as number[]).map((dy) => {
                   const fx = AR.CX + floorRx * dx;
@@ -390,34 +382,33 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
                       <ellipse cx={fx} cy={fy} rx={fcRx} ry={fcRy}
                         fill="none" stroke="#cc0000" strokeWidth="0.7" />
                       <circle cx={fx} cy={fy} r={1.5} fill="#cc0000" />
-                      {/* Hash marks */}
-                      <line x1={fx - fcRx * 0.3} y1={fy - fcRy * 1.1} x2={fx + fcRx * 0.3} y2={fy - fcRy * 1.1}
+                      {/* Hash marks — VERTICAL on left & right sides of circle */}
+                      <line x1={fx - fcRx * 1.1} y1={fy - fcRy * 0.3} x2={fx - fcRx * 1.1} y2={fy + fcRy * 0.3}
                         stroke="#cc0000" strokeWidth="0.6" />
-                      <line x1={fx - fcRx * 0.3} y1={fy + fcRy * 1.1} x2={fx + fcRx * 0.3} y2={fy + fcRy * 1.1}
+                      <line x1={fx + fcRx * 1.1} y1={fy - fcRy * 0.3} x2={fx + fcRx * 1.1} y2={fy + fcRy * 0.3}
                         stroke="#cc0000" strokeWidth="0.6" />
                     </g>
                   );
                 })
               )}
-              {/* Goal lines — red lines near each end */}
-              {([-1, 1] as number[]).map((side) => {
-                const gy = AR.CY + side * floorRy * 0.84;
-                const gHalfW = floorRx * 0.28;
-                return (
-                  <g key={side}>
-                    <line x1={AR.CX - gHalfW} y1={gy} x2={AR.CX + gHalfW} y2={gy}
-                      stroke="#cc0000" strokeWidth="0.8" />
-                    {/* Goal net */}
-                    <rect x={AR.CX - floorRx * 0.1} y={gy - (side * 4)} width={floorRx * 0.2} height={4}
-                      fill="rgba(0,0,0,0.08)" stroke="#666" strokeWidth="0.5" rx="0.5" />
-                    {/* Goal crease (D-shape) */}
-                    <path
-                      d={`M ${AR.CX - creaseRx} ${gy}
-                          A ${creaseRx} ${creaseRy} 0 0 ${side === -1 ? 1 : 0} ${AR.CX + creaseRx} ${gy} Z`}
-                      fill="rgba(0,85,204,0.18)" stroke="#0055cc" strokeWidth="0.7" />
-                  </g>
-                );
-              })}
+              {/* Goals — goal lines VERTICAL at left & right ends */}
+              {([{ gx: goalL, side: -1 }, { gx: goalR, side: 1 }]).map(({ gx, side }) => (
+                <g key={side}>
+                  {/* Goal line */}
+                  <line x1={gx} y1={AR.CY - floorRy * 0.9} x2={gx} y2={AR.CY + floorRy * 0.9}
+                    stroke="#cc0000" strokeWidth="0.8" />
+                  {/* Net behind goal line (away from center) */}
+                  <rect
+                    x={side === -1 ? gx - netD : gx}
+                    y={AR.CY - goalHW}
+                    width={netD} height={goalHW * 2}
+                    fill="rgba(0,0,0,0.10)" stroke="#666" strokeWidth="0.5" rx="0.5" />
+                  {/* Crease — D-shape opening toward center */}
+                  <path
+                    d={`M ${gx} ${AR.CY - creaseHW} A ${creaseD} ${creaseHW} 0 0 ${side === -1 ? 1 : 0} ${gx} ${AR.CY + creaseHW} Z`}
+                    fill="rgba(0,85,204,0.18)" stroke="#0055cc" strokeWidth="0.7" />
+                </g>
+              ))}
             </g>
           </g>
         );
@@ -436,13 +427,17 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
         </g>
       )}
 
-      {/* Floor labels */}
-      <text x={AR.CX} y={AR.CY - (isNBA || isNHL ? 5 : 3)} textAnchor="middle" fontSize="8"
-        fill={floorInk} fontFamily="system-ui,sans-serif" fontWeight="800" letterSpacing="0.5"
-        style={{ pointerEvents: "none", userSelect: "none" }}>{floorLabel}</text>
-      <text x={AR.CX} y={AR.CY + 7} textAnchor="middle" fontSize="5.5"
-        fill={floorInk} fontFamily="system-ui,sans-serif" fontWeight="600" letterSpacing="0.3"
-        style={{ pointerEvents: "none", userSelect: "none" }} opacity={0.65}>{floorSub}</text>
+      {/* Floor labels — hidden for NBA/NHL where court/ice markings make it obvious */}
+      {!isNBA && !isNHL && (
+        <>
+          <text x={AR.CX} y={AR.CY - 3} textAnchor="middle" fontSize="8"
+            fill={floorInk} fontFamily="system-ui,sans-serif" fontWeight="800" letterSpacing="0.5"
+            style={{ pointerEvents: "none", userSelect: "none" }}>{floorLabel}</text>
+          <text x={AR.CX} y={AR.CY + 7} textAnchor="middle" fontSize="5.5"
+            fill={floorInk} fontFamily="system-ui,sans-serif" fontWeight="600" letterSpacing="0.3"
+            style={{ pointerEvents: "none", userSelect: "none" }} opacity={0.65}>{floorSub}</text>
+        </>
+      )}
 
       {/* Suite boxes */}
       {[{ x: suiteX1 }, { x: suiteX2 }].map((set, si) => (
