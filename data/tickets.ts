@@ -161,7 +161,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Hip-Hop",
     lowestAllInPrice: 82,
     listingCount: 21,
-    imageUrl: "https://cdn-images.dzcdn.net/images/artist/5a56e49e-dc3e-4ac3-80b4-41d89c8a8e36/1000x1000-000000-80-0-0.jpg",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/eb0ed5b21d1ea5af021fc074ded0e91f/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-014",
@@ -185,7 +185,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop",
     lowestAllInPrice: 96,
     listingCount: 19,
-    imageUrl: "https://cdn-images.dzcdn.net/images/artist/89c1060a-b8e8-4c84-9d29-e96b78834c23/1000x1000-000000-80-0-0.jpg",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/90f0b5b11df4f87ee878f38569b5995b/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-016",
@@ -197,7 +197,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop",
     lowestAllInPrice: 68,
     listingCount: 18,
-    imageUrl: "https://cdn-images.dzcdn.net/images/artist/cca5fa95-7855-49c5-a5ea-bd57f13adf90/1000x1000-000000-80-0-0.jpg",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/4a9cdc7737e2a0e59b4917b47884b859/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-017",
@@ -209,7 +209,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Country",
     lowestAllInPrice: 63,
     listingCount: 17,
-    imageUrl: "https://cdn-images.dzcdn.net/images/artist/d0cd6a5c-5ef5-47ff-a4d5-f91c52027fad/1000x1000-000000-80-0-0.jpg",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/75488d12757f5809b9e6c7f53e5bb455/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-018",
@@ -221,7 +221,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "R&B",
     lowestAllInPrice: 71,
     listingCount: 16,
-    imageUrl: "https://cdn-images.dzcdn.net/images/artist/dc50ad43-f93f-4e75-bc8e-ca12c2c61f16/1000x1000-000000-80-0-0.jpg",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/8ced041da2bed70d5715f0860956169b/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-019",
@@ -233,7 +233,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Hip-Hop",
     lowestAllInPrice: 78,
     listingCount: 18,
-    imageUrl: "https://cdn-images.dzcdn.net/images/artist/4a4f44f4-5cc8-4b74-a8ae-6a7b7b1e0c1b/1000x1000-000000-80-0-0.jpg",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/a5a8cca44e7eab2db7d44e039bed2574/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-020",
@@ -245,7 +245,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop",
     lowestAllInPrice: 84,
     listingCount: 20,
-    imageUrl: "https://cdn-images.dzcdn.net/images/artist/1f8c37a8-7b3b-4a8e-b7b9-4c2d5e3f6a7b/1000x1000-000000-80-0-0.jpg",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/3504ffe2519090026bc359b689d22e20/1000x1000-000000-80-0-0.jpg",
   },
 
   // ── More Sports ──────────────────────────────────────────────────────────────
