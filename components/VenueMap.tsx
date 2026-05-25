@@ -12,6 +12,8 @@ interface Props {
   onClearSectionTypes: () => void;
   genre?: string;
   venue?: string;
+  /** "card" = compact widget with border (default); "panel" = fills parent div, no card chrome */
+  mode?: "card" | "panel";
 }
 
 interface MapProps {
@@ -27,20 +29,16 @@ interface MapProps {
 }
 
 // ── Palette ───────────────────────────────────────────────────────────────────
-// Medium-saturation base (readable on white bg); vivid active; near-white dim.
-// All text uses dark ink so it works on every fill state.
 
 const CLR: Record<SectionType, { base: string; act: string; dim: string }> = {
   floor: { base: "#4ade80", act: "#16a34a", dim: "#dcfce7" },
-  lower: { base: "#60a5fa", act: "#2563eb", dim: "#dbeafe" },
-  club:  { base: "#2dd4bf", act: "#0d9488", dim: "#ccfbf1" },
-  upper: { base: "#94a3b8", act: "#475569", dim: "#e2e8f0" },
-  suite: { base: "#fbbf24", act: "#d97706", dim: "#fef3c7" },
+  lower: { base: "#93c5fd", act: "#2563eb", dim: "#dbeafe" },
+  club:  { base: "#5eead4", act: "#0d9488", dim: "#ccfbf1" },
+  upper: { base: "#cbd5e1", act: "#475569", dim: "#f1f5f9" },
+  suite: { base: "#fcd34d", act: "#d97706", dim: "#fef3c7" },
 };
 
-// Label ink — dark enough to read on every fill state
 const INK = "rgba(15,23,42,0.72)";
-
 const GRS = { base: "#4ade80", act: "#16a34a", dim: "#dcfce7" };
 
 function fieldFill(hov: SectionType | null, active: SectionType[]): string {
@@ -101,7 +99,7 @@ const PLAT_COLORS: Record<Platform, string> = {
 const fmt = (n: number) => `$${n}`;
 const toRad = (d: number) => (d * Math.PI) / 180;
 
-// ── Price badge (expanded modal only) ────────────────────────────────────────
+// ── Price badge ───────────────────────────────────────────────────────────────
 
 function PriceBadge({ x, y, count, min, active }: {
   x: number; y: number; count: number; min: number | null; active: boolean;
@@ -126,7 +124,7 @@ function PriceBadge({ x, y, count, min, active }: {
 
 // ─────────────────────────────── ARENA MAP ───────────────────────────────────
 
-const AR = { W: 580, H: 300, CX: 290, CY: 150 };
+const AR = { W: 580, H: 310, CX: 290, CY: 155 };
 
 function ellipsePath(cx: number, cy: number, rx: number, ry: number) {
   return `M ${cx} ${cy - ry} A ${rx} ${ry} 0 0 1 ${cx} ${cy + ry} A ${rx} ${ry} 0 0 1 ${cx} ${cy - ry} Z`;
@@ -145,54 +143,53 @@ function divLine(cx: number, cy: number, iRx: number, iRy: number, oRx: number, 
   };
 }
 
-const SB = { w: 14, h: 10, gap: 3, count: 5 };
+const SB = { w: 14, h: 9, gap: 3, count: 5 };
 const sbTotalH = SB.count * SB.h + (SB.count - 1) * SB.gap;
 
 function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, genre = "", venue = "", showBadges, minByType, countByType }: MapProps) {
   const isNBA = genre === "NBA", isNHL = genre === "NHL";
   const isMSG = venue === "Madison Square Garden";
 
-  // ── Venue-specific geometry ────────────────────────────────────────────────
-  // MSG is a true cylindrical building — rings are near-circular.
-  // Crypto.com Arena is a standard elongated oval.
+  // ── Venue-specific ring geometry ──────────────────────────────────────────
+  // MSG is nearly circular; Crypto.com is a standard elongated oval.
+  // Lower ring uses 40 dividers; upper uses 30 — matches real venue section density.
   const ARENA_RINGS = isMSG ? [
-    { type: "lower" as SectionType, label: "LOWER ARENA", iRx: 80,  iRy: 62,  oRx: 130, oRy: 100, divs: 20 },
-    { type: "club"  as SectionType, label: "SUITE LEVEL", iRx: 138, iRy: 108, oRx: 158, oRy: 124, divs: 10 },
-    { type: "upper" as SectionType, label: "BALCONY",     iRx: 166, iRy: 132, oRx: 210, oRy: 144, divs: 20 },
+    { type: "lower" as SectionType, label: "LOWER ARENA", iRx: 78,  iRy: 60,  oRx: 128, oRy: 98,  divs: 40 },
+    { type: "club"  as SectionType, label: "SUITE LEVEL", iRx: 136, iRy: 106, oRx: 156, oRy: 122, divs: 14 },
+    { type: "upper" as SectionType, label: "BALCONY",     iRx: 164, iRy: 130, oRx: 208, oRy: 142, divs: 30 },
   ] : [
-    { type: "lower" as SectionType, label: "LOWER BOWL",  iRx: 90,  iRy: 46,  oRx: 152, oRy: 94,  divs: 22 },
-    { type: "club"  as SectionType, label: "CLUB",        iRx: 160, iRy: 101, oRx: 184, oRy: 117, divs: 10 },
-    { type: "upper" as SectionType, label: "UPPER DECK",  iRx: 192, iRy: 124, oRx: 250, oRy: 148, divs: 20 },
+    { type: "lower" as SectionType, label: "LOWER BOWL",  iRx: 88,  iRy: 44,  oRx: 150, oRy: 92,  divs: 40 },
+    { type: "club"  as SectionType, label: "CLUB",        iRx: 158, iRy: 99,  oRx: 182, oRy: 115, divs: 14 },
+    { type: "upper" as SectionType, label: "UPPER DECK",  iRx: 190, iRy: 122, oRx: 248, oRy: 146, divs: 30 },
   ];
 
-  const outerRx   = isMSG ? 216 : 256;
-  const outerRy   = isMSG ? 146 : 151;
-  const floorRx   = isMSG ? 72  : 82;
-  const floorRy   = isMSG ? 46  : 38;
-  // Suite side-boxes — position relative to outer ring
-  const sbTop = AR.CY - sbTotalH / 2;
-  const suiteX1 = AR.CX - outerRx - SB.w - 2;
-  const suiteX2 = AR.CX + outerRx + 2;
-
-  // Upper section numbers: MSG → 201-220 (Balcony); Crypto → 301-320
+  const outerRx   = isMSG ? 214 : 254;
+  const outerRy   = isMSG ? 144 : 149;
+  const floorRx   = isMSG ? 70  : 80;
+  const floorRy   = isMSG ? 44  : 36;
+  const sbTop     = AR.CY - sbTotalH / 2;
+  const suiteX1   = AR.CX - outerRx - SB.w - 2;
+  const suiteX2   = AR.CX + outerRx + 2;
   const upperSecBase = isMSG ? 201 : 301;
 
   const floorLabel = isNBA ? "COURT" : isNHL ? "ICE" : "STAGE";
-  const floorSub   = isNBA ? (isMSG ? "COURTSIDE" : "COURTSIDE") : isNHL ? "RINKSIDE" : "GA / FLOOR";
+  const floorSub   = isNBA ? "COURTSIDE" : isNHL ? "RINKSIDE" : "GA / FLOOR";
 
   const floorActive = activeSectionTypes.includes("floor");
   const floorDimmed = activeSectionTypes.length > 0 && !floorActive;
-  const baseColor   = isNBA ? "#c8a06a" : isNHL ? "#cce8f8" : "#1e293b";
+  const baseColor   = isNBA ? "#d4a96a" : isNHL ? "#cce8f8" : "#1e293b";
   const activeColor = isNBA ? "#b8883a" : isNHL ? "#99cef0" : CLR.floor.act;
   const dimColor    = isNBA ? "#ede8d8" : isNHL ? "#e8f5fd" : CLR.floor.dim;
   const floorColor  = hoveredZone === "floor" ? activeColor : floorDimmed ? dimColor : floorActive ? activeColor : baseColor;
-  const floorInk    = isNHL ? INK : "rgba(255,255,255,0.88)";
+  const floorInk    = isNHL ? INK : "rgba(255,255,255,0.92)";
   const floorStroke = hoveredZone === "floor" || floorActive ? "#2563eb" : "#e2e8f0";
 
   return (
-    <svg viewBox={`0 0 ${AR.W} ${AR.H}`} className="w-full" style={{ background: "#ffffff" }}>
-      {/* Outer boundary */}
-      <ellipse cx={AR.CX} cy={AR.CY} rx={outerRx} ry={outerRy} fill="none" stroke="#e2e8f0" strokeWidth="1.5" />
+    <svg viewBox={`0 0 ${AR.W} ${AR.H}`} className="w-full" style={{ background: "#f8fafc" }}>
+
+      {/* Subtle background circle */}
+      <ellipse cx={AR.CX} cy={AR.CY} rx={outerRx + 18} ry={outerRy + 14}
+        fill="#f1f5f9" stroke="#e2e8f0" strokeWidth="1" />
 
       {/* Seating rings — outer to inner */}
       {[...ARENA_RINGS].reverse().map((ring) => {
@@ -200,12 +197,14 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
         const midRy = (ring.iRy + ring.oRy) / 2;
         const midRx = (ring.iRx + ring.oRx) / 2;
         const isAct = activeSectionTypes.includes(ring.type) || hoveredZone === ring.type;
+        // Aisle dividers every 4th line; thinner lines between
+        const aisleMod = ring.divs <= 14 ? 2 : 4;
         return (
           <g key={ring.type}>
             <path
               d={ringPath(AR.CX, AR.CY, ring.iRx, ring.iRy, ring.oRx, ring.oRy)}
               fill={f} fillRule="evenodd"
-              stroke={isAct ? CLR[ring.type].act : "#e5e7eb"} strokeWidth={ring.type === "lower" ? "1.5" : "1"}
+              stroke={isAct ? CLR[ring.type].act : "#d1d5db"} strokeWidth={ring.type === "lower" ? "1.2" : "0.8"}
               style={{ cursor: "pointer", transition: "fill 0.12s" }}
               onClick={() => onSectionTypeToggle(ring.type)}
               onMouseEnter={() => onZoneHover(ring.type)}
@@ -214,40 +213,42 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
             {/* Section dividers */}
             {Array.from({ length: ring.divs }, (_, i) => {
               const l = divLine(AR.CX, AR.CY, ring.iRx, ring.iRy, ring.oRx, ring.oRy, i * (360 / ring.divs));
-              const isAisle = i % 4 === 0;
+              const isAisle = i % aisleMod === 0;
               return <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
-                stroke={isAisle ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.5)"}
-                strokeWidth={isAisle ? "1.2" : "0.6"}
+                stroke={isAisle ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.45)"}
+                strokeWidth={isAisle ? "1.1" : "0.45"}
                 style={{ pointerEvents: "none" }} />;
             })}
-            {/* Section numbers — lower bowl */}
+            {/* Section numbers — lower bowl (every other section to avoid crowding) */}
             {ring.type === "lower" && Array.from({ length: ring.divs }, (_, i) => {
-              const angle = (i + 0.5) * (360 / ring.divs);
-              const rad = toRad(angle);
-              const x = AR.CX + midRx * Math.sin(rad);
-              const y = AR.CY - midRy * Math.cos(rad);
-              return (
-                <text key={i} x={x} y={y + 2.5} textAnchor="middle" fontSize="6"
-                  fill={INK} fontFamily="system-ui" fontWeight="700"
-                  style={{ pointerEvents: "none", userSelect: "none" }}
-                >{101 + i}</text>
-              );
-            })}
-            {/* Section numbers — upper ring */}
-            {ring.type === "upper" && Array.from({ length: ring.divs }, (_, i) => {
+              if (i % 2 !== 0) return null;
               const angle = (i + 0.5) * (360 / ring.divs);
               const rad = toRad(angle);
               const x = AR.CX + midRx * Math.sin(rad);
               const y = AR.CY - midRy * Math.cos(rad);
               return (
                 <text key={i} x={x} y={y + 2.5} textAnchor="middle" fontSize="5.5"
+                  fill={INK} fontFamily="system-ui" fontWeight="700"
+                  style={{ pointerEvents: "none", userSelect: "none" }}
+                >{101 + i}</text>
+              );
+            })}
+            {/* Section numbers — upper ring (every other) */}
+            {ring.type === "upper" && Array.from({ length: ring.divs }, (_, i) => {
+              if (i % 2 !== 0) return null;
+              const angle = (i + 0.5) * (360 / ring.divs);
+              const rad = toRad(angle);
+              const x = AR.CX + midRx * Math.sin(rad);
+              const y = AR.CY - midRy * Math.cos(rad);
+              return (
+                <text key={i} x={x} y={y + 2.5} textAnchor="middle" fontSize="5"
                   fill={INK} fontFamily="system-ui" fontWeight="600"
                   style={{ pointerEvents: "none", userSelect: "none" }}
                 >{upperSecBase + i}</text>
               );
             })}
-            {/* Zone label at bottom of ring */}
-            <text x={AR.CX} y={AR.CY + midRy + 5} textAnchor="middle" fontSize="6.5"
+            {/* Zone label */}
+            <text x={AR.CX} y={AR.CY + midRy + 5} textAnchor="middle" fontSize="6"
               fill={INK} fontFamily="system-ui,sans-serif"
               fontWeight="700" letterSpacing="0.8"
               style={{ pointerEvents: "none", userSelect: "none" }}>{ring.label}</text>
@@ -255,7 +256,7 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
         );
       })}
 
-      {/* Floor ellipse */}
+      {/* Floor (court / ice / stage) */}
       <path
         d={ellipsePath(AR.CX, AR.CY, floorRx, floorRy)}
         fill={floorColor} stroke={floorStroke} strokeWidth="1.5"
@@ -265,65 +266,185 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
         onMouseLeave={() => onZoneHover(null)}
       />
 
-      {/* NBA court markings */}
-      {isNBA && (
-        <g style={{ pointerEvents: "none" }} opacity="0.85">
-          <line x1={AR.CX} y1={AR.CY - 38} x2={AR.CX} y2={AR.CY + 38} stroke="#c8871c" strokeWidth="0.7" />
-          <ellipse cx={AR.CX} cy={AR.CY} rx={9} ry={6} fill="none" stroke="#c8871c" strokeWidth="0.8" />
-          <circle cx={AR.CX} cy={AR.CY} r={1.5} fill="#c8871c" />
-          <rect x={AR.CX - 10} y={AR.CY - 38} width={20} height={18} fill="rgba(180,100,20,0.2)" stroke="#c8871c" strokeWidth="0.7" />
-          <rect x={AR.CX - 10} y={AR.CY + 20} width={20} height={18} fill="rgba(180,100,20,0.2)" stroke="#c8871c" strokeWidth="0.7" />
-          <ellipse cx={AR.CX} cy={AR.CY - 20} rx={10} ry={7} fill="none" stroke="#c8871c" strokeWidth="0.7" strokeDasharray="2,1.5" />
-          <ellipse cx={AR.CX} cy={AR.CY + 20} rx={10} ry={7} fill="none" stroke="#c8871c" strokeWidth="0.7" strokeDasharray="2,1.5" />
-          <path d={`M ${AR.CX - 10} ${AR.CY - 38} A 24 21 0 0 0 ${AR.CX + 10} ${AR.CY - 38}`} fill="none" stroke="#c8871c" strokeWidth="0.7" />
-          <path d={`M ${AR.CX - 10} ${AR.CY + 38} A 24 21 0 0 1 ${AR.CX + 10} ${AR.CY + 38}`} fill="none" stroke="#c8871c" strokeWidth="0.7" />
-          <circle cx={AR.CX} cy={AR.CY - 31} r={2.5} fill="none" stroke="#c8871c" strokeWidth="0.8" />
-          <circle cx={AR.CX} cy={AR.CY + 31} r={2.5} fill="none" stroke="#c8871c" strokeWidth="0.8" />
-        </g>
-      )}
+      {/* ── NBA court markings ── */}
+      {isNBA && (() => {
+        // Court is vertical: baselines at CY ± floorRy, width = floorRx*2
+        const top = AR.CY - floorRy;      // top baseline
+        const bot = AR.CY + floorRy;      // bottom baseline
+        const laneW = floorRx * 0.44;     // lane half-width ~35% of floor half-width
+        const laneH = floorRy * 0.44;     // lane depth
+        const ftRad = laneW * 0.82;       // free-throw circle radius
+        const tpRx  = floorRx * 0.88;     // three-point arc x-radius
+        const tpRy  = floorRy * 0.78;     // three-point arc y-radius
+        const tpCY  = floorRy * 0.28;     // arc center offset from baseline
+        const rstRad = laneW * 0.32;      // restricted area radius
+        const strokeClr = "rgba(180,120,40,0.9)";
+        const sw = "0.8";
+        const clipId = "court-clip";
+        return (
+          <g style={{ pointerEvents: "none" }}>
+            <defs>
+              <clipPath id={clipId}>
+                <ellipse cx={AR.CX} cy={AR.CY} rx={floorRx - 0.5} ry={floorRy - 0.5} />
+              </clipPath>
+            </defs>
+            <g clipPath={`url(#${clipId})`}>
+              {/* Center line */}
+              <line x1={AR.CX - floorRx} y1={AR.CY} x2={AR.CX + floorRx} y2={AR.CY}
+                stroke={strokeClr} strokeWidth={sw} />
+              {/* Center circle */}
+              <ellipse cx={AR.CX} cy={AR.CY} rx={floorRx * 0.18} ry={floorRy * 0.22}
+                fill="none" stroke={strokeClr} strokeWidth={sw} />
+              <circle cx={AR.CX} cy={AR.CY} r={2} fill={strokeClr} />
 
-      {/* NHL ice markings */}
-      {isNHL && (
-        <g style={{ pointerEvents: "none" }} opacity="0.85">
-          <line x1={AR.CX} y1={AR.CY - 38} x2={AR.CX} y2={AR.CY + 38} stroke="#cc0000" strokeWidth="1.2" />
-          <line x1={AR.CX - 24} y1={AR.CY - 38} x2={AR.CX - 24} y2={AR.CY + 38} stroke="#0055cc" strokeWidth="0.9" />
-          <line x1={AR.CX + 24} y1={AR.CY - 38} x2={AR.CX + 24} y2={AR.CY + 38} stroke="#0055cc" strokeWidth="0.9" />
-          <ellipse cx={AR.CX} cy={AR.CY} rx={14} ry={9} fill="none" stroke="#cc0000" strokeWidth="0.9" />
-          <circle cx={AR.CX} cy={AR.CY} r={1.5} fill="#cc0000" />
-          {([-32, 32] as number[]).flatMap(dx =>
-            ([-18, 18] as number[]).map(dy => (
-              <g key={`${dx}${dy}`}>
-                <ellipse cx={AR.CX + dx} cy={AR.CY + dy} rx={7} ry={5} fill="none" stroke="#cc0000" strokeWidth="0.7" />
-                <circle cx={AR.CX + dx} cy={AR.CY + dy} r={1} fill="#cc0000" />
-              </g>
-            ))
-          )}
-          <path d={`M ${AR.CX - 6} ${AR.CY - 36} A 6 4 0 0 1 ${AR.CX + 6} ${AR.CY - 36}`} fill="rgba(0,85,204,0.15)" stroke="#cc0000" strokeWidth="0.7" />
-          <path d={`M ${AR.CX - 6} ${AR.CY + 36} A 6 4 0 0 0 ${AR.CX + 6} ${AR.CY + 36}`} fill="rgba(0,85,204,0.15)" stroke="#cc0000" strokeWidth="0.7" />
-        </g>
-      )}
+              {/* ── TOP END ── */}
+              {/* Paint / lane */}
+              <rect x={AR.CX - laneW} y={top} width={laneW * 2} height={laneH}
+                fill="rgba(180,120,40,0.12)" stroke={strokeClr} strokeWidth={sw} />
+              {/* Free throw circle */}
+              <ellipse cx={AR.CX} cy={top + laneH} rx={ftRad} ry={ftRad * 0.65}
+                fill="none" stroke={strokeClr} strokeWidth={sw} strokeDasharray="3,2" />
+              <ellipse cx={AR.CX} cy={top + laneH} rx={ftRad} ry={ftRad * 0.65}
+                fill="none" stroke={strokeClr} strokeWidth={sw}
+                strokeDasharray="none" clipPath={`url(#${clipId})`}
+                style={{ clipPath: `inset(0 0 50% 0)` }} />
+              {/* Restricted area arc */}
+              <ellipse cx={AR.CX} cy={top + 3.5} rx={rstRad} ry={rstRad * 0.55}
+                fill="none" stroke={strokeClr} strokeWidth={sw} />
+              {/* Basket */}
+              <circle cx={AR.CX} cy={top + 3.5} r={2.2} fill="none" stroke={strokeClr} strokeWidth="1" />
+              <line x1={AR.CX - 3} y1={top + 1.5} x2={AR.CX + 3} y2={top + 1.5}
+                stroke={strokeClr} strokeWidth="1.2" />
+              {/* Three-point arc — full arc clipped to floor */}
+              <path
+                d={`M ${AR.CX - tpRx} ${AR.CY - tpCY}
+                    A ${tpRx} ${tpRy} 0 0 1 ${AR.CX + tpRx} ${AR.CY - tpCY}`}
+                fill="none" stroke={strokeClr} strokeWidth={sw} />
+              {/* Straight three-point sideline segments */}
+              <line x1={AR.CX - tpRx} y1={top} x2={AR.CX - tpRx} y2={AR.CY - tpCY}
+                stroke={strokeClr} strokeWidth={sw} />
+              <line x1={AR.CX + tpRx} y1={top} x2={AR.CX + tpRx} y2={AR.CY - tpCY}
+                stroke={strokeClr} strokeWidth={sw} />
 
-      {/* Concert stage */}
+              {/* ── BOTTOM END ── */}
+              <rect x={AR.CX - laneW} y={bot - laneH} width={laneW * 2} height={laneH}
+                fill="rgba(180,120,40,0.12)" stroke={strokeClr} strokeWidth={sw} />
+              <ellipse cx={AR.CX} cy={bot - laneH} rx={ftRad} ry={ftRad * 0.65}
+                fill="none" stroke={strokeClr} strokeWidth={sw} strokeDasharray="3,2" />
+              <ellipse cx={AR.CX} cy={bot - 3.5} rx={rstRad} ry={rstRad * 0.55}
+                fill="none" stroke={strokeClr} strokeWidth={sw} />
+              <circle cx={AR.CX} cy={bot - 3.5} r={2.2} fill="none" stroke={strokeClr} strokeWidth="1" />
+              <line x1={AR.CX - 3} y1={bot - 1.5} x2={AR.CX + 3} y2={bot - 1.5}
+                stroke={strokeClr} strokeWidth="1.2" />
+              <path
+                d={`M ${AR.CX - tpRx} ${AR.CY + tpCY}
+                    A ${tpRx} ${tpRy} 0 0 0 ${AR.CX + tpRx} ${AR.CY + tpCY}`}
+                fill="none" stroke={strokeClr} strokeWidth={sw} />
+              <line x1={AR.CX - tpRx} y1={bot} x2={AR.CX - tpRx} y2={AR.CY + tpCY}
+                stroke={strokeClr} strokeWidth={sw} />
+              <line x1={AR.CX + tpRx} y1={bot} x2={AR.CX + tpRx} y2={AR.CY + tpCY}
+                stroke={strokeClr} strokeWidth={sw} />
+            </g>
+          </g>
+        );
+      })()}
+
+      {/* ── NHL ice markings ── */}
+      {isNHL && (() => {
+        const top = AR.CY - floorRy;
+        const bot = AR.CY + floorRy;
+        const redSW = "1.2", blueSW = "0.9";
+        const clipId = "ice-clip";
+        // Face-off circle radii
+        const fcRx = floorRx * 0.22, fcRy = floorRy * 0.28;
+        // Goal crease (D-shape in front of goal)
+        const creaseRx = floorRx * 0.14, creaseRy = floorRy * 0.09;
+        return (
+          <g style={{ pointerEvents: "none" }}>
+            <defs>
+              <clipPath id={clipId}>
+                <ellipse cx={AR.CX} cy={AR.CY} rx={floorRx - 0.5} ry={floorRy - 0.5} />
+              </clipPath>
+            </defs>
+            <g clipPath={`url(#${clipId})`}>
+              {/* Red center line */}
+              <line x1={AR.CX - floorRx} y1={AR.CY} x2={AR.CX + floorRx} y2={AR.CY}
+                stroke="#cc0000" strokeWidth={redSW} />
+              {/* Blue zone lines — 1/3 and 2/3 */}
+              {([-0.28, 0.28] as number[]).map((f, i) => (
+                <line key={i} x1={AR.CX - floorRx} y1={AR.CY + floorRy * f}
+                  x2={AR.CX + floorRx} y2={AR.CY + floorRy * f}
+                  stroke="#0055cc" strokeWidth={blueSW} />
+              ))}
+              {/* Center ice circle */}
+              <ellipse cx={AR.CX} cy={AR.CY} rx={floorRx * 0.2} ry={floorRy * 0.26}
+                fill="none" stroke="#cc0000" strokeWidth="0.9" />
+              <circle cx={AR.CX} cy={AR.CY} r={2} fill="#cc0000" />
+              {/* Face-off circles — 4 spots */}
+              {([-0.55, 0.55] as number[]).flatMap((dx) =>
+                ([-0.52, 0.52] as number[]).map((dy) => {
+                  const fx = AR.CX + floorRx * dx;
+                  const fy = AR.CY + floorRy * dy;
+                  return (
+                    <g key={`${dx}${dy}`}>
+                      <ellipse cx={fx} cy={fy} rx={fcRx} ry={fcRy}
+                        fill="none" stroke="#cc0000" strokeWidth="0.7" />
+                      <circle cx={fx} cy={fy} r={1.5} fill="#cc0000" />
+                      {/* Hash marks */}
+                      <line x1={fx - fcRx * 0.3} y1={fy - fcRy * 1.1} x2={fx + fcRx * 0.3} y2={fy - fcRy * 1.1}
+                        stroke="#cc0000" strokeWidth="0.6" />
+                      <line x1={fx - fcRx * 0.3} y1={fy + fcRy * 1.1} x2={fx + fcRx * 0.3} y2={fy + fcRy * 1.1}
+                        stroke="#cc0000" strokeWidth="0.6" />
+                    </g>
+                  );
+                })
+              )}
+              {/* Goal lines — red lines near each end */}
+              {([-1, 1] as number[]).map((side) => {
+                const gy = AR.CY + side * floorRy * 0.84;
+                const gHalfW = floorRx * 0.28;
+                return (
+                  <g key={side}>
+                    <line x1={AR.CX - gHalfW} y1={gy} x2={AR.CX + gHalfW} y2={gy}
+                      stroke="#cc0000" strokeWidth="0.8" />
+                    {/* Goal net */}
+                    <rect x={AR.CX - floorRx * 0.1} y={gy - (side * 4)} width={floorRx * 0.2} height={4}
+                      fill="rgba(0,0,0,0.08)" stroke="#666" strokeWidth="0.5" rx="0.5" />
+                    {/* Goal crease (D-shape) */}
+                    <path
+                      d={`M ${AR.CX - creaseRx} ${gy}
+                          A ${creaseRx} ${creaseRy} 0 0 ${side === -1 ? 1 : 0} ${AR.CX + creaseRx} ${gy} Z`}
+                      fill="rgba(0,85,204,0.18)" stroke="#0055cc" strokeWidth="0.7" />
+                  </g>
+                );
+              })}
+            </g>
+          </g>
+        );
+      })()}
+
+      {/* ── Concert stage ── */}
       {!isNBA && !isNHL && (
         <g style={{ pointerEvents: "none" }}>
-          <rect x={AR.CX - 40} y={AR.CY + 10} width={80} height={22} rx={3} fill="#1e293b" stroke="#334155" strokeWidth="0.9" />
-          <rect x={AR.CX - 34} y={AR.CY + 9} width={68} height={4} rx={1} fill="#0f172a" />
-          <text x={AR.CX} y={AR.CY + 23} textAnchor="middle" fontSize="6.5"
-            fill="rgba(255,255,255,0.55)" fontFamily="system-ui" letterSpacing="2">STAGE</text>
-          <rect x={AR.CX - 44} y={AR.CY + 14} width={5} height={12} rx={1} fill="#334155" stroke="#475569" strokeWidth="0.5" />
-          <rect x={AR.CX + 39} y={AR.CY + 14} width={5} height={12} rx={1} fill="#334155" stroke="#475569" strokeWidth="0.5" />
+          <rect x={AR.CX - 38} y={AR.CY + 8} width={76} height={22} rx={3}
+            fill="#1e293b" stroke="#334155" strokeWidth="0.9" />
+          <rect x={AR.CX - 32} y={AR.CY + 7} width={64} height={4} rx={1} fill="#0f172a" />
+          <text x={AR.CX} y={AR.CY + 22} textAnchor="middle" fontSize="6"
+            fill="rgba(255,255,255,0.5)" fontFamily="system-ui" letterSpacing="2">STAGE</text>
+          <rect x={AR.CX - 42} y={AR.CY + 12} width={5} height={12} rx={1} fill="#334155" />
+          <rect x={AR.CX + 37} y={AR.CY + 12} width={5} height={12} rx={1} fill="#334155" />
         </g>
       )}
 
       {/* Floor labels */}
-      <text x={AR.CX} y={AR.CY - 3} textAnchor="middle" fontSize="8.5"
+      <text x={AR.CX} y={AR.CY - (isNBA || isNHL ? 5 : 3)} textAnchor="middle" fontSize="8"
         fill={floorInk} fontFamily="system-ui,sans-serif" fontWeight="800" letterSpacing="0.5"
         style={{ pointerEvents: "none", userSelect: "none" }}>{floorLabel}</text>
-      <text x={AR.CX} y={AR.CY + 9} textAnchor="middle" fontSize="6"
+      <text x={AR.CX} y={AR.CY + 7} textAnchor="middle" fontSize="5.5"
         fill={floorInk} fontFamily="system-ui,sans-serif" fontWeight="600" letterSpacing="0.3"
         style={{ pointerEvents: "none", userSelect: "none" }} opacity={0.65}>{floorSub}</text>
 
-      {/* Suite boxes — positioned outside the outer ring */}
+      {/* Suite boxes */}
       {[{ x: suiteX1 }, { x: suiteX2 }].map((set, si) => (
         <g key={si} style={{ cursor: "pointer" }}
           onClick={() => onSectionTypeToggle("suite")}
@@ -334,12 +455,12 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
             <rect key={i} x={set.x} y={sbTop + i * (SB.h + SB.gap)}
               width={SB.w} height={SB.h} rx={2}
               fill={zoneFill("suite", hoveredZone, activeSectionTypes)}
-              stroke="#f1f5f9" strokeWidth="0.8"
+              stroke="#e2e8f0" strokeWidth="0.7"
               style={{ transition: "fill 0.12s" }}
             />
           ))}
           <text x={set.x + SB.w / 2} y={sbTop - 5}
-            textAnchor="middle" fontSize="5" fill={INK}
+            textAnchor="middle" fontSize="4.5" fill={INK}
             fontFamily="system-ui" fontWeight="600"
             style={{ pointerEvents: "none", userSelect: "none" }}>SUITES</text>
         </g>
@@ -348,13 +469,12 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
       {showBadges && minByType && countByType && (
         <>
           <PriceBadge x={AR.CX} y={AR.CY - 6} count={countByType.floor} min={minByType.floor} active={activeSectionTypes.includes("floor")} />
-          <PriceBadge x={AR.CX + (isMSG ? 106 : 122)} y={AR.CY} count={countByType.lower} min={minByType.lower} active={activeSectionTypes.includes("lower")} />
-          <PriceBadge x={AR.CX + (isMSG ? 148 : 170)} y={AR.CY + 22} count={countByType.club} min={minByType.club} active={activeSectionTypes.includes("club")} />
-          <PriceBadge x={AR.CX} y={AR.CY + (isMSG ? 136 : 141)} count={countByType.upper} min={minByType.upper} active={activeSectionTypes.includes("upper")} />
+          <PriceBadge x={AR.CX + (isMSG ? 104 : 120)} y={AR.CY} count={countByType.lower} min={minByType.lower} active={activeSectionTypes.includes("lower")} />
+          <PriceBadge x={AR.CX + (isMSG ? 146 : 168)} y={AR.CY + 20} count={countByType.club} min={minByType.club} active={activeSectionTypes.includes("club")} />
+          <PriceBadge x={AR.CX} y={AR.CY + (isMSG ? 134 : 139)} count={countByType.upper} min={minByType.upper} active={activeSectionTypes.includes("upper")} />
           <PriceBadge x={suiteX1 + SB.w / 2} y={sbTop - 16} count={countByType.suite} min={minByType.suite} active={activeSectionTypes.includes("suite")} />
         </>
       )}
-
     </svg>
   );
 }
@@ -394,13 +514,12 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
   const lowerMidY_top = NFY - 14;
   const lowerMidY_bot = NFY + NFL_FIELD.h + 14;
   const isATT = venue === "AT&T Stadium";
-  // Arrowhead: sections 103–135 along sidelines; AT&T: 101–128 sideline + 401s end zones
   const topSecNums = isATT ? [102, 108, 114, 119, 125] : [103, 110, 118, 126, 133];
   const botSecNums = isATT ? [220, 226, 232, 238, 244] : [310, 318, 326, 334, 342];
   const sideSecX = topSecNums.map((_, i) => NFX + EZ_W + playW * (i + 1) / (topSecNums.length + 1));
 
   return (
-    <svg viewBox={`0 0 ${NF.W} ${NF.H}`} className="w-full" style={{ background: "#ffffff" }}>
+    <svg viewBox={`0 0 ${NF.W} ${NF.H}`} className="w-full" style={{ background: "#f8fafc" }}>
 
       {/* Seating bands — outer to inner */}
       {[...NFL_BANDS].reverse().map((band) => {
@@ -408,16 +527,32 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         const bw = NFL_FIELD.w + band.pad * 2, bh = NFL_FIELD.h + band.pad * 2;
         const f = zoneFill(band.type, hoveredZone, activeSectionTypes);
         const isAct = activeSectionTypes.includes(band.type) || hoveredZone === band.type;
+
+        // Section dividers along the sidelines
+        const numDivs = band.type === "lower" ? 12 : band.type === "club" ? 8 : 10;
         return (
           <g key={band.type}>
             <rect x={bx} y={by} width={bw} height={bh} rx={band.rx}
               fill={f}
-              stroke={isAct ? CLR[band.type].act : "#e5e7eb"} strokeWidth="1.5"
+              stroke={isAct ? CLR[band.type].act : "#d1d5db"} strokeWidth="1.2"
               style={{ cursor: "pointer", transition: "fill 0.12s" }}
               onClick={() => onSectionTypeToggle(band.type)}
               onMouseEnter={() => onZoneHover(band.type)}
               onMouseLeave={() => onZoneHover(null)}
             />
+            {/* Sideline section dividers */}
+            {Array.from({ length: numDivs - 1 }, (_, i) => {
+              const x = bx + (bw * (i + 1)) / numDivs;
+              // Only draw dividers along the long sides, not through the field
+              return (
+                <g key={i} style={{ pointerEvents: "none" }}>
+                  <line x1={x} y1={by} x2={x} y2={by + (band.pad - (i === 0 ? 0 : 0))}
+                    stroke="rgba(255,255,255,0.6)" strokeWidth="0.6" />
+                  <line x1={x} y1={by + bh} x2={x} y2={by + bh - band.pad}
+                    stroke="rgba(255,255,255,0.6)" strokeWidth="0.6" />
+                </g>
+              );
+            })}
           </g>
         );
       })}
@@ -428,25 +563,24 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         const labelY = NFY - prevPad - (band.pad - prevPad) / 2 + 3;
         return (
           <text key={band.type} x={NF.CX} y={labelY}
-            textAnchor="middle" fontSize="7" fill={INK}
+            textAnchor="middle" fontSize="6.5" fill={INK}
             fontFamily="system-ui" fontWeight="700" letterSpacing="0.7"
             style={{ pointerEvents: "none", userSelect: "none" }}
           >{band.label}</text>
         );
       })}
 
-      {/* Section numbers — top sideline */}
+      {/* Section numbers */}
       {topSecNums.map((num, i) => (
         <text key={i} x={sideSecX[i]} y={lowerMidY_top + 3}
-          textAnchor="middle" fontSize="6.5" fill={INK}
+          textAnchor="middle" fontSize="6" fill={INK}
           fontFamily="system-ui" fontWeight="700"
           style={{ pointerEvents: "none", userSelect: "none" }}
         >{num}</text>
       ))}
-      {/* Section numbers — bottom sideline */}
       {botSecNums.map((num, i) => (
         <text key={i} x={sideSecX[i]} y={lowerMidY_bot + 3}
-          textAnchor="middle" fontSize="6.5" fill={INK}
+          textAnchor="middle" fontSize="6" fill={INK}
           fontFamily="system-ui" fontWeight="700"
           style={{ pointerEvents: "none", userSelect: "none" }}
         >{num}</text>
@@ -459,7 +593,7 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
       ].map((s, i) => (
         <rect key={i} x={s.x} y={s.y} width={s.w} height={s.h} rx={2}
           fill={zoneFill("suite", hoveredZone, activeSectionTypes)}
-          stroke="#f1f5f9" strokeWidth="0.8"
+          stroke="#e2e8f0" strokeWidth="0.8"
           style={{ cursor: "pointer", transition: "fill 0.12s" }}
           onClick={() => onSectionTypeToggle("suite")}
           onMouseEnter={() => onZoneHover("suite")}
@@ -479,13 +613,11 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         onMouseEnter={() => onZoneHover("floor")}
         onMouseLeave={() => onZoneHover(null)}
       />
-      {/* Mowing stripes */}
       {Array.from({ length: 10 }, (_, i) => i % 2 === 0 ? null : (
         <rect key={i} x={NFX + EZ_W + i * playW / 10} y={NFY}
           width={playW / 10} height={NFL_FIELD.h}
-          fill="rgba(255,255,255,0.06)" style={{ pointerEvents: "none" }} />
+          fill="rgba(255,255,255,0.05)" style={{ pointerEvents: "none" }} />
       ))}
-      {/* End zones */}
       <rect x={NFX} y={NFY} width={EZ_W} height={NFL_FIELD.h} rx={2} fill="#16a34a" style={{ pointerEvents: "none" }} />
       <rect x={NFX + NFL_FIELD.w - EZ_W} y={NFY} width={EZ_W} height={NFL_FIELD.h} rx={2} fill="#16a34a" style={{ pointerEvents: "none" }} />
       <text x={NFX + EZ_W / 2} y={NF.CY + 2} textAnchor="middle" fontSize="5"
@@ -496,18 +628,15 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         fill="rgba(255,255,255,0.55)" fontFamily="system-ui" fontWeight="800" letterSpacing="0.5"
         transform={`rotate(90, ${NFX + NFL_FIELD.w - EZ_W / 2}, ${NF.CY})`}
         style={{ pointerEvents: "none", userSelect: "none" }}>END ZONE</text>
-      {/* EZ separators */}
       <line x1={NFX + EZ_W} y1={NFY} x2={NFX + EZ_W} y2={NFY + NFL_FIELD.h} stroke="rgba(255,255,255,0.5)" strokeWidth="1" style={{ pointerEvents: "none" }} />
       <line x1={NFX + NFL_FIELD.w - EZ_W} y1={NFY} x2={NFX + NFL_FIELD.w - EZ_W} y2={NFY + NFL_FIELD.h} stroke="rgba(255,255,255,0.5)" strokeWidth="1" style={{ pointerEvents: "none" }} />
-      {/* Yard lines */}
       {yardLines.map((x, i) => (
         <g key={i} style={{ pointerEvents: "none" }}>
-          <line x1={x} y1={NFY + 2} x2={x} y2={NFY + NFL_FIELD.h - 2} stroke="rgba(255,255,255,0.38)" strokeWidth="0.8" />
+          <line x1={x} y1={NFY + 2} x2={x} y2={NFY + NFL_FIELD.h - 2} stroke="rgba(255,255,255,0.35)" strokeWidth="0.8" />
           <text x={x} y={NF.CY + 4} textAnchor="middle" fontSize="6.5"
             fill="rgba(255,255,255,0.6)" fontFamily="system-ui" fontWeight="700">{yardNums[i]}</text>
         </g>
       ))}
-      {/* Hash marks */}
       {Array.from({ length: 10 }, (_, i) => {
         const x = NFX + EZ_W + (i + 0.5) * playW / 10;
         return (
@@ -517,12 +646,10 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
           </g>
         );
       })}
-      {/* Sidelines */}
       <line x1={NFX} y1={NFY} x2={NFX + NFL_FIELD.w} y2={NFY} stroke="rgba(255,255,255,0.28)" strokeWidth="0.8" style={{ pointerEvents: "none" }} />
       <line x1={NFX} y1={NFY + NFL_FIELD.h} x2={NFX + NFL_FIELD.w} y2={NFY + NFL_FIELD.h} stroke="rgba(255,255,255,0.28)" strokeWidth="0.8" style={{ pointerEvents: "none" }} />
       <GoalPost x={NFX + EZ_W * 0.5} />
       <GoalPost x={NFX + NFL_FIELD.w - EZ_W * 0.5} flip />
-      {/* Field label */}
       <text x={NF.CX} y={NF.CY - 10} textAnchor="middle" fontSize="8"
         fill="rgba(255,255,255,0.75)" fontFamily="system-ui" fontWeight="800" letterSpacing="0.5"
         style={{ pointerEvents: "none", userSelect: "none" }}>FIELD LEVEL</text>
@@ -536,24 +663,13 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
           <PriceBadge x={NF.CX} y={NFY - 7} count={countByType.suite} min={minByType.suite} active={activeSectionTypes.includes("suite")} />
         </>
       )}
-
     </svg>
   );
 }
 
 // ─────────────────────────────── MLB MAP ─────────────────────────────────────
-// Genuine top-down ballpark geometry.
-//
-// Home plate at bottom-center (240, 350) in a 480×370 viewBox.
-// Seating arcs sweep from -155° (LF line) through -90° (CF) to -25° (RF line).
-// All seating bands stay within the viewBox at every radius.
-//
-// Diamond is a proper 45°-rotated square:
-//   HP  (240, 350)  ·  1B (272, 318)  ·  2B (240, 286)  ·  3B (208, 318)
-//   Pitcher's mound at (240, 321) — ~57% of the way to 2B, matching 60.5/90 ft.
 
 const BL = { W: 480, H: 370, HX: 240, HY: 350 };
-// Fan angles: -90° = straight up (CF); -155° = LF; -25° = RF
 const FAN_S = -155;
 const FAN_E  = -25;
 
@@ -585,58 +701,51 @@ function sectorPath(cx: number, cy: number, r: number, startDeg: number, endDeg:
 }
 
 const MLB_R = {
-  // Grass field starts beyond the infield (~55 px from HP)
   fieldIn:  55,  fieldOut: 112,
-  lowerIn: 115,  lowerOut: 162,
-  suiteIn: 165,  suiteOut: 175,
-  clubIn:  177,  clubOut:  200,
-  upperIn: 202,  upperOut: 242,
-  trackIn: 242,  trackOut: 250,
-  wall:    254,
+  lowerIn: 115,  lowerOut: 165,
+  suiteIn: 168,  suiteOut: 178,
+  clubIn:  180,  clubOut:  204,
+  upperIn: 206,  upperOut: 248,
+  trackIn: 248,  trackOut: 256,
+  wall:    260,
 };
 
-// 13 sections → 14 dividers
-const MLB_DIVS = Array.from({ length: 14 }, (_, i) => FAN_S + i * (FAN_E - FAN_S) / 13);
+// 25 sections — matches real Yankee Stadium lower deck count
+const MLB_SEC_COUNT = 25;
+const MLB_DIVS = Array.from({ length: MLB_SEC_COUNT + 1 }, (_, i) => FAN_S + i * (FAN_E - FAN_S) / MLB_SEC_COUNT);
 
 function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, venue = "", showBadges, minByType, countByType }: MapProps) {
   const cx = BL.HX, cy = BL.HY;
-  // Diamond coords (45°-rotated square, half-diagonal = 32 px)
   const d = 32;
-  const hp = { x: cx,     y: cy };          // home plate
-  const b1 = { x: cx + d, y: cy - d };      // first base
-  const b2 = { x: cx,     y: cy - 2 * d };  // second base
-  const b3 = { x: cx - d, y: cy - d };      // third base
-  const pm = { x: cx,     y: cy - 38 };     // pitcher's mound (~57% to 2B)
+  const hp = { x: cx,     y: cy };
+  const b1 = { x: cx + d, y: cy - d };
+  const b2 = { x: cx,     y: cy - 2 * d };
+  const b3 = { x: cx - d, y: cy - d };
+  const pm = { x: cx,     y: cy - 38 };
 
   const mkZoneStroke = (t: SectionType) =>
-    activeSectionTypes.includes(t) || hoveredZone === t ? CLR[t].act : "#e5e7eb";
+    activeSectionTypes.includes(t) || hoveredZone === t ? CLR[t].act : "#d1d5db";
 
   return (
-    <svg viewBox={`0 0 ${BL.W} ${BL.H}`} className="w-full" style={{ background: "#ffffff" }}>
+    <svg viewBox={`0 0 ${BL.W} ${BL.H}`} className="w-full" style={{ background: "#f8fafc" }}>
 
-      {/* ── Seating zones — drawn back to front ─────────────────────────────── */}
-
-      {/* Upper deck */}
+      {/* ── Seating zones ── */}
       <path d={arcBandPath(cx, cy, MLB_R.upperIn, MLB_R.upperOut, FAN_S, FAN_E)}
         fill={zoneFill("upper", hoveredZone, activeSectionTypes)}
-        stroke={mkZoneStroke("upper")} strokeWidth="1.5"
+        stroke={mkZoneStroke("upper")} strokeWidth="1.2"
         style={{ cursor: "pointer", transition: "fill 0.12s" }}
         onClick={() => onSectionTypeToggle("upper")}
         onMouseEnter={() => onZoneHover("upper")}
         onMouseLeave={() => onZoneHover(null)}
       />
-
-      {/* Club / Mezzanine */}
       <path d={arcBandPath(cx, cy, MLB_R.clubIn, MLB_R.clubOut, FAN_S, FAN_E)}
         fill={zoneFill("club", hoveredZone, activeSectionTypes)}
-        stroke={mkZoneStroke("club")} strokeWidth="1.5"
+        stroke={mkZoneStroke("club")} strokeWidth="1.2"
         style={{ cursor: "pointer", transition: "fill 0.12s" }}
         onClick={() => onSectionTypeToggle("club")}
         onMouseEnter={() => onZoneHover("club")}
         onMouseLeave={() => onZoneHover(null)}
       />
-
-      {/* Suites */}
       <path d={arcBandPath(cx, cy, MLB_R.suiteIn, MLB_R.suiteOut, FAN_S, FAN_E)}
         fill={zoneFill("suite", hoveredZone, activeSectionTypes)}
         stroke={mkZoneStroke("suite")} strokeWidth="0.8"
@@ -645,80 +754,69 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         onMouseEnter={() => onZoneHover("suite")}
         onMouseLeave={() => onZoneHover(null)}
       />
-
-      {/* Lower bowl */}
       <path d={arcBandPath(cx, cy, MLB_R.lowerIn, MLB_R.lowerOut, FAN_S, FAN_E)}
         fill={zoneFill("lower", hoveredZone, activeSectionTypes)}
-        stroke={mkZoneStroke("lower")} strokeWidth="1.5"
+        stroke={mkZoneStroke("lower")} strokeWidth="1.2"
         style={{ cursor: "pointer", transition: "fill 0.12s" }}
         onClick={() => onSectionTypeToggle("lower")}
         onMouseEnter={() => onZoneHover("lower")}
         onMouseLeave={() => onZoneHover(null)}
       />
 
-      {/* Section dividers — white on colour fill */}
+      {/* Section dividers — all zones */}
       {MLB_DIVS.map((deg, i) => {
+        const isle = i % 5 === 0;
         const lIn  = arcPoint(cx, cy, MLB_R.lowerIn,  deg);
         const lOut = arcPoint(cx, cy, MLB_R.lowerOut, deg);
         const cIn  = arcPoint(cx, cy, MLB_R.clubIn,   deg);
         const cOut = arcPoint(cx, cy, MLB_R.clubOut,  deg);
         const uIn  = arcPoint(cx, cy, MLB_R.upperIn,  deg);
         const uOut = arcPoint(cx, cy, MLB_R.upperOut, deg);
-        const isle = i % 4 === 0;
         return (
           <g key={i} style={{ pointerEvents: "none" }}>
             <line x1={lIn.x} y1={lIn.y} x2={lOut.x} y2={lOut.y}
-              stroke={isle ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.5)"} strokeWidth={isle ? "1.1" : "0.7"} />
+              stroke={isle ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.55)"} strokeWidth={isle ? "1.1" : "0.55"} />
             <line x1={cIn.x} y1={cIn.y} x2={cOut.x} y2={cOut.y}
-              stroke={isle ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.5)"} strokeWidth={isle ? "1.1" : "0.7"} />
+              stroke={isle ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.55)"} strokeWidth={isle ? "1.1" : "0.55"} />
             <line x1={uIn.x} y1={uIn.y} x2={uOut.x} y2={uOut.y}
-              stroke={isle ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.5)"} strokeWidth={isle ? "1.1" : "0.7"} />
+              stroke={isle ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.55)"} strokeWidth={isle ? "1.1" : "0.55"} />
           </g>
         );
       })}
 
-      {/* Section numbers — lower bowl mid-arc */}
-      {Array.from({ length: 13 }, (_, i) => {
-        const deg = FAN_S + (i + 0.5) * (FAN_E - FAN_S) / 13;
+      {/* Section numbers — lower bowl, every other */}
+      {Array.from({ length: MLB_SEC_COUNT }, (_, i) => {
+        if (i % 2 !== 0) return null;
+        const deg = FAN_S + (i + 0.5) * (FAN_E - FAN_S) / MLB_SEC_COUNT;
         const midR = (MLB_R.lowerIn + MLB_R.lowerOut) / 2;
         const pt = arcPoint(cx, cy, midR, deg);
         return (
-          <text key={i} x={pt.x} y={pt.y + 2.5} textAnchor="middle" fontSize="6"
+          <text key={i} x={pt.x} y={pt.y + 2.5} textAnchor="middle" fontSize="5.5"
             fill={INK} fontFamily="system-ui" fontWeight="700"
             style={{ pointerEvents: "none", userSelect: "none" }}
           >{100 + i + 1}</text>
         );
       })}
 
-      {/* ── Playing field ───────────────────────────────────────────────────── */}
-
-      {/* Warning track (tan, decorative) */}
+      {/* ── Playing field ── */}
       <path d={arcBandPath(cx, cy, MLB_R.trackIn, MLB_R.trackOut, FAN_S, FAN_E)}
-        fill="#c4a96d" stroke="#e5e7eb" strokeWidth="0.8" style={{ pointerEvents: "none" }}
-      />
-
-      {/* Outfield wall */}
+        fill="#c4a96d" stroke="#e5e7eb" strokeWidth="0.8" style={{ pointerEvents: "none" }} />
       <path d={sectorPath(cx, cy, MLB_R.wall + 2, FAN_S, FAN_E)}
-        fill="none" stroke="#94a3b8" strokeWidth="2.5" style={{ pointerEvents: "none" }}
-      />
+        fill="none" stroke="#94a3b8" strokeWidth="2.5" style={{ pointerEvents: "none" }} />
 
-      {/* Foul poles at -45° (RF) and -135° (LF) — actual foul line angles */}
+      {/* Foul poles */}
       {([-135, -45] as number[]).map((deg, i) => {
         const pt = arcPoint(cx, cy, MLB_R.wall + 4, deg);
         return <circle key={i} cx={pt.x} cy={pt.y} r={2.5} fill="#f59e0b" style={{ pointerEvents: "none" }} />;
       })}
 
-      {/* Foul lines from HP through the stands to the poles */}
-      <line x1={cx} y1={cy}
-        x2={arcPoint(cx, cy, MLB_R.wall + 8, -135).x}
-        y2={arcPoint(cx, cy, MLB_R.wall + 8, -135).y}
+      {/* Foul lines */}
+      <line x1={cx} y1={cy} x2={arcPoint(cx, cy, MLB_R.wall + 8, -135).x} y2={arcPoint(cx, cy, MLB_R.wall + 8, -135).y}
         stroke="rgba(255,255,255,0.35)" strokeWidth="0.8" style={{ pointerEvents: "none" }} />
-      <line x1={cx} y1={cy}
-        x2={arcPoint(cx, cy, MLB_R.wall + 8, -45).x}
-        y2={arcPoint(cx, cy, MLB_R.wall + 8, -45).y}
+      <line x1={cx} y1={cy} x2={arcPoint(cx, cy, MLB_R.wall + 8, -45).x} y2={arcPoint(cx, cy, MLB_R.wall + 8, -45).y}
         stroke="rgba(255,255,255,0.35)" strokeWidth="0.8" style={{ pointerEvents: "none" }} />
 
-      {/* Outfield grass (clickable floor zone) */}
+      {/* Outfield grass (clickable) */}
       <path d={arcBandPath(cx, cy, MLB_R.fieldIn, MLB_R.fieldOut, FAN_S, FAN_E)}
         fill={fieldFill(hoveredZone, activeSectionTypes)}
         stroke={hoveredZone === "floor" ? "#16a34a" : "#15803d"} strokeWidth="1.5"
@@ -728,35 +826,35 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         onMouseLeave={() => onZoneHover(null)}
       />
 
-      {/* Distance markers on wall — Yankee Stadium: LF 318, CF 408, RF 314 */}
+      {/* Distance markers — Yankee Stadium */}
       {[
-        { deg: (FAN_S + FAN_E) / 2, r: MLB_R.wall - 8, text: "408′" },
-        { deg: FAN_S + 22,           r: MLB_R.wall - 8, text: "318′" },
-        { deg: FAN_E - 18,           r: MLB_R.wall - 8, text: "314′" },
+        { deg: (FAN_S + FAN_E) / 2, r: MLB_R.wall - 10, text: "408′" },
+        { deg: FAN_S + 22,           r: MLB_R.wall - 10, text: "318′" },
+        { deg: FAN_E - 18,           r: MLB_R.wall - 10, text: "314′" },
       ].map(({ deg, r, text }) => {
         const pt = arcPoint(cx, cy, r, deg);
         return (
-          <text key={text + deg} x={pt.x} y={pt.y + 2.5} textAnchor="middle" fontSize="7"
+          <text key={text} x={pt.x} y={pt.y + 2.5} textAnchor="middle" fontSize="6.5"
             fill={INK} fontFamily="system-ui" fontWeight="700"
             style={{ pointerEvents: "none", userSelect: "none" }}>{text}</text>
         );
       })}
 
-      {/* Monument Park — Yankee Stadium deep center */}
+      {/* Monument Park */}
       {(() => {
-        const pt = arcPoint(BL.HX, BL.HY, MLB_R.wall - 18, (FAN_S + FAN_E) / 2);
+        const pt = arcPoint(BL.HX, BL.HY, MLB_R.wall - 20, (FAN_S + FAN_E) / 2);
         return (
           <g style={{ pointerEvents: "none" }}>
             <rect x={pt.x - 14} y={pt.y - 6} width={28} height={12} rx={2}
               fill="#166534" stroke="#15803d" strokeWidth="0.7" />
-            <text x={pt.x} y={pt.y + 2.5} textAnchor="middle" fontSize="4.5"
+            <text x={pt.x} y={pt.y + 2.5} textAnchor="middle" fontSize="4"
               fill="rgba(255,255,255,0.75)" fontFamily="system-ui" fontWeight="700"
               letterSpacing="0.3">MONUMENT PARK</text>
           </g>
         );
       })()}
 
-      {/* Bullpens — corner outfield */}
+      {/* Bullpens */}
       {[FAN_S + 10, FAN_E - 10].map((deg, i) => {
         const pt = arcPoint(cx, cy, MLB_R.upperOut - 18, deg);
         return (
@@ -765,42 +863,40 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         );
       })}
 
-      {/* Infield dirt sector — wide arc from HP covering the infield */}
+      {/* Infield dirt */}
       <path d={sectorPath(cx, cy, MLB_R.fieldIn - 1, -160, -20)}
-        fill="#c49a4a" style={{ pointerEvents: "none" }}
-      />
+        fill="#c49a4a" style={{ pointerEvents: "none" }} />
 
-      {/* Infield grass — diamond-shaped polygon inside the dirt */}
+      {/* Infield grass */}
       <polygon
         points={`${hp.x},${hp.y} ${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y}`}
         fill="#22c55e" style={{ pointerEvents: "none" }}
       />
 
-      {/* ── Diamond markings ──────────────────────────────────────────────── */}
+      {/* ── Diamond markings ── */}
       <g style={{ pointerEvents: "none" }}>
-        {/* Base paths */}
         <line x1={hp.x} y1={hp.y} x2={b1.x} y2={b1.y} stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" />
         <line x1={b1.x} y1={b1.y} x2={b2.x} y2={b2.y} stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" />
         <line x1={b2.x} y1={b2.y} x2={b3.x} y2={b3.y} stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" />
         <line x1={b3.x} y1={b3.y} x2={hp.x} y2={hp.y} stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" />
-        {/* Pitcher's mound */}
+        {/* Dugouts */}
+        <rect x={b3.x - 18} y={cy - 10} width={14} height={8} rx={1.5}
+          fill="#94a3b8" stroke="#64748b" strokeWidth="0.6" opacity={0.7} />
+        <rect x={b1.x + 4} y={cy - 10} width={14} height={8} rx={1.5}
+          fill="#94a3b8" stroke="#64748b" strokeWidth="0.6" opacity={0.7} />
         <circle cx={pm.x} cy={pm.y} r={6} fill="#c49a4a" stroke="rgba(0,0,0,0.15)" strokeWidth="0.5" />
         <rect x={pm.x - 2.5} y={pm.y - 1} width={5} height={2} rx={0.5} fill="rgba(255,255,255,0.8)" />
-        {/* Bases — 1B, 2B, 3B */}
         {[b1, b2, b3].map((b, i) => (
           <rect key={i} x={b.x - 3} y={b.y - 3} width={6} height={6}
-            fill="white" opacity={0.9}
-            transform={`rotate(45, ${b.x}, ${b.y})`}
-          />
+            fill="white" opacity={0.9} transform={`rotate(45, ${b.x}, ${b.y})`} />
         ))}
-        {/* Home plate (pentagon) */}
         <polygon
           points={`${hp.x},${hp.y - 4} ${hp.x + 4},${hp.y} ${hp.x + 4},${hp.y + 3} ${hp.x - 4},${hp.y + 3} ${hp.x - 4},${hp.y}`}
           fill="white" opacity={0.9}
         />
       </g>
 
-      {/* ── Zone labels (inside seating arcs) ─────────────────────────────── */}
+      {/* Zone labels */}
       {[
         { r: (MLB_R.lowerIn + MLB_R.lowerOut) / 2 + 4, text: "LOWER BOWL", deg: -90 },
         { r: (MLB_R.clubIn  + MLB_R.clubOut)  / 2,     text: "CLUB",        deg: -115 },
@@ -808,38 +904,36 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
       ].map(({ r, text, deg }) => {
         const pt = arcPoint(cx, cy, r, deg);
         return (
-          <text key={text} x={pt.x} y={pt.y + 2.5} textAnchor="middle" fontSize="7"
+          <text key={text} x={pt.x} y={pt.y + 2.5} textAnchor="middle" fontSize="6.5"
             fill={INK} fontFamily="system-ui" fontWeight="700" letterSpacing="0.5"
             style={{ pointerEvents: "none", userSelect: "none" }}
           >{text}</text>
         );
       })}
 
-      {/* Field label */}
       <text x={arcPoint(cx, cy, 82, -90).x} y={arcPoint(cx, cy, 82, -90).y + 2.5}
-        textAnchor="middle" fontSize="6.5" fill="rgba(255,255,255,0.8)"
+        textAnchor="middle" fontSize="6" fill="rgba(255,255,255,0.8)"
         fontFamily="system-ui" fontWeight="700" letterSpacing="0.5"
         style={{ pointerEvents: "none", userSelect: "none" }}>FIELD</text>
 
-      {/* Home plate label */}
-      <text x={cx} y={cy + 14} textAnchor="middle" fontSize="5.5"
-        fill={INK} fontFamily="system-ui" opacity={0.55}
+      <text x={cx} y={cy + 14} textAnchor="middle" fontSize="5"
+        fill={INK} fontFamily="system-ui" opacity={0.5}
         style={{ pointerEvents: "none", userSelect: "none" }}>HOME PLATE</text>
 
       {showBadges && minByType && countByType && (
         <>
           <PriceBadge x={arcPoint(cx,cy,82,-110).x} y={arcPoint(cx,cy,82,-110).y - 6} count={countByType.floor} min={minByType.floor} active={activeSectionTypes.includes("floor")} />
-          <PriceBadge x={arcPoint(cx,cy,138,-55).x + 8} y={arcPoint(cx,cy,138,-55).y} count={countByType.lower} min={minByType.lower} active={activeSectionTypes.includes("lower")} />
-          <PriceBadge x={arcPoint(cx,cy,188,-55).x + 8} y={arcPoint(cx,cy,188,-55).y} count={countByType.club} min={minByType.club} active={activeSectionTypes.includes("club")} />
-          <PriceBadge x={arcPoint(cx,cy,222,-55).x + 8} y={arcPoint(cx,cy,222,-55).y} count={countByType.upper} min={minByType.upper} active={activeSectionTypes.includes("upper")} />
-          <PriceBadge x={arcPoint(cx,cy,170,-55).x + 8} y={arcPoint(cx,cy,170,-55).y} count={countByType.suite} min={minByType.suite} active={activeSectionTypes.includes("suite")} />
+          <PriceBadge x={arcPoint(cx,cy,140,-55).x + 8} y={arcPoint(cx,cy,140,-55).y} count={countByType.lower} min={minByType.lower} active={activeSectionTypes.includes("lower")} />
+          <PriceBadge x={arcPoint(cx,cy,192,-55).x + 8} y={arcPoint(cx,cy,192,-55).y} count={countByType.club} min={minByType.club} active={activeSectionTypes.includes("club")} />
+          <PriceBadge x={arcPoint(cx,cy,228,-55).x + 8} y={arcPoint(cx,cy,228,-55).y} count={countByType.upper} min={minByType.upper} active={activeSectionTypes.includes("upper")} />
+          <PriceBadge x={arcPoint(cx,cy,174,-55).x + 8} y={arcPoint(cx,cy,174,-55).y} count={countByType.suite} min={minByType.suite} active={activeSectionTypes.includes("suite")} />
         </>
       )}
     </svg>
   );
 }
 
-// ── Listing row (expanded modal) ──────────────────────────────────────────────
+// ── Listing row ───────────────────────────────────────────────────────────────
 
 function MapListingRow({ listing, cheapest }: { listing: TicketListing; cheapest: boolean }) {
   const color = PLAT_COLORS[listing.platform] ?? "#6b7280";
@@ -881,13 +975,9 @@ function ExpandedModal({
 }) {
   const panelListings = useMemo(() => {
     let result: TicketListing[];
-    if (hoveredZone) {
-      result = listings.filter(l => l.sectionType === hoveredZone);
-    } else if (activeSectionTypes.length > 0) {
-      result = listings.filter(l => activeSectionTypes.includes(l.sectionType));
-    } else {
-      result = [...listings];
-    }
+    if (hoveredZone) result = listings.filter(l => l.sectionType === hoveredZone);
+    else if (activeSectionTypes.length > 0) result = listings.filter(l => activeSectionTypes.includes(l.sectionType));
+    else result = [...listings];
     return result.sort((a, b) => a.allInTotal - b.allInTotal);
   }, [listings, hoveredZone, activeSectionTypes]);
 
@@ -914,8 +1004,6 @@ function ExpandedModal({
       onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
     >
       <div className="bg-[#0f172a] rounded-2xl border border-white/10 shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden">
-
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/8 flex-shrink-0">
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-white font-bold text-base">{mapTitle}</span>
@@ -946,7 +1034,6 @@ function ExpandedModal({
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
           <div className="flex-1 flex flex-col overflow-hidden p-4 lg:p-6">
             <div className="flex-1 flex items-center justify-center min-h-0">
@@ -978,18 +1065,10 @@ function ExpandedModal({
               {panelMin !== null && (
                 <p className="text-gray-400 text-xs mt-0.5">from <span className="text-white font-semibold">${panelMin}</span> all-in</p>
               )}
-              {!displayZone && activeSectionTypes.length === 0 && (
-                <p className="text-gray-600 text-xs mt-1">Hover or click a zone to filter</p>
-              )}
             </div>
             <div className="flex-1 overflow-y-auto">
               {panelListings.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-3">
-                    <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                    </svg>
-                  </div>
                   <p className="text-gray-500 text-sm font-medium">No listings</p>
                   <p className="text-gray-600 text-xs mt-1">for this zone</p>
                 </div>
@@ -1015,44 +1094,36 @@ function LegendPanel({ genre, activeSectionTypes, onSectionTypeToggle, onClearSe
   countByType: Record<SectionType, number>;
 }) {
   return (
-    <div className="flex-1 p-4 flex flex-col justify-center gap-0.5">
-      <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Zones</p>
+    <div className="flex flex-wrap gap-1.5 px-3 py-2.5">
       {(["floor", "lower", "suite", "club", "upper"] as SectionType[]).map((type) => {
         const label = getZoneLabel(type, genre);
         const min = minByType[type];
         const count = countByType[type];
         const active = activeSectionTypes.includes(type);
         const dimmed = activeSectionTypes.length > 0 && !active;
+        if (count === 0) return null;
         return (
           <button key={type} onClick={() => onSectionTypeToggle(type)}
-            className={`flex items-center justify-between w-full px-3 py-2 rounded-lg text-left transition-all ${
-              active   ? "bg-blue-50 border border-blue-200"
-              : dimmed ? "border border-transparent opacity-40"
-              :          "border border-transparent hover:bg-gray-50"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all border ${
+              active   ? "border-blue-200 bg-blue-50 text-blue-700"
+              : dimmed ? "border-transparent opacity-40 text-gray-500"
+              :          "border-gray-200 hover:bg-gray-50 text-gray-600"
             }`}
           >
-            <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: CLR[type].act }} />
-              <span className={`text-sm font-medium ${active ? "text-blue-700" : dimmed ? "text-gray-400" : "text-gray-700"}`}>
-                {label}
-              </span>
-              {count > 0 && (
-                <span className={`text-xs ${active ? "text-blue-500" : "text-gray-400"}`}>{count}</span>
-              )}
-            </div>
-            {min !== null ? (
-              <span className={`text-xs font-semibold tabular-nums ${active ? "text-blue-600" : dimmed ? "text-gray-300" : "text-gray-500"}`}>
+            <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: CLR[type].act }} />
+            <span className="font-semibold">{label}</span>
+            {min !== null && (
+              <span className={`tabular-nums ${active ? "text-blue-500" : "text-gray-400"}`}>
                 from {fmt(min)}
               </span>
-            ) : (
-              <span className="text-xs text-gray-300">—</span>
             )}
           </button>
         );
       })}
       {activeSectionTypes.length > 0 && (
-        <button onClick={onClearSectionTypes} className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-medium transition text-left px-3">
-          Clear zone filter
+        <button onClick={onClearSectionTypes}
+          className="px-2.5 py-1.5 rounded-lg text-xs text-blue-600 hover:text-blue-700 font-medium transition">
+          Clear
         </button>
       )}
     </div>
@@ -1061,7 +1132,10 @@ function LegendPanel({ genre, activeSectionTypes, onSectionTypeToggle, onClearSe
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
-export default function VenueMap({ listings, activeSectionTypes, onSectionTypeToggle, onClearSectionTypes, genre = "", venue = "" }: Props) {
+export default function VenueMap({
+  listings, activeSectionTypes, onSectionTypeToggle, onClearSectionTypes,
+  genre = "", venue = "", mode = "card",
+}: Props) {
   const { minByType, countByType } = useZoneData(listings);
   const [expanded, setExpanded] = useState(false);
   const [hoveredZone, setHoveredZone] = useState<SectionType | null>(null);
@@ -1088,14 +1162,132 @@ export default function VenueMap({ listings, activeSectionTypes, onSectionTypeTo
   }, []);
 
   const isNFL = genre === "NFL", isMLB = genre === "MLB";
-  const isArena = genre === "NBA" || genre === "NHL";
-  const title = isNFL ? "Stadium Map" : isMLB ? "Ballpark Map" : isArena ? "Arena Map" : "Seat Map";
 
+  const mapSVG = (
+    <div
+      ref={svgContainerRef}
+      className="relative w-full"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {isNFL ? (
+        <NFLMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+          onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
+      ) : isMLB ? (
+        <MLBMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+          onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
+      ) : (
+        <ArenaMap genre={genre} venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+          onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
+      )}
+
+      {/* Tooltip */}
+      <div
+        ref={tooltipRef}
+        style={{ position: "absolute", pointerEvents: "none", zIndex: 10, visibility: "hidden" }}
+        className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 shadow-xl whitespace-nowrap"
+      >
+        {hoveredZone && (
+          <>
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: CLR[hoveredZone].act }} />
+              <span className="text-white font-semibold text-sm">{getZoneLabel(hoveredZone, genre)}</span>
+            </div>
+            <div className="text-gray-400 text-xs">
+              {countByType[hoveredZone]} listings · from {fmt(minByType[hoveredZone] ?? 0)}
+            </div>
+            <div className="text-gray-600 text-xs mt-0.5">Click to filter</div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  // ── Panel mode (right-side panel in split layout) ──────────────────────────
+  if (mode === "panel") {
+    return (
+      <>
+        <div className="h-full flex flex-col">
+          {/* Map SVG — fills available space */}
+          <div className="flex-1 min-h-0 overflow-hidden flex items-center justify-center bg-[#f8fafc] rounded-xl border border-gray-100">
+            <div className="w-full" ref={svgContainerRef}
+              onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}
+              style={{ position: "relative" }}
+            >
+              {isNFL ? (
+                <NFLMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+                  onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
+              ) : isMLB ? (
+                <MLBMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+                  onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
+              ) : (
+                <ArenaMap genre={genre} venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+                  onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
+              )}
+              {/* Tooltip */}
+              <div ref={tooltipRef}
+                style={{ position: "absolute", pointerEvents: "none", zIndex: 10, visibility: "hidden" }}
+                className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 shadow-xl whitespace-nowrap"
+              >
+                {hoveredZone && (
+                  <>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: CLR[hoveredZone].act }} />
+                      <span className="text-white font-semibold text-sm">{getZoneLabel(hoveredZone, genre)}</span>
+                    </div>
+                    <div className="text-gray-400 text-xs">
+                      {countByType[hoveredZone]} listings · from {fmt(minByType[hoveredZone] ?? 0)}
+                    </div>
+                    <div className="text-gray-600 text-xs mt-0.5">Click to filter</div>
+                  </>
+                )}
+              </div>
+              {/* Expand button — floating bottom-right */}
+              <button
+                onClick={() => setExpanded(true)}
+                className="absolute bottom-3 right-3 flex items-center gap-1 bg-white border border-gray-200 text-blue-600 text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm hover:shadow-md hover:border-blue-200 transition"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+                Expand
+              </button>
+            </div>
+          </div>
+
+          {/* Zone legend — compact horizontal chips */}
+          <div className="flex-shrink-0 border-t border-gray-100 bg-white rounded-b-xl">
+            <LegendPanel
+              genre={genre}
+              activeSectionTypes={activeSectionTypes}
+              onSectionTypeToggle={onSectionTypeToggle}
+              onClearSectionTypes={onClearSectionTypes}
+              minByType={minByType}
+              countByType={countByType}
+            />
+          </div>
+        </div>
+
+        {expanded && (
+          <ExpandedModal
+            listings={listings} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+            onSectionTypeToggle={onSectionTypeToggle} onClearSectionTypes={onClearSectionTypes}
+            onZoneHover={onZoneHover} onClose={() => setExpanded(false)}
+            genre={genre} venue={venue} minByType={minByType} countByType={countByType}
+          />
+        )}
+      </>
+    );
+  }
+
+  // ── Card mode (default — compact widget) ──────────────────────────────────
   return (
     <>
       <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
         <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
-          <span className="text-gray-700 text-sm font-semibold">{title}</span>
+          <span className="text-gray-700 text-sm font-semibold">
+            {isNFL ? "Stadium Map" : isMLB ? "Ballpark Map" : (genre === "NBA" || genre === "NHL") ? "Arena Map" : "Seat Map"}
+          </span>
           <div className="flex items-center gap-3">
             <span className="text-gray-400 text-xs hidden sm:block">Click a zone to filter</span>
             <button
@@ -1111,68 +1303,58 @@ export default function VenueMap({ listings, activeSectionTypes, onSectionTypeTo
         </div>
 
         <div className="flex flex-col sm:flex-row">
-          <div
-            ref={svgContainerRef}
-            className="w-full sm:w-72 flex-shrink-0 relative"
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-          >
-            {isNFL ? (
-              <NFLMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
-                onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
-            ) : isMLB ? (
-              <MLBMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
-                onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
-            ) : (
-              <ArenaMap genre={genre} venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
-                onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
-            )}
-
-            {/* Tooltip — imperatively positioned, zero re-renders on mousemove */}
-            <div
-              ref={tooltipRef}
-              style={{ position: "absolute", pointerEvents: "none", zIndex: 10, visibility: "hidden" }}
-              className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 shadow-xl whitespace-nowrap"
-            >
-              {hoveredZone && (
-                <>
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: CLR[hoveredZone].act }} />
-                    <span className="text-white font-semibold text-sm">{getZoneLabel(hoveredZone, genre)}</span>
-                  </div>
-                  <div className="text-gray-400 text-xs">
-                    {countByType[hoveredZone]} listings · from {fmt(minByType[hoveredZone] ?? 0)}
-                  </div>
-                  <div className="text-gray-600 text-xs mt-0.5">Click to filter · Expand to browse</div>
-                </>
-              )}
-            </div>
+          <div className="w-full sm:w-72 flex-shrink-0" ref={svgContainerRef}
+            onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave} style={{ position: "relative" }}>
+            {mapSVG}
           </div>
-
-          <LegendPanel
-            genre={genre}
-            activeSectionTypes={activeSectionTypes}
-            onSectionTypeToggle={onSectionTypeToggle}
-            onClearSectionTypes={onClearSectionTypes}
-            minByType={minByType}
-            countByType={countByType}
-          />
+          <div className="flex-1 p-4 flex flex-col justify-center gap-0.5">
+            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Zones</p>
+            {(["floor", "lower", "suite", "club", "upper"] as SectionType[]).map((type) => {
+              const label = getZoneLabel(type, genre);
+              const min = minByType[type];
+              const count = countByType[type];
+              const active = activeSectionTypes.includes(type);
+              const dimmed = activeSectionTypes.length > 0 && !active;
+              return (
+                <button key={type} onClick={() => onSectionTypeToggle(type)}
+                  className={`flex items-center justify-between w-full px-3 py-2 rounded-lg text-left transition-all ${
+                    active   ? "bg-blue-50 border border-blue-200"
+                    : dimmed ? "border border-transparent opacity-40"
+                    :          "border border-transparent hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: CLR[type].act }} />
+                    <span className={`text-sm font-medium ${active ? "text-blue-700" : dimmed ? "text-gray-400" : "text-gray-700"}`}>
+                      {label}
+                    </span>
+                    {count > 0 && <span className={`text-xs ${active ? "text-blue-500" : "text-gray-400"}`}>{count}</span>}
+                  </div>
+                  {min !== null ? (
+                    <span className={`text-xs font-semibold tabular-nums ${active ? "text-blue-600" : dimmed ? "text-gray-300" : "text-gray-500"}`}>
+                      from {fmt(min)}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-gray-300">—</span>
+                  )}
+                </button>
+              );
+            })}
+            {activeSectionTypes.length > 0 && (
+              <button onClick={onClearSectionTypes} className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-medium transition text-left px-3">
+                Clear zone filter
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {expanded && (
         <ExpandedModal
-          listings={listings}
-          activeSectionTypes={activeSectionTypes}
-          hoveredZone={hoveredZone}
-          onSectionTypeToggle={onSectionTypeToggle}
-          onClearSectionTypes={onClearSectionTypes}
-          onZoneHover={onZoneHover}
-          onClose={() => setExpanded(false)}
-          genre={genre}
-          venue={venue}
-          minByType={minByType}
-          countByType={countByType}
+          listings={listings} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+          onSectionTypeToggle={onSectionTypeToggle} onClearSectionTypes={onClearSectionTypes}
+          onZoneHover={onZoneHover} onClose={() => setExpanded(false)}
+          genre={genre} venue={venue} minByType={minByType} countByType={countByType}
         />
       )}
     </>

@@ -29,10 +29,7 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
 
   const [sortField, setSortField] = useState<SortField>("price");
   const [sortDir, setSortDir]     = useState<SortDir>("asc");
-  const [showMap, setShowMap]     = useState(true);
 
-  // startTransition marks filter/sort updates as non-urgent so React can
-  // yield to user input (clicks, typing) before committing the heavy re-render.
   const [, startTransition] = useTransition();
 
   const toggleSectionType = useCallback((type: (typeof filters.sectionTypes)[number]) => {
@@ -47,7 +44,6 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
   }, []);
 
   const handleFilterChange = useCallback((next: FilterState) => {
-    // Keep search input immediate; defer everything else
     startTransition(() => setFilters(next));
   }, []);
 
@@ -86,11 +82,17 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
     ).id;
   }, [filtered]);
 
+  const mapTitle = event.genre === "NFL" ? "Stadium Map"
+    : event.genre === "MLB" ? "Ballpark Map"
+    : (event.genre === "NBA" || event.genre === "NHL") ? "Arena Map"
+    : "Seat Map";
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+
       {/* ── Nav ────────────────────────────────────────────── */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
+      <header className="bg-white border-b border-gray-200 z-30 flex-shrink-0">
+        <div className="px-4 sm:px-6 h-14 flex items-center gap-4">
           <Link href="/" className="flex items-center gap-1.5 flex-shrink-0">
             <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
@@ -122,74 +124,63 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
         </div>
       </header>
 
-      {/* ── Event header ────────────────────────────────────── */}
-      <EventHeader event={event} totalListings={filtered.length} />
+      {/* ── Split layout ────────────────────────────────────── */}
+      <div className="flex-1 flex overflow-hidden min-h-0">
 
-      {/* ── Main content ────────────────────────────────────── */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-5">
+        {/* ── Left: scrollable listings panel ── */}
+        <div className="w-full lg:w-[46%] xl:w-[44%] flex flex-col overflow-hidden border-r border-gray-200 bg-white">
 
-        {/* Seat map toggle */}
-        <div className="mb-4">
-          <button
-            onClick={() => setShowMap((v) => !v)}
-            className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium transition"
-          >
-            <svg
-              className={`w-4 h-4 transition-transform ${showMap ? "rotate-90" : ""}`}
-              fill="none" viewBox="0 0 24 24" stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-            {showMap ? "Hide" : "Show"}{" "}
-            {event.genre === "NFL" ? "Stadium Map"
-              : event.genre === "MLB" ? "Ballpark Map"
-              : event.genre === "NBA" || event.genre === "NHL" ? "Arena Map"
-              : "Seat Map"}
-          </button>
+          {/* Event header — scrolls naturally */}
+          <EventHeader event={event} totalListings={filtered.length} />
 
-          {showMap && (
-            <div className="mt-3">
-              <VenueMap
-                listings={initialListings}
-                activeSectionTypes={filters.sectionTypes}
-                onSectionTypeToggle={toggleSectionType}
-                onClearSectionTypes={() => startTransition(() => setFilters((f) => ({ ...f, sectionTypes: [] })))}
-                genre={event.genre}
-                venue={event.venue}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Sidebar + listings */}
-        <div className="flex flex-col lg:flex-row gap-5">
-          <FilterSidebar
-            filters={filters}
-            onChange={handleFilterChange}
-            absoluteMin={absoluteMin}
-            absoluteMax={absoluteMax}
-          />
-
-          <div className="flex-1 min-w-0">
+          {/* Sort bar — sticks once event header scrolls off */}
+          <div className="flex-shrink-0 bg-white border-b border-gray-100 px-4 pt-3 z-10">
             <SortBar
               field={sortField}
               dir={sortDir}
               count={filtered.length}
               onChange={handleSortChange}
             />
-            <TicketList listings={filtered} cheapestId={cheapestId} />
+          </div>
+
+          {/* Scrollable content: filter sidebar + ticket list */}
+          <div className="flex-1 overflow-y-auto bg-gray-50">
+            <div className="flex flex-col sm:flex-row gap-4 p-4 items-start">
+              <FilterSidebar
+                filters={filters}
+                onChange={handleFilterChange}
+                absoluteMin={absoluteMin}
+                absoluteMax={absoluteMax}
+              />
+              <div className="flex-1 min-w-0">
+                <TicketList listings={filtered} cheapestId={cheapestId} />
+              </div>
+            </div>
           </div>
         </div>
-      </main>
 
-      <footer className="border-t border-gray-200 bg-white mt-8 px-6 py-5">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span className="text-gray-900 font-bold text-sm">Ticket<span className="text-blue-600">Central</span></span>
-          <p className="text-gray-400 text-xs">
-            All prices include fees and taxes &middot; Not affiliated with any ticketing platform
-          </p>
+        {/* ── Right: seat map panel ── */}
+        <div className="hidden lg:flex flex-col flex-1 overflow-hidden bg-white">
+          {/* Panel header */}
+          <div className="flex-shrink-0 px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+            <span className="text-gray-800 font-semibold text-sm">{mapTitle}</span>
+            <span className="text-gray-400 text-xs">Click a zone to filter listings</span>
+          </div>
+          {/* Map fills remaining height */}
+          <div className="flex-1 overflow-hidden p-4">
+            <VenueMap
+              listings={initialListings}
+              activeSectionTypes={filters.sectionTypes}
+              onSectionTypeToggle={toggleSectionType}
+              onClearSectionTypes={() => startTransition(() => setFilters((f) => ({ ...f, sectionTypes: [] })))}
+              genre={event.genre}
+              venue={event.venue}
+              mode="panel"
+            />
+          </div>
         </div>
-      </footer>
+
+      </div>
     </div>
   );
 }

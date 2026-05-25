@@ -34,17 +34,17 @@ function scoreLabel(score: number): string {
   return "High Price";
 }
 
-function scoreColor(score: number): { bar: string; text: string } {
-  if (score >= 75) return { bar: "bg-green-500",  text: "text-green-700"  };
-  if (score >= 45) return { bar: "bg-yellow-400", text: "text-yellow-700" };
-  return              { bar: "bg-red-400",    text: "text-red-700"    };
+function scoreColor(score: number): { bar: string; text: string; badge: string } {
+  if (score >= 75) return { bar: "bg-green-500",  text: "text-green-700",  badge: "bg-green-100 text-green-700"  };
+  if (score >= 45) return { bar: "bg-yellow-400", text: "text-yellow-700", badge: "bg-yellow-100 text-yellow-700" };
+  return              { bar: "bg-red-400",    text: "text-red-700",    badge: "bg-red-100 text-red-700"    };
 }
 
 export default function TicketCard({ listing, isBestDeal, rank, allInMin, allInMax }: Props) {
   const { text: pText, border: pBorder } = PLATFORM_COLORS[listing.platform];
   const hasFees = listing.fees > 0;
   const score = dealScore(listing.allInTotal, allInMin, allInMax);
-  const { bar: scoreBar, text: scoreTxt } = scoreColor(score);
+  const { badge: scoreBadge } = scoreColor(score);
 
   return (
     <div
@@ -80,28 +80,15 @@ export default function TicketCard({ listing, isBestDeal, rank, allInMin, allInM
             {!hasFees && (
               <span className="text-green-600 text-xs font-semibold">No fees</span>
             )}
+            <span className={`text-xs font-bold px-1.5 py-0.5 rounded tabular-nums ${scoreBadge}`} title={scoreLabel(score)}>
+              {score}
+            </span>
           </div>
           {listing.dealerNotes && (
             <p className="text-gray-400 text-xs mt-1 truncate max-w-[220px]" title={listing.dealerNotes}>
               {listing.dealerNotes}
             </p>
           )}
-        </div>
-
-        {/* ── Center: deal score ─────────────────────────── */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-gray-400 text-xs">Deal Score</span>
-            <span className={`text-xs font-semibold ${scoreTxt}`}>
-              {score} &middot; {scoreLabel(score)}
-            </span>
-          </div>
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full ${scoreBar} transition-all`}
-              style={{ width: `${score}%` }}
-            />
-          </div>
         </div>
 
         {/* ── Right: price + CTA ────────────────────────── */}
