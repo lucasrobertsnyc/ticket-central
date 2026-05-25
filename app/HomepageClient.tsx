@@ -175,10 +175,39 @@ export default function HomepageClient({ events }: Props) {
           </div>
 
           {/* Platform logos row */}
-          <div className="flex flex-wrap justify-center items-center gap-x-5 gap-y-2 mt-6 text-xs font-semibold text-gray-400">
+          <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2 mt-6 text-xs font-semibold text-gray-400">
             <span>Comparing:</span>
-            {["SeatGeek", "StubHub", "TickPick", "Vivid Seats", "GameTime", "Ticketmaster", "AXS"].map((p) => (
-              <span key={p} className="text-gray-500">{p}</span>
+            {[
+              { name: "SeatGeek",    url: "https://seatgeek.com",              color: "#059669", bg: "rgba(5,150,105,0.08)",   hover: "rgba(5,150,105,0.16)"   },
+              { name: "StubHub",     url: "https://www.stubhub.com",           color: "#CC2828", bg: "rgba(204,40,40,0.08)",   hover: "rgba(204,40,40,0.16)"   },
+              { name: "TickPick",    url: "https://www.tickpick.com",          color: "#0284C7", bg: "rgba(2,132,199,0.08)",   hover: "rgba(2,132,199,0.16)"   },
+              { name: "Vivid Seats", url: "https://www.vividseats.com",        color: "#6D28D9", bg: "rgba(109,40,217,0.08)",  hover: "rgba(109,40,217,0.16)"  },
+              { name: "GameTime",    url: "https://gametime.co",               color: "#EA580C", bg: "rgba(234,88,12,0.08)",   hover: "rgba(234,88,12,0.16)"   },
+              { name: "Ticketmaster",url: "https://www.ticketmaster.com",      color: "#026CDF", bg: "rgba(2,108,223,0.08)",   hover: "rgba(2,108,223,0.16)"   },
+              { name: "AXS",         url: "https://www.axs.com",               color: "#1d4ed8", bg: "rgba(29,78,216,0.08)",   hover: "rgba(29,78,216,0.16)"   },
+            ].map(({ name, url, color, bg }) => (
+              <a
+                key={name}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2.5 py-1 rounded-full font-semibold transition-all duration-150 border whitespace-nowrap"
+                style={{
+                  color,
+                  backgroundColor: bg,
+                  borderColor: `${color}30`,
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.backgroundColor = `${color}18`;
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor = `${color}55`;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.backgroundColor = bg;
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor = `${color}30`;
+                }}
+              >
+                {name}
+              </a>
             ))}
           </div>
         </div>
