@@ -9,8 +9,6 @@ import FilterSidebar from "@/components/FilterSidebar";
 import TicketList from "@/components/TicketList";
 import SortBar from "@/components/SortBar";
 import VenueMap from "@/components/VenueMap";
-import BuyTickets from "@/components/BuyTickets";
-import PriceAlert from "@/components/PriceAlert";
 
 interface Props {
   event: Event;
@@ -129,12 +127,6 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
 
       {/* ── Main content ────────────────────────────────────── */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-5">
-
-        {/* Buy Tickets */}
-        <BuyTickets event={event} />
-
-        {/* Price Alert */}
-        <PriceAlert event={event} />
 
         {/* Seat map toggle */}
         <div className="mb-4">
