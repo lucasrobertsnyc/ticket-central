@@ -146,21 +146,44 @@ function divLine(cx: number, cy: number, iRx: number, iRy: number, oRx: number, 
 const SB = { w: 14, h: 9, gap: 3, count: 5 };
 const sbTotalH = SB.count * SB.h + (SB.count - 1) * SB.gap;
 
+// ── Per-venue arena configs (real section counts from official seating charts) ─
+interface ArenaCfg { lowerDivs: number; clubDivs: number; upperDivs: number; upperSecBase: number; lowerSecBase: number }
+const ARENA_VENUE: Record<string, ArenaCfg> = {
+  // lower / club / upper divider counts match official section totals
+  "Madison Square Garden": { lowerDivs: 19, clubDivs: 14, upperDivs: 27, upperSecBase: 201, lowerSecBase: 101 },
+  "TD Garden":             { lowerDivs: 22, clubDivs: 10, upperDivs: 30, upperSecBase: 301, lowerSecBase: 1   },
+  "Capital One Arena":     { lowerDivs: 22, clubDivs: 30, upperDivs: 34, upperSecBase: 400, lowerSecBase: 100 },
+  "Ball Arena":            { lowerDivs: 24, clubDivs: 30, upperDivs: 40, upperSecBase: 301, lowerSecBase: 102 },
+  "United Center":         { lowerDivs: 22, clubDivs: 34, upperDivs: 34, upperSecBase: 301, lowerSecBase: 101 },
+  "Barclays Center":       { lowerDivs: 31, clubDivs: 12, upperDivs: 31, upperSecBase: 201, lowerSecBase: 1   },
+  "Crypto.com Arena":      { lowerDivs: 26, clubDivs: 16, upperDivs: 32, upperSecBase: 301, lowerSecBase: 101 },
+  "Chase Center":          { lowerDivs: 22, clubDivs: 16, upperDivs: 26, upperSecBase: 201, lowerSecBase: 101 },
+  "Kia Forum":             { lowerDivs: 28, clubDivs: 12, upperDivs: 26, upperSecBase: 201, lowerSecBase: 101 },
+  "T-Mobile Arena":        { lowerDivs: 22, clubDivs: 14, upperDivs: 28, upperSecBase: 201, lowerSecBase: 101 },
+  "Spectrum Center":       { lowerDivs: 22, clubDivs: 12, upperDivs: 30, upperSecBase: 201, lowerSecBase: 101 },
+};
+const DEFAULT_ARENA_CFG: ArenaCfg = { lowerDivs: 40, clubDivs: 14, upperDivs: 30, upperSecBase: 301, lowerSecBase: 101 };
+
 function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, genre = "", venue = "", showBadges, minByType, countByType }: MapProps) {
   const isNBA = genre === "NBA", isNHL = genre === "NHL";
   const isMSG = venue === "Madison Square Garden";
 
-  // ── Venue-specific ring geometry ──────────────────────────────────────────
-  // MSG is nearly circular; Crypto.com is a standard elongated oval.
-  // Lower ring uses 40 dividers; upper uses 30 — matches real venue section density.
+  // ── Venue-specific ring geometry — uses real section counts per venue ─────────
+  const vCfg      = ARENA_VENUE[venue] ?? DEFAULT_ARENA_CFG;
+  const lowerDivs = vCfg.lowerDivs;
+  const clubDivs  = vCfg.clubDivs;
+  const upperDivs = vCfg.upperDivs;
+  const upperSecBase  = vCfg.upperSecBase;
+  const lowerSecBase  = vCfg.lowerSecBase;
+
   const ARENA_RINGS = isMSG ? [
-    { type: "lower" as SectionType, label: "LOWER ARENA", iRx: 78,  iRy: 60,  oRx: 128, oRy: 98,  divs: 40 },
-    { type: "club"  as SectionType, label: "SUITE LEVEL", iRx: 136, iRy: 106, oRx: 156, oRy: 122, divs: 14 },
-    { type: "upper" as SectionType, label: "BALCONY",     iRx: 164, iRy: 130, oRx: 208, oRy: 142, divs: 30 },
+    { type: "lower" as SectionType, label: "LOWER ARENA", iRx: 78,  iRy: 60,  oRx: 128, oRy: 98,  divs: lowerDivs },
+    { type: "club"  as SectionType, label: "SUITE LEVEL", iRx: 136, iRy: 106, oRx: 156, oRy: 122, divs: clubDivs  },
+    { type: "upper" as SectionType, label: "BALCONY",     iRx: 164, iRy: 130, oRx: 208, oRy: 142, divs: upperDivs },
   ] : [
-    { type: "lower" as SectionType, label: "LOWER BOWL",  iRx: 88,  iRy: 44,  oRx: 150, oRy: 92,  divs: 40 },
-    { type: "club"  as SectionType, label: "CLUB",        iRx: 158, iRy: 99,  oRx: 182, oRy: 115, divs: 14 },
-    { type: "upper" as SectionType, label: "UPPER DECK",  iRx: 190, iRy: 122, oRx: 248, oRy: 146, divs: 30 },
+    { type: "lower" as SectionType, label: "LOWER BOWL",  iRx: 88,  iRy: 44,  oRx: 150, oRy: 92,  divs: lowerDivs },
+    { type: "club"  as SectionType, label: "CLUB",        iRx: 158, iRy: 99,  oRx: 182, oRy: 115, divs: clubDivs  },
+    { type: "upper" as SectionType, label: "UPPER DECK",  iRx: 190, iRy: 122, oRx: 248, oRy: 146, divs: upperDivs },
   ];
 
   const outerRx   = isMSG ? 214 : 254;
@@ -170,7 +193,6 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
   const sbTop     = AR.CY - sbTotalH / 2;
   const suiteX1   = AR.CX - outerRx - SB.w - 2;
   const suiteX2   = AR.CX + outerRx + 2;
-  const upperSecBase = isMSG ? 201 : 301;
 
   const floorLabel = isNBA ? "COURT" : isNHL ? "ICE" : "STAGE";
   const floorSub   = isNBA ? "COURTSIDE" : isNHL ? "RINKSIDE" : "GA / FLOOR";
@@ -230,7 +252,7 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
                 <text key={i} x={x} y={y + 2.5} textAnchor="middle" fontSize="5.5"
                   fill={INK} fontFamily="system-ui" fontWeight="700"
                   style={{ pointerEvents: "none", userSelect: "none" }}
-                >{101 + i}</text>
+                >{lowerSecBase + i}</text>
               );
             })}
             {/* Section numbers — upper ring (every other) */}
@@ -505,12 +527,25 @@ function GoalPost({ x, flip }: { x: number; flip?: boolean }) {
   );
 }
 
+// ── Per-stadium NFL section numbers (top sideline / bottom sideline labels) ───
+const NFL_VENUE: Record<string, { top: number[]; bot: number[]; openEndLeft?: boolean }> = {
+  "AT&T Stadium":    { top: [102, 108, 114, 119, 125], bot: [220, 226, 232, 238, 244] },
+  "MetLife Stadium": { top: [109, 115, 121, 127, 133], bot: [310, 318, 326, 334, 342] },
+  "Lumen Field":     { top: [105, 111, 116, 122, 128], bot: [305, 313, 321, 329, 337], openEndLeft: true },
+  "M&T Bank Stadium":{ top: [106, 112, 118, 124, 130], bot: [201, 207, 213, 219, 225] },
+  "SoFi Stadium":    { top: [107, 113, 119, 125, 131], bot: [215, 221, 227, 233, 239] },
+  "Nissan Stadium":  { top: [103, 109, 115, 121, 127], bot: [215, 221, 227, 233, 239] },
+  "Rose Bowl":       { top: [10,  15,  20,  25,  30 ], bot: [60,  65,  70,  75,  80 ] },
+};
+const DEFAULT_NFL = { top: [103, 110, 118, 126, 133], bot: [310, 318, 326, 334, 342] };
+
 function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, venue = "", showBadges, minByType, countByType }: MapProps) {
   const lowerMidY_top = NFY - 14;
   const lowerMidY_bot = NFY + NFL_FIELD.h + 14;
-  const isATT = venue === "AT&T Stadium";
-  const topSecNums = isATT ? [102, 108, 114, 119, 125] : [103, 110, 118, 126, 133];
-  const botSecNums = isATT ? [220, 226, 232, 238, 244] : [310, 318, 326, 334, 342];
+  const nflCfg = NFL_VENUE[venue] ?? DEFAULT_NFL;
+  const topSecNums = nflCfg.top;
+  const botSecNums = nflCfg.bot;
+  const isOpenEndLeft = nflCfg.openEndLeft ?? false;   // Lumen Field open north end
   const sideSecX = topSecNums.map((_, i) => NFX + EZ_W + playW * (i + 1) / (topSecNums.length + 1));
 
   return (
@@ -649,6 +684,31 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         fill="rgba(255,255,255,0.75)" fontFamily="system-ui" fontWeight="800" letterSpacing="0.5"
         style={{ pointerEvents: "none", userSelect: "none" }}>FIELD LEVEL</text>
 
+      {/* Lumen Field: open north end — overlay hatched zone on left endzone seating */}
+      {isOpenEndLeft && (() => {
+        const maxPad = 82; // upper band pad
+        const bx = NFX - maxPad, by = NFY - maxPad, bh = NFL_FIELD.h + maxPad * 2;
+        const openW = maxPad + EZ_W;
+        return (
+          <g style={{ pointerEvents: "none" }}>
+            {/* Wash out the left endzone seating bands */}
+            <rect x={bx} y={by} width={openW} height={bh} rx={4}
+              fill="#f8fafc" opacity={0.75} />
+            {/* Diagonal hatch marks to indicate "no seating" */}
+            {Array.from({ length: 8 }, (_, i) => {
+              const yy = by + (bh * i) / 7;
+              return <line key={i} x1={bx} y1={yy} x2={bx + openW} y2={yy - 28}
+                stroke="#94a3b8" strokeWidth="0.8" opacity={0.5} />;
+            })}
+            {/* Label */}
+            <text x={bx + openW / 2} y={NF.CY} textAnchor="middle" fontSize="5.5"
+              fill="#64748b" fontFamily="system-ui" fontWeight="700" letterSpacing="0.5"
+              transform={`rotate(-90, ${bx + openW / 2}, ${NF.CY})`}
+              style={{ userSelect: "none" }}>OPEN END</text>
+          </g>
+        );
+      })()}
+
       {showBadges && minByType && countByType && (
         <>
           <PriceBadge x={NF.CX} y={NF.CY} count={countByType.floor} min={minByType.floor} active={activeSectionTypes.includes("floor")} />
@@ -705,7 +765,28 @@ const MLB_R = {
   wall:    260,
 };
 
-// 25 sections — matches real Yankee Stadium lower deck count
+// ── Per-ballpark data (real field dimensions + unique features) ───────────────
+interface BallparkCfg {
+  lf: string; lcf: string; cf: string; rcf: string; rf: string;
+  secCount: number;         // lower-bowl section count
+  showMonumentPark: boolean;
+  hasGreenMonster: boolean; // Fenway — 37-ft left-field wall
+  hasIvyWall: boolean;      // Wrigley — ivy-covered brick outfield wall
+}
+const BALLPARK_DATA: Record<string, BallparkCfg> = {
+  "Yankee Stadium": { lf: "318′", lcf: "399′", cf: "408′", rcf: "385′", rf: "314′", secCount: 25, showMonumentPark: true,  hasGreenMonster: false, hasIvyWall: false },
+  "Fenway Park":    { lf: "310′", lcf: "379′", cf: "390′", rcf: "380′", rf: "302′", secCount: 20, showMonumentPark: false, hasGreenMonster: true,  hasIvyWall: false },
+  "Wrigley Field":  { lf: "355′", lcf: "368′", cf: "400′", rcf: "368′", rf: "353′", secCount: 22, showMonumentPark: false, hasGreenMonster: false, hasIvyWall: true  },
+  "Citi Field":     { lf: "335′", lcf: "379′", cf: "408′", rcf: "383′", rf: "330′", secCount: 23, showMonumentPark: false, hasGreenMonster: false, hasIvyWall: false },
+};
+const DEFAULT_BALLPARK: BallparkCfg = { lf: "—", lcf: "—", cf: "—", rcf: "—", rf: "—", secCount: 25, showMonumentPark: false, hasGreenMonster: false, hasIvyWall: false };
+
+// section dividers are computed per-venue based on secCount
+function getMlbDivs(secCount: number) {
+  return Array.from({ length: secCount + 1 }, (_, i) => FAN_S + i * (FAN_E - FAN_S) / secCount);
+}
+
+// 25 sections — default (overridden per-venue via BALLPARK_DATA)
 const MLB_SEC_COUNT = 25;
 const MLB_DIVS = Array.from({ length: MLB_SEC_COUNT + 1 }, (_, i) => FAN_S + i * (FAN_E - FAN_S) / MLB_SEC_COUNT);
 
@@ -717,6 +798,9 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
   const b2 = { x: cx,     y: cy - 2 * d };
   const b3 = { x: cx - d, y: cy - d };
   const pm = { x: cx,     y: cy - 38 };
+
+  const bp     = BALLPARK_DATA[venue] ?? DEFAULT_BALLPARK;
+  const divs   = getMlbDivs(bp.secCount);
 
   const mkZoneStroke = (t: SectionType) =>
     activeSectionTypes.includes(t) || hoveredZone === t ? CLR[t].act : "#d1d5db";
@@ -758,8 +842,8 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         onMouseLeave={() => onZoneHover(null)}
       />
 
-      {/* Section dividers — all zones */}
-      {MLB_DIVS.map((deg, i) => {
+      {/* Section dividers — all zones, per-venue count */}
+      {divs.map((deg, i) => {
         const isle = i % 5 === 0;
         const lIn  = arcPoint(cx, cy, MLB_R.lowerIn,  deg);
         const lOut = arcPoint(cx, cy, MLB_R.lowerOut, deg);
@@ -780,9 +864,9 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
       })}
 
       {/* Section numbers — lower bowl, every other */}
-      {Array.from({ length: MLB_SEC_COUNT }, (_, i) => {
+      {Array.from({ length: bp.secCount }, (_, i) => {
         if (i % 2 !== 0) return null;
-        const deg = FAN_S + (i + 0.5) * (FAN_E - FAN_S) / MLB_SEC_COUNT;
+        const deg = FAN_S + (i + 0.5) * (FAN_E - FAN_S) / bp.secCount;
         const midR = (MLB_R.lowerIn + MLB_R.lowerOut) / 2;
         const pt = arcPoint(cx, cy, midR, deg);
         return (
@@ -821,11 +905,58 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         onMouseLeave={() => onZoneHover(null)}
       />
 
-      {/* Distance markers — Yankee Stadium */}
-      {[
-        { deg: (FAN_S + FAN_E) / 2, r: MLB_R.wall - 10, text: "408′" },
-        { deg: FAN_S + 22,           r: MLB_R.wall - 10, text: "318′" },
-        { deg: FAN_E - 18,           r: MLB_R.wall - 10, text: "314′" },
+      {/* ── Fenway Park: Green Monster (37-ft left field wall at 310 ft) ── */}
+      {bp.hasGreenMonster && (() => {
+        // The Monster runs ~from LF foul line into left-center (FAN_S to FAN_S+28°)
+        // At 310 ft vs 390 ft CF → ~79% of wall radius
+        const gmR  = MLB_R.wall * 0.79;
+        const gmS  = FAN_S;
+        const gmE  = FAN_S + 28;
+        const mid  = (gmS + gmE) / 2;
+        const lbl  = arcPoint(cx, cy, gmR - 2, mid);
+        return (
+          <g style={{ pointerEvents: "none" }}>
+            {/* Thick wall strip */}
+            <path d={arcBandPath(cx, cy, gmR - 4, gmR + 7, gmS, gmE)}
+              fill="#15803d" stroke="#166534" strokeWidth="1" opacity={0.92} />
+            {/* Manual scoreboard panel on Monster */}
+            {(() => {
+              const sp = arcPoint(cx, cy, gmR + 1, gmS + 12);
+              return <rect x={sp.x - 5} y={sp.y - 3} width={10} height={7} rx={1}
+                fill="#1e293b" stroke="#374151" strokeWidth="0.5" />;
+            })()}
+            {/* Label */}
+            <text x={lbl.x - 4} y={lbl.y + 2} textAnchor="middle" fontSize="4.5"
+              fill="rgba(255,255,255,0.85)" fontFamily="system-ui" fontWeight="800"
+              transform={`rotate(-52, ${lbl.x - 4}, ${lbl.y + 2})`}
+              style={{ userSelect: "none" }}>GREEN MONSTER 37′</text>
+          </g>
+        );
+      })()}
+
+      {/* ── Wrigley Field: ivy-covered brick outfield wall + manual scoreboard ── */}
+      {bp.hasIvyWall && (() => {
+        const cfPt = arcPoint(cx, cy, MLB_R.wall - 10, (FAN_S + FAN_E) / 2);
+        return (
+          <g style={{ pointerEvents: "none" }}>
+            {/* Ivy wall — thick green arc along full outfield perimeter */}
+            <path d={arcBandPath(cx, cy, MLB_R.wall - 6, MLB_R.wall + 8, FAN_S, FAN_E)}
+              fill="#15803d" stroke="#166534" strokeWidth="0.8" opacity={0.80} />
+            {/* Manual scoreboard in CF */}
+            <rect x={cfPt.x - 9} y={cfPt.y - 5} width={18} height={11} rx={1.5}
+              fill="#1e293b" stroke="#374151" strokeWidth="0.6" />
+            <text x={cfPt.x} y={cfPt.y + 2} textAnchor="middle" fontSize="3.8"
+              fill="rgba(255,255,255,0.65)" fontFamily="system-ui" fontWeight="700"
+              style={{ userSelect: "none" }}>SCOREBOARD</text>
+          </g>
+        );
+      })()}
+
+      {/* Distance markers — real per-venue dimensions */}
+      {bp.cf !== "—" && [
+        { deg: (FAN_S + FAN_E) / 2, r: MLB_R.wall - 12, text: bp.cf  },
+        { deg: FAN_S + 20,          r: MLB_R.wall - 12, text: bp.lf  },
+        { deg: FAN_E - 16,          r: MLB_R.wall - 12, text: bp.rf  },
       ].map(({ deg, r, text }) => {
         const pt = arcPoint(cx, cy, r, deg);
         return (
@@ -835,8 +966,8 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         );
       })}
 
-      {/* Monument Park */}
-      {(() => {
+      {/* Monument Park (Yankee Stadium only) */}
+      {bp.showMonumentPark && (() => {
         const pt = arcPoint(BL.HX, BL.HY, MLB_R.wall - 20, (FAN_S + FAN_E) / 2);
         return (
           <g style={{ pointerEvents: "none" }}>
