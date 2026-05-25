@@ -39,11 +39,10 @@ const CLR: Record<SectionType, { base: string; act: string; dim: string }> = {
   suite: { base: "#f59e0b", act: "#d97706", dim: "rgba(245,158,11,0.25)" },
 };
 
-// Dark map background (matches SeatGeek's dark map)
-const MAP_BG = "#0f172a";
-const SECTION_STROKE = "#0f172a";
-const INK = "rgba(255,255,255,0.85)";
-const INK_DIM = "rgba(255,255,255,0.4)";
+const MAP_BG = "#f8fafc";
+const SECTION_STROKE = "#f8fafc";
+const INK = "rgba(15,23,42,0.72)";
+const INK_DIM = "rgba(15,23,42,0.28)";
 
 const GRS = { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.25)" };
 
@@ -232,7 +231,7 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
 
       {/* Outer stadium silhouette */}
       <ellipse cx={AR.CX} cy={AR.CY} rx={outerRx + 14} ry={outerRy + 10}
-        fill="#1e293b" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+        fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1" />
 
       {/* Seating rings — each section is its own polygon */}
       {[...ARENA_RINGS].reverse().map((ring) => {
@@ -580,7 +579,7 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
 
       {/* Outer stadium silhouette */}
       <rect x={NFX - 90} y={NFY - 90} width={NFL_FIELD.w + 180} height={NFL_FIELD.h + 180} rx={22}
-        fill="#1e293b" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+        fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1" />
 
       {/* Individual section blocks for each band — top sideline, bottom sideline, end zones */}
       {[...NFL_BANDS].reverse().map((band) => {
@@ -963,7 +962,7 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
 
       {/* Outer ballpark silhouette */}
       <path d={sectorPath(cx, cy, MLB_R.upperOut + 16, FAN_S - 4, FAN_E + 4)}
-        fill="#1e293b" style={{ pointerEvents: "none" }} />
+        fill="#e2e8f0" style={{ pointerEvents: "none" }} />
 
       {/* ── Individual section polygons — outer to inner ── */}
       {renderZone("upper", MLB_R.upperIn, MLB_R.upperOut, upperCount)}
