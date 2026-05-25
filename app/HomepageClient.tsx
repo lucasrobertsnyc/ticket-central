@@ -31,7 +31,7 @@ function extractLocations(events: Event[]): { label: string; match: string }[] {
       locs.push({ label: stateNames[state] ?? state, match: state });
     }
   }
-  return locs;
+  return locs.sort((a, b) => a.label.localeCompare(b.label));
 }
 
 const SPORT_GENRES = new Set(["NFL", "NBA", "MLB", "NHL", "MLS"]);
