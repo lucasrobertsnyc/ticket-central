@@ -19,7 +19,7 @@ export default function SearchBar({ value, onChange, resultCount }: Props) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search by section, row, or platform…"
-        className="w-full bg-white text-gray-900 placeholder-gray-400 border border-gray-200 rounded-xl pl-9 pr-36 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition shadow-sm"
+        className="w-full bg-white text-gray-900 placeholder-gray-400 border border-gray-200 rounded-xl pl-9 pr-24 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition shadow-sm"
       />
       <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
         <span className="text-gray-400 text-xs tabular-nums">

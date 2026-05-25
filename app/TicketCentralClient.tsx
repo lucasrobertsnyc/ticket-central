@@ -114,7 +114,7 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
             All events
           </Link>
 
-          <div className="ml-auto">
+          <div className="ml-auto w-64 sm:w-72 flex-shrink-0">
             <SearchBar
               value={filters.search}
               onChange={(search) => setFilters((f) => ({ ...f, search }))}
