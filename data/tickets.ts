@@ -173,7 +173,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Alternative",
     lowestAllInPrice: 74,
     listingCount: 20,
-    imageUrl: "https://cdn-images.dzcdn.net/images/artist/d0e4bc621b35c4d9e5e2cce2b4b57d7e/1000x1000-000000-80-0-0.jpg",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/8eab1a9a644889aabaca1e193e05f984/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-015",
