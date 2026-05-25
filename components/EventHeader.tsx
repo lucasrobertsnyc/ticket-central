@@ -126,7 +126,7 @@ function ConcertHeader({ event, totalListings }: { event: Event; totalListings: 
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <Link href="/" className="hover:text-white/60 transition">Concerts</Link>
+          <Link href="/?category=concerts" className="hover:text-white/60 transition">Concerts</Link>
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
@@ -220,7 +220,7 @@ function SportsHeader({ event, totalListings }: { event: Event; totalListings: n
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <Link href="/" className="hover:text-white/60 transition">Sports</Link>
+          <Link href="/?category=sports" className="hover:text-white/60 transition">Sports</Link>
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import type { Event } from "@/types/ticket";
 import EventCard from "@/components/EventCard";
 
@@ -43,9 +44,11 @@ type SortBy   = "date" | "price" | "location";
 
 export default function HomepageClient({ events }: Props) {
   const [isPending, startTransition] = useTransition();
+  const searchParams = useSearchParams();
+  const initialCategory = (searchParams.get("category") ?? "all") as Category;
   const [artist, setArtist]     = useState("");
   const [location, setLocation] = useState("");
-  const [category, setCategory] = useState<Category>("all");
+  const [category, setCategory] = useState<Category>(initialCategory);
   const [league, setLeague]     = useState<League | "">("");
   const [genre, setGenre]       = useState<string>("");
   const [sortBy, setSortBy]     = useState<SortBy>("date");
