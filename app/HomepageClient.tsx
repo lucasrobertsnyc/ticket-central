@@ -302,6 +302,7 @@ export default function HomepageClient({ events }: Props) {
             All prices include fees and taxes &middot; Not affiliated with any ticketing platform
           </p>
         </div>
+        <p className="text-center text-gray-300 text-xs mt-3">Impact-Site-Verification: 6e2fdb0a-6a37-4a7e-bc52-8c57a3f3445f</p>
       </footer>
     </div>
   );
