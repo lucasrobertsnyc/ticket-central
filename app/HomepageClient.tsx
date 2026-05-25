@@ -18,10 +18,10 @@ function extractLocations(events: Event[]): { label: string; match: string }[] {
   const seen = new Set<string>();
   const locs: { label: string; match: string }[] = [];
   const stateNames: Record<string, string> = {
-    CA: "California", CO: "Colorado", FL: "Florida", GA: "Georgia",
-    IL: "Illinois",   MA: "Massachusetts", MO: "Missouri", NC: "North Carolina",
-    NV: "Nevada",     NY: "New York",      PA: "Pennsylvania", TN: "Tennessee",
-    TX: "Texas",
+    CA: "California", CO: "Colorado", DC: "Washington D.C.", FL: "Florida",
+    GA: "Georgia",    IL: "Illinois", MA: "Massachusetts",   MO: "Missouri",
+    NC: "North Carolina", NJ: "New Jersey", NV: "Nevada",    NY: "New York",
+    PA: "Pennsylvania",   TN: "Tennessee",  TX: "Texas",      WA: "Washington",
   };
   for (const e of events) {
     const state = e.city.split(", ")[1];

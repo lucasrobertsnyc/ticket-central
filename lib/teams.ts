@@ -33,6 +33,19 @@ export const TEAM_INFO: Record<string, TeamInfo> = {
   "Penguins":     { abbr: "PIT", primary: "#000000", secondary: "#FCB514", espnId: "pit", league: "nhl" },
   "Bruins":       { abbr: "BOS", primary: "#FCB514", secondary: "#000000", espnId: "bos", league: "nhl" },
   "Maple Leafs":  { abbr: "TOR", primary: "#003E7E", secondary: "#FFFFFF", espnId: "tor", league: "nhl" },
+  "Capitals":     { abbr: "WSH", primary: "#041E42", secondary: "#C8102E", espnId: "wsh", league: "nhl" },
+  "Blackhawks":   { abbr: "CHI", primary: "#CF0A2C", secondary: "#000000", espnId: "chi", league: "nhl" },
+  // NFL (additional)
+  "Seahawks":     { abbr: "SEA", primary: "#002244", secondary: "#69BE28", espnId: "sea", league: "nfl" },
+  "Patriots":     { abbr: "NE",  primary: "#002244", secondary: "#C60C30", espnId: "ne",  league: "nfl" },
+  "Ravens":       { abbr: "BAL", primary: "#241773", secondary: "#9E7C0C", espnId: "bal", league: "nfl" },
+  "Bengals":      { abbr: "CIN", primary: "#FB4F14", secondary: "#000000", espnId: "cin", league: "nfl" },
+  // MLB (additional)
+  "Cardinals":    { abbr: "STL", primary: "#C41E3A", secondary: "#0C2340", espnId: "stl", league: "mlb" },
+  "Mets":         { abbr: "NYM", primary: "#002D72", secondary: "#FF5910", espnId: "nym", league: "mlb" },
+  // NBA (additional)
+  "Suns":         { abbr: "PHX", primary: "#1D1160", secondary: "#E56020", espnId: "phx", league: "nba" },
+  "Nuggets":      { abbr: "DEN", primary: "#0E2240", secondary: "#FEC524", espnId: "den", league: "nba" },
 };
 
 export const SPORT_GENRES = new Set(["NFL", "NBA", "MLB", "NHL", "MLS"]);
