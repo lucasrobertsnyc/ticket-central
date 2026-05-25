@@ -323,7 +323,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop",
     lowestAllInPrice: 89,
     listingCount: 22,
-    imageUrl: "https://picsum.photos/seed/ed-sheeran-sofi-2026/800/400",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/d6bb84390641d8ae9118228d9544e53d/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-027",
@@ -335,7 +335,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Rock",
     lowestAllInPrice: 72,
     listingCount: 20,
-    imageUrl: "https://picsum.photos/seed/gnr-rosebowl-2026/800/400",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/c62989722e38d7a2ab18afde3c19bc5c/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-028",
@@ -347,7 +347,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Folk",
     lowestAllInPrice: 65,
     listingCount: 17,
-    imageUrl: "https://picsum.photos/seed/noah-kahan-fenway-2026/800/400",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/e43ae0c4354a6afe58ae0b0cfad05f19/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-029",
@@ -359,7 +359,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop",
     lowestAllInPrice: 78,
     listingCount: 19,
-    imageUrl: "https://picsum.photos/seed/olivia-rodrigo-msg-2026/800/400",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/2c9e480317183c037eaebcd7ba96daf4/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-030",
@@ -371,7 +371,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop",
     lowestAllInPrice: 81,
     listingCount: 18,
-    imageUrl: "https://picsum.photos/seed/dua-lipa-barclays-2026/800/400",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/7375742a46dbebb6efc0ae362e18eb24/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-031",
@@ -383,7 +383,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Country",
     lowestAllInPrice: 58,
     listingCount: 18,
-    imageUrl: "https://picsum.photos/seed/zach-bryan-nissan-2026/800/400",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/552d448a0c2cb72f40c3de3a384949bd/1000x1000-000000-80-0-0.jpg",
   },
   {
     id: "evt-032",
@@ -395,7 +395,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Pop",
     lowestAllInPrice: 88,
     listingCount: 20,
-    imageUrl: "https://picsum.photos/seed/harry-styles-united-2026/800/400",
+    imageUrl: "https://cdn-images.dzcdn.net/images/artist/1151dba9b3edc0633adf35b64c21713f/1000x1000-000000-80-0-0.jpg",
   },
 
   // ── More Sports ──────────────────────────────────────────────────────────────
@@ -3101,5 +3101,195 @@ export const MOCK_LISTINGS: Record<string, TicketListing[]> = {
     { id: "lst-025-08", platform: "Ticketmaster", section: "Section 102", sectionType: "lower", row: "Row C", quantity: 2, basePrice: 255, fees: 51, tax: 19, allInTotal: 325 },
     { id: "lst-025-09", platform: "StubHub",     section: "Section 103",  sectionType: "lower", row: "Row A", quantity: 2, basePrice: 335, fees: 67, tax: 26, allInTotal: 428 },
     { id: "lst-025-10", platform: "AXS",         section: "Rinkside",     sectionType: "floor", row: "Row 1", quantity: 2, basePrice: 620, fees: 124,tax: 47, allInTotal: 791, dealerNotes: "Rinkside seats — glass adjacent" },
+  ],
+
+  // ── evt-026: Ed Sheeran @ SoFi Stadium ───────────────────────────────────────
+  "evt-026": [
+    { id: "lst-026-01", platform: "GameTime",     section: "Section 524",  sectionType: "upper", row: "Row L", quantity: 2, basePrice: 71,  fees: 11, tax: 7,  allInTotal: 89 },
+    { id: "lst-026-02", platform: "TickPick",     section: "Section 511",  sectionType: "upper", row: "Row H", quantity: 4, basePrice: 82,  fees: 0,  tax: 6,  allInTotal: 88, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-026-03", platform: "SeatGeek",     section: "Section 503",  sectionType: "upper", row: "Row E", quantity: 2, basePrice: 95,  fees: 15, tax: 8,  allInTotal: 118 },
+    { id: "lst-026-04", platform: "Vivid Seats",  section: "Club 241",     sectionType: "club",  row: "Row C", quantity: 2, basePrice: 128, fees: 26, tax: 10, allInTotal: 164 },
+    { id: "lst-026-05", platform: "StubHub",      section: "Club 255",     sectionType: "club",  row: "Row B", quantity: 2, basePrice: 142, fees: 28, tax: 11, allInTotal: 181 },
+    { id: "lst-026-06", platform: "SeatGeek",     section: "Section 132",  sectionType: "lower", row: "Row J", quantity: 2, basePrice: 178, fees: 36, tax: 14, allInTotal: 228 },
+    { id: "lst-026-07", platform: "TickPick",     section: "Section 118",  sectionType: "lower", row: "Row G", quantity: 2, basePrice: 195, fees: 0,  tax: 15, allInTotal: 210, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-026-08", platform: "Ticketmaster", section: "Section 108",  sectionType: "lower", row: "Row D", quantity: 2, basePrice: 235, fees: 47, tax: 18, allInTotal: 300 },
+    { id: "lst-026-09", platform: "AXS",          section: "Floor GA",     sectionType: "floor", row: "GA",    quantity: 2, basePrice: 298, fees: 60, tax: 23, allInTotal: 381, dealerNotes: "General admission — standing pit" },
+    { id: "lst-026-10", platform: "StubHub",      section: "Floor GA",     sectionType: "floor", row: "GA",    quantity: 4, basePrice: 265, fees: 53, tax: 20, allInTotal: 338 },
+  ],
+
+  // ── evt-027: Guns N' Roses @ Rose Bowl ───────────────────────────────────────
+  "evt-027": [
+    { id: "lst-027-01", platform: "GameTime",     section: "Section 32-L", sectionType: "upper", row: "Row 20",quantity: 2, basePrice: 57,  fees: 9,  tax: 6,  allInTotal: 72 },
+    { id: "lst-027-02", platform: "TickPick",     section: "Section 18-L", sectionType: "upper", row: "Row 15",quantity: 4, basePrice: 65,  fees: 0,  tax: 5,  allInTotal: 70, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-027-03", platform: "SeatGeek",     section: "Section 24-U", sectionType: "upper", row: "Row 8", quantity: 2, basePrice: 78,  fees: 12, tax: 6,  allInTotal: 96 },
+    { id: "lst-027-04", platform: "Vivid Seats",  section: "Section 5-L",  sectionType: "club",  row: "Row 4", quantity: 2, basePrice: 108, fees: 22, tax: 8,  allInTotal: 138 },
+    { id: "lst-027-05", platform: "StubHub",      section: "Section 8-L",  sectionType: "club",  row: "Row 2", quantity: 2, basePrice: 122, fees: 24, tax: 9,  allInTotal: 155 },
+    { id: "lst-027-06", platform: "SeatGeek",     section: "Section 2-L",  sectionType: "lower", row: "Row 12",quantity: 2, basePrice: 155, fees: 31, tax: 12, allInTotal: 198 },
+    { id: "lst-027-07", platform: "TickPick",     section: "Section 14-L", sectionType: "lower", row: "Row 8", quantity: 2, basePrice: 172, fees: 0,  tax: 13, allInTotal: 185, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-027-08", platform: "AXS",          section: "Pit GA",       sectionType: "floor", row: "GA",    quantity: 2, basePrice: 248, fees: 50, tax: 19, allInTotal: 317, dealerNotes: "General admission — standing pit" },
+  ],
+
+  // ── evt-028: Noah Kahan @ Fenway Park ────────────────────────────────────────
+  "evt-028": [
+    { id: "lst-028-01", platform: "GameTime",     section: "Bleachers 42", sectionType: "upper", row: "Row 12",quantity: 2, basePrice: 51,  fees: 8,  tax: 6,  allInTotal: 65 },
+    { id: "lst-028-02", platform: "TickPick",     section: "Bleachers 38", sectionType: "upper", row: "Row 9", quantity: 4, basePrice: 58,  fees: 0,  tax: 5,  allInTotal: 63, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-028-03", platform: "SeatGeek",     section: "Grandstand 7", sectionType: "upper", row: "Row 5", quantity: 2, basePrice: 68,  fees: 11, tax: 6,  allInTotal: 85 },
+    { id: "lst-028-04", platform: "Vivid Seats",  section: "Pavilion Box", sectionType: "club",  row: "Row B", quantity: 2, basePrice: 95,  fees: 19, tax: 7,  allInTotal: 121 },
+    { id: "lst-028-05", platform: "StubHub",      section: "Field Box 68", sectionType: "lower", row: "Row G", quantity: 2, basePrice: 118, fees: 24, tax: 9,  allInTotal: 151 },
+    { id: "lst-028-06", platform: "SeatGeek",     section: "Field Box 52", sectionType: "lower", row: "Row D", quantity: 2, basePrice: 138, fees: 28, tax: 11, allInTotal: 177 },
+    { id: "lst-028-07", platform: "TickPick",     section: "Field Box 41", sectionType: "lower", row: "Row B", quantity: 2, basePrice: 155, fees: 0,  tax: 12, allInTotal: 167, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-028-08", platform: "AXS",          section: "Floor GA",     sectionType: "floor", row: "GA",    quantity: 2, basePrice: 198, fees: 40, tax: 15, allInTotal: 253, dealerNotes: "General admission — infield area" },
+  ],
+
+  // ── evt-029: Olivia Rodrigo @ Madison Square Garden ──────────────────────────
+  "evt-029": [
+    { id: "lst-029-01", platform: "GameTime",     section: "Section 401",  sectionType: "upper", row: "Row M", quantity: 2, basePrice: 62,  fees: 10, tax: 6,  allInTotal: 78 },
+    { id: "lst-029-02", platform: "TickPick",     section: "Section 416",  sectionType: "upper", row: "Row J", quantity: 4, basePrice: 71,  fees: 0,  tax: 6,  allInTotal: 77, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-029-03", platform: "SeatGeek",     section: "Section 409",  sectionType: "upper", row: "Row F", quantity: 2, basePrice: 85,  fees: 13, tax: 7,  allInTotal: 105 },
+    { id: "lst-029-04", platform: "Vivid Seats",  section: "Section 201",  sectionType: "club",  row: "Row D", quantity: 2, basePrice: 125, fees: 25, tax: 10, allInTotal: 160 },
+    { id: "lst-029-05", platform: "StubHub",      section: "Section 218",  sectionType: "club",  row: "Row B", quantity: 2, basePrice: 142, fees: 28, tax: 11, allInTotal: 181 },
+    { id: "lst-029-06", platform: "SeatGeek",     section: "Section 112",  sectionType: "lower", row: "Row K", quantity: 2, basePrice: 172, fees: 34, tax: 13, allInTotal: 219 },
+    { id: "lst-029-07", platform: "TickPick",     section: "Section 104",  sectionType: "lower", row: "Row G", quantity: 2, basePrice: 195, fees: 0,  tax: 15, allInTotal: 210, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-029-08", platform: "Ticketmaster", section: "Section 101",  sectionType: "lower", row: "Row C", quantity: 2, basePrice: 238, fees: 48, tax: 18, allInTotal: 304 },
+    { id: "lst-029-09", platform: "AXS",          section: "Floor GA",     sectionType: "floor", row: "GA",    quantity: 2, basePrice: 295, fees: 59, tax: 23, allInTotal: 377, dealerNotes: "General admission — standing floor" },
+  ],
+
+  // ── evt-030: Dua Lipa @ Barclays Center ──────────────────────────────────────
+  "evt-030": [
+    { id: "lst-030-01", platform: "GameTime",     section: "Section 228",  sectionType: "upper", row: "Row L", quantity: 2, basePrice: 64,  fees: 10, tax: 7,  allInTotal: 81 },
+    { id: "lst-030-02", platform: "TickPick",     section: "Section 211",  sectionType: "upper", row: "Row H", quantity: 4, basePrice: 73,  fees: 0,  tax: 6,  allInTotal: 79, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-030-03", platform: "SeatGeek",     section: "Section 219",  sectionType: "upper", row: "Row E", quantity: 2, basePrice: 88,  fees: 14, tax: 7,  allInTotal: 109 },
+    { id: "lst-030-04", platform: "Vivid Seats",  section: "Section 16",   sectionType: "club",  row: "Row C", quantity: 2, basePrice: 118, fees: 24, tax: 9,  allInTotal: 151 },
+    { id: "lst-030-05", platform: "StubHub",      section: "Section 22",   sectionType: "club",  row: "Row B", quantity: 2, basePrice: 135, fees: 27, tax: 10, allInTotal: 172 },
+    { id: "lst-030-06", platform: "SeatGeek",     section: "Section 107",  sectionType: "lower", row: "Row J", quantity: 2, basePrice: 165, fees: 33, tax: 13, allInTotal: 211 },
+    { id: "lst-030-07", platform: "TickPick",     section: "Section 114",  sectionType: "lower", row: "Row F", quantity: 2, basePrice: 185, fees: 0,  tax: 14, allInTotal: 199, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-030-08", platform: "Ticketmaster", section: "Section 102",  sectionType: "lower", row: "Row C", quantity: 2, basePrice: 225, fees: 45, tax: 17, allInTotal: 287 },
+    { id: "lst-030-09", platform: "AXS",          section: "Floor GA",     sectionType: "floor", row: "GA",    quantity: 2, basePrice: 278, fees: 56, tax: 21, allInTotal: 355, dealerNotes: "General admission — standing floor" },
+  ],
+
+  // ── evt-031: Zach Bryan @ Nissan Stadium ─────────────────────────────────────
+  "evt-031": [
+    { id: "lst-031-01", platform: "GameTime",     section: "Section 324",  sectionType: "upper", row: "Row N", quantity: 2, basePrice: 46,  fees: 7,  tax: 5,  allInTotal: 58 },
+    { id: "lst-031-02", platform: "TickPick",     section: "Section 308",  sectionType: "upper", row: "Row J", quantity: 4, basePrice: 53,  fees: 0,  tax: 4,  allInTotal: 57, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-031-03", platform: "SeatGeek",     section: "Section 317",  sectionType: "upper", row: "Row G", quantity: 2, basePrice: 65,  fees: 10, tax: 5,  allInTotal: 80 },
+    { id: "lst-031-04", platform: "Vivid Seats",  section: "Club 212",     sectionType: "club",  row: "Row C", quantity: 2, basePrice: 95,  fees: 19, tax: 7,  allInTotal: 121 },
+    { id: "lst-031-05", platform: "StubHub",      section: "Club 225",     sectionType: "club",  row: "Row B", quantity: 2, basePrice: 108, fees: 22, tax: 8,  allInTotal: 138 },
+    { id: "lst-031-06", platform: "SeatGeek",     section: "Section 118",  sectionType: "lower", row: "Row K", quantity: 2, basePrice: 128, fees: 26, tax: 10, allInTotal: 164 },
+    { id: "lst-031-07", platform: "TickPick",     section: "Section 126",  sectionType: "lower", row: "Row G", quantity: 2, basePrice: 145, fees: 0,  tax: 11, allInTotal: 156, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-031-08", platform: "AXS",          section: "Pit GA",       sectionType: "floor", row: "GA",    quantity: 2, basePrice: 225, fees: 45, tax: 17, allInTotal: 287, dealerNotes: "General admission standing pit" },
+  ],
+
+  // ── evt-032: Harry Styles @ United Center ────────────────────────────────────
+  "evt-032": [
+    { id: "lst-032-01", platform: "GameTime",     section: "Section 325",  sectionType: "upper", row: "Row M", quantity: 2, basePrice: 70,  fees: 11, tax: 7,  allInTotal: 88 },
+    { id: "lst-032-02", platform: "TickPick",     section: "Section 311",  sectionType: "upper", row: "Row J", quantity: 4, basePrice: 80,  fees: 0,  tax: 6,  allInTotal: 86, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-032-03", platform: "SeatGeek",     section: "Section 318",  sectionType: "upper", row: "Row F", quantity: 2, basePrice: 92,  fees: 15, tax: 7,  allInTotal: 114 },
+    { id: "lst-032-04", platform: "Vivid Seats",  section: "Section 214",  sectionType: "club",  row: "Row D", quantity: 2, basePrice: 128, fees: 26, tax: 10, allInTotal: 164 },
+    { id: "lst-032-05", platform: "StubHub",      section: "Section 222",  sectionType: "club",  row: "Row B", quantity: 2, basePrice: 145, fees: 29, tax: 11, allInTotal: 185 },
+    { id: "lst-032-06", platform: "SeatGeek",     section: "Section 108",  sectionType: "lower", row: "Row K", quantity: 2, basePrice: 178, fees: 36, tax: 14, allInTotal: 228 },
+    { id: "lst-032-07", platform: "TickPick",     section: "Section 119",  sectionType: "lower", row: "Row G", quantity: 2, basePrice: 198, fees: 0,  tax: 15, allInTotal: 213, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-032-08", platform: "Ticketmaster", section: "Section 103",  sectionType: "lower", row: "Row C", quantity: 2, basePrice: 242, fees: 48, tax: 18, allInTotal: 308 },
+    { id: "lst-032-09", platform: "AXS",          section: "Floor GA",     sectionType: "floor", row: "GA",    quantity: 2, basePrice: 305, fees: 61, tax: 23, allInTotal: 389, dealerNotes: "General admission — standing floor" },
+  ],
+
+  // ── evt-033: Giants vs. Cowboys @ MetLife Stadium ────────────────────────────
+  "evt-033": [
+    { id: "lst-033-01", platform: "GameTime",     section: "Section 342",  sectionType: "upper", row: "Row 22",quantity: 2, basePrice: 68,  fees: 10, tax: 7,  allInTotal: 85 },
+    { id: "lst-033-02", platform: "TickPick",     section: "Section 310",  sectionType: "upper", row: "Row 15",quantity: 4, basePrice: 76,  fees: 0,  tax: 6,  allInTotal: 82, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-033-03", platform: "SeatGeek",     section: "Section 328",  sectionType: "upper", row: "Row 10",quantity: 2, basePrice: 92,  fees: 15, tax: 7,  allInTotal: 114 },
+    { id: "lst-033-04", platform: "Vivid Seats",  section: "Club 244A",    sectionType: "club",  row: "Row 5", quantity: 2, basePrice: 128, fees: 26, tax: 10, allInTotal: 164 },
+    { id: "lst-033-05", platform: "StubHub",      section: "Club 250",     sectionType: "club",  row: "Row 3", quantity: 2, basePrice: 148, fees: 30, tax: 11, allInTotal: 189 },
+    { id: "lst-033-06", platform: "SeatGeek",     section: "Section 148",  sectionType: "lower", row: "Row 18",quantity: 2, basePrice: 178, fees: 36, tax: 14, allInTotal: 228 },
+    { id: "lst-033-07", platform: "TickPick",     section: "Section 133",  sectionType: "lower", row: "Row 12",quantity: 2, basePrice: 198, fees: 0,  tax: 15, allInTotal: 213, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-033-08", platform: "Ticketmaster", section: "Section 118",  sectionType: "lower", row: "Row 6", quantity: 2, basePrice: 245, fees: 49, tax: 19, allInTotal: 313 },
+    { id: "lst-033-09", platform: "AXS",          section: "Field Level",  sectionType: "floor", row: "Row 1", quantity: 2, basePrice: 395, fees: 79, tax: 30, allInTotal: 504, dealerNotes: "Front-row field level — sideline" },
+  ],
+
+  // ── evt-034: Seahawks vs. Patriots @ Lumen Field ─────────────────────────────
+  "evt-034": [
+    { id: "lst-034-01", platform: "GameTime",     section: "Section 334",  sectionType: "upper", row: "Row 18",quantity: 2, basePrice: 57,  fees: 9,  tax: 6,  allInTotal: 72 },
+    { id: "lst-034-02", platform: "TickPick",     section: "Section 318",  sectionType: "upper", row: "Row 12",quantity: 4, basePrice: 65,  fees: 0,  tax: 5,  allInTotal: 70, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-034-03", platform: "SeatGeek",     section: "Section 326",  sectionType: "upper", row: "Row 8", quantity: 2, basePrice: 78,  fees: 12, tax: 6,  allInTotal: 96 },
+    { id: "lst-034-04", platform: "Vivid Seats",  section: "Club 234",     sectionType: "club",  row: "Row 4", quantity: 2, basePrice: 115, fees: 23, tax: 9,  allInTotal: 147 },
+    { id: "lst-034-05", platform: "StubHub",      section: "Club 242",     sectionType: "club",  row: "Row 2", quantity: 2, basePrice: 132, fees: 26, tax: 10, allInTotal: 168 },
+    { id: "lst-034-06", platform: "SeatGeek",     section: "Section 140",  sectionType: "lower", row: "Row 15",quantity: 2, basePrice: 158, fees: 32, tax: 12, allInTotal: 202 },
+    { id: "lst-034-07", platform: "TickPick",     section: "Section 128",  sectionType: "lower", row: "Row 9", quantity: 2, basePrice: 178, fees: 0,  tax: 14, allInTotal: 192, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-034-08", platform: "AXS",          section: "Field Level",  sectionType: "floor", row: "Row 2", quantity: 2, basePrice: 328, fees: 66, tax: 25, allInTotal: 419, dealerNotes: "Field level — behind the bench" },
+  ],
+
+  // ── evt-035: Celtics vs. Knicks @ TD Garden ──────────────────────────────────
+  "evt-035": [
+    { id: "lst-035-01", platform: "GameTime",     section: "Section 320",  sectionType: "upper", row: "Row J", quantity: 2, basePrice: 70,  fees: 11, tax: 7,  allInTotal: 88 },
+    { id: "lst-035-02", platform: "TickPick",     section: "Section 308",  sectionType: "upper", row: "Row G", quantity: 4, basePrice: 80,  fees: 0,  tax: 6,  allInTotal: 86, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-035-03", platform: "SeatGeek",     section: "Section 314",  sectionType: "upper", row: "Row D", quantity: 2, basePrice: 95,  fees: 15, tax: 7,  allInTotal: 117 },
+    { id: "lst-035-04", platform: "Vivid Seats",  section: "Loge 12",      sectionType: "club",  row: "Row C", quantity: 2, basePrice: 142, fees: 28, tax: 11, allInTotal: 181 },
+    { id: "lst-035-05", platform: "StubHub",      section: "Loge 6",       sectionType: "club",  row: "Row A", quantity: 2, basePrice: 162, fees: 32, tax: 12, allInTotal: 206 },
+    { id: "lst-035-06", platform: "SeatGeek",     section: "Section 118",  sectionType: "lower", row: "Row K", quantity: 2, basePrice: 212, fees: 42, tax: 16, allInTotal: 270 },
+    { id: "lst-035-07", platform: "TickPick",     section: "Section 109",  sectionType: "lower", row: "Row G", quantity: 2, basePrice: 238, fees: 0,  tax: 18, allInTotal: 256, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-035-08", platform: "Ticketmaster", section: "Section 103",  sectionType: "lower", row: "Row C", quantity: 2, basePrice: 295, fees: 59, tax: 23, allInTotal: 377 },
+    { id: "lst-035-09", platform: "AXS",          section: "Courtside",    sectionType: "floor", row: "Row 1", quantity: 2, basePrice: 748, fees: 150,tax: 57, allInTotal: 955, dealerNotes: "Courtside seats — front row" },
+  ],
+
+  // ── evt-036: Cubs vs. Cardinals @ Wrigley Field ──────────────────────────────
+  "evt-036": [
+    { id: "lst-036-01", platform: "GameTime",     section: "Section 436",  sectionType: "upper", row: "Row 12",quantity: 2, basePrice: 41,  fees: 6,  tax: 5,  allInTotal: 52 },
+    { id: "lst-036-02", platform: "TickPick",     section: "Section 422",  sectionType: "upper", row: "Row 9", quantity: 4, basePrice: 47,  fees: 0,  tax: 4,  allInTotal: 51, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-036-03", platform: "SeatGeek",     section: "Section 418",  sectionType: "upper", row: "Row 6", quantity: 2, basePrice: 58,  fees: 9,  tax: 5,  allInTotal: 72 },
+    { id: "lst-036-04", platform: "Vivid Seats",  section: "Bleachers",    sectionType: "club",  row: "Row 4", quantity: 2, basePrice: 88,  fees: 18, tax: 7,  allInTotal: 113 },
+    { id: "lst-036-05", platform: "StubHub",      section: "Section 226",  sectionType: "lower", row: "Row M", quantity: 2, basePrice: 112, fees: 22, tax: 9,  allInTotal: 143 },
+    { id: "lst-036-06", platform: "SeatGeek",     section: "Section 218",  sectionType: "lower", row: "Row H", quantity: 2, basePrice: 132, fees: 26, tax: 10, allInTotal: 168 },
+    { id: "lst-036-07", platform: "TickPick",     section: "Section 208",  sectionType: "lower", row: "Row D", quantity: 2, basePrice: 152, fees: 0,  tax: 12, allInTotal: 164, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-036-08", platform: "AXS",          section: "Field Box 28", sectionType: "floor", row: "Row 1", quantity: 2, basePrice: 285, fees: 57, tax: 22, allInTotal: 364, dealerNotes: "First-row field box — next to dugout" },
+  ],
+
+  // ── evt-037: Capitals vs. Penguins @ Capital One Arena ───────────────────────
+  "evt-037": [
+    { id: "lst-037-01", platform: "GameTime",     section: "Section 418",  sectionType: "upper", row: "Row J", quantity: 2, basePrice: 55,  fees: 8,  tax: 6,  allInTotal: 69 },
+    { id: "lst-037-02", platform: "TickPick",     section: "Section 405",  sectionType: "upper", row: "Row G", quantity: 4, basePrice: 62,  fees: 0,  tax: 5,  allInTotal: 67, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-037-03", platform: "SeatGeek",     section: "Section 411",  sectionType: "upper", row: "Row D", quantity: 2, basePrice: 74,  fees: 12, tax: 6,  allInTotal: 92 },
+    { id: "lst-037-04", platform: "Vivid Seats",  section: "Mezzanine 6",  sectionType: "club",  row: "Row C", quantity: 2, basePrice: 108, fees: 22, tax: 8,  allInTotal: 138 },
+    { id: "lst-037-05", platform: "StubHub",      section: "Mezzanine 12", sectionType: "club",  row: "Row A", quantity: 2, basePrice: 125, fees: 25, tax: 10, allInTotal: 160 },
+    { id: "lst-037-06", platform: "SeatGeek",     section: "Section 112",  sectionType: "lower", row: "Row K", quantity: 2, basePrice: 178, fees: 36, tax: 14, allInTotal: 228 },
+    { id: "lst-037-07", platform: "TickPick",     section: "Section 106",  sectionType: "lower", row: "Row G", quantity: 2, basePrice: 198, fees: 0,  tax: 15, allInTotal: 213, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-037-08", platform: "Ticketmaster", section: "Section 101",  sectionType: "lower", row: "Row C", quantity: 2, basePrice: 242, fees: 48, tax: 18, allInTotal: 308 },
+    { id: "lst-037-09", platform: "AXS",          section: "Rinkside",     sectionType: "floor", row: "Row 1", quantity: 2, basePrice: 548, fees: 110,tax: 42, allInTotal: 700, dealerNotes: "Glass-adjacent rinkside seats" },
+  ],
+
+  // ── evt-038: Mets vs. Yankees @ Citi Field ───────────────────────────────────
+  "evt-038": [
+    { id: "lst-038-01", platform: "GameTime",     section: "Section 523",  sectionType: "upper", row: "Row 14",quantity: 2, basePrice: 48,  fees: 7,  tax: 6,  allInTotal: 61 },
+    { id: "lst-038-02", platform: "TickPick",     section: "Section 511",  sectionType: "upper", row: "Row 10",quantity: 4, basePrice: 55,  fees: 0,  tax: 5,  allInTotal: 60, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-038-03", platform: "SeatGeek",     section: "Section 518",  sectionType: "upper", row: "Row 7", quantity: 2, basePrice: 68,  fees: 11, tax: 5,  allInTotal: 84 },
+    { id: "lst-038-04", platform: "Vivid Seats",  section: "Excelsior 324",sectionType: "club",  row: "Row D", quantity: 2, basePrice: 98,  fees: 20, tax: 8,  allInTotal: 126 },
+    { id: "lst-038-05", platform: "StubHub",      section: "Excelsior 316",sectionType: "club",  row: "Row B", quantity: 2, basePrice: 115, fees: 23, tax: 9,  allInTotal: 147 },
+    { id: "lst-038-06", platform: "SeatGeek",     section: "Section 118",  sectionType: "lower", row: "Row J", quantity: 2, basePrice: 142, fees: 28, tax: 11, allInTotal: 181 },
+    { id: "lst-038-07", platform: "TickPick",     section: "Section 109",  sectionType: "lower", row: "Row F", quantity: 2, basePrice: 162, fees: 0,  tax: 12, allInTotal: 174, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-038-08", platform: "AXS",          section: "Field Box 14", sectionType: "floor", row: "Row 1", quantity: 2, basePrice: 295, fees: 59, tax: 22, allInTotal: 376, dealerNotes: "Front-row field box — Subway Series premium" },
+  ],
+
+  // ── evt-039: Nuggets vs. Suns @ Ball Arena ───────────────────────────────────
+  "evt-039": [
+    { id: "lst-039-01", platform: "GameTime",     section: "Section 346",  sectionType: "upper", row: "Row J", quantity: 2, basePrice: 56,  fees: 9,  tax: 6,  allInTotal: 71 },
+    { id: "lst-039-02", platform: "TickPick",     section: "Section 332",  sectionType: "upper", row: "Row G", quantity: 4, basePrice: 65,  fees: 0,  tax: 5,  allInTotal: 70, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-039-03", platform: "SeatGeek",     section: "Section 318",  sectionType: "upper", row: "Row D", quantity: 2, basePrice: 78,  fees: 12, tax: 6,  allInTotal: 96 },
+    { id: "lst-039-04", platform: "Vivid Seats",  section: "Club 136",     sectionType: "club",  row: "Row C", quantity: 2, basePrice: 115, fees: 23, tax: 9,  allInTotal: 147 },
+    { id: "lst-039-05", platform: "StubHub",      section: "Club 144",     sectionType: "club",  row: "Row A", quantity: 2, basePrice: 132, fees: 26, tax: 10, allInTotal: 168 },
+    { id: "lst-039-06", platform: "SeatGeek",     section: "Section 122",  sectionType: "lower", row: "Row K", quantity: 2, basePrice: 175, fees: 35, tax: 13, allInTotal: 223 },
+    { id: "lst-039-07", platform: "TickPick",     section: "Section 114",  sectionType: "lower", row: "Row G", quantity: 2, basePrice: 195, fees: 0,  tax: 15, allInTotal: 210, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-039-08", platform: "Ticketmaster", section: "Section 107",  sectionType: "lower", row: "Row C", quantity: 2, basePrice: 238, fees: 48, tax: 18, allInTotal: 304 },
+    { id: "lst-039-09", platform: "AXS",          section: "Courtside",    sectionType: "floor", row: "Row 1", quantity: 2, basePrice: 618, fees: 124,tax: 47, allInTotal: 789, dealerNotes: "Courtside — front row" },
+  ],
+
+  // ── evt-040: Ravens vs. Bengals @ M&T Bank Stadium ───────────────────────────
+  "evt-040": [
+    { id: "lst-040-01", platform: "GameTime",     section: "Section 537",  sectionType: "upper", row: "Row 20",quantity: 2, basePrice: 65,  fees: 10, tax: 7,  allInTotal: 82 },
+    { id: "lst-040-02", platform: "TickPick",     section: "Section 512",  sectionType: "upper", row: "Row 14",quantity: 4, basePrice: 74,  fees: 0,  tax: 6,  allInTotal: 80, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-040-03", platform: "SeatGeek",     section: "Section 524",  sectionType: "upper", row: "Row 9", quantity: 2, basePrice: 88,  fees: 14, tax: 7,  allInTotal: 109 },
+    { id: "lst-040-04", platform: "Vivid Seats",  section: "Club 224",     sectionType: "club",  row: "Row 5", quantity: 2, basePrice: 122, fees: 24, tax: 9,  allInTotal: 155 },
+    { id: "lst-040-05", platform: "StubHub",      section: "Club 238",     sectionType: "club",  row: "Row 3", quantity: 2, basePrice: 142, fees: 28, tax: 11, allInTotal: 181 },
+    { id: "lst-040-06", platform: "SeatGeek",     section: "Section 148",  sectionType: "lower", row: "Row 16",quantity: 2, basePrice: 172, fees: 34, tax: 13, allInTotal: 219 },
+    { id: "lst-040-07", platform: "TickPick",     section: "Section 136",  sectionType: "lower", row: "Row 10",quantity: 2, basePrice: 192, fees: 0,  tax: 15, allInTotal: 207, dealerNotes: "No fees — price shown is all-in" },
+    { id: "lst-040-08", platform: "Ticketmaster", section: "Section 122",  sectionType: "lower", row: "Row 5", quantity: 2, basePrice: 235, fees: 47, tax: 18, allInTotal: 300 },
+    { id: "lst-040-09", platform: "AXS",          section: "Field Level",  sectionType: "floor", row: "Row 1", quantity: 2, basePrice: 368, fees: 74, tax: 28, allInTotal: 470, dealerNotes: "Field level — Ravens sideline" },
   ],
 };

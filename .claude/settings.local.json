@@ -26,7 +26,8 @@
       "mcp__Claude_in_Chrome__tabs_context_mcp",
       "Bash(curl -s \"https://itunes.apple.com/search?term=The+Weeknd&entity=musicArtist&limit=1\")",
       "Bash(python3 -c \"import sys,json; print\\(json.dumps\\(json.load\\(sys.stdin\\), indent=2\\)\\)\")",
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:api.deezer.com)"
     ]
   }
 }
