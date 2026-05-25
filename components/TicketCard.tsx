@@ -4,7 +4,7 @@ import type { TicketListing, Platform } from "@/types/ticket";
 
 const PLATFORM_COLORS: Record<Platform, { text: string; border: string }> = {
   SeatGeek:      { text: "text-emerald-700", border: "border-emerald-200 bg-emerald-50"  },
-  StubHub:       { text: "text-blue-700",    border: "border-blue-200 bg-blue-50"        },
+  StubHub:       { text: "text-gray-700",    border: "border-gray-200 bg-gray-50"        },
   "Vivid Seats": { text: "text-violet-700",  border: "border-violet-200 bg-violet-50"    },
   TickPick:      { text: "text-amber-700",   border: "border-amber-200 bg-amber-50"      },
   GameTime:      { text: "text-orange-700",  border: "border-orange-200 bg-orange-50"    },
@@ -103,7 +103,7 @@ export default function TicketCard({ listing, isBestDeal, rank, allInMin, allInM
             </div>
             <div className="text-gray-400 text-xs">each &middot; all-in</div>
           </div>
-          <button className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
+          <button className="bg-gray-900 hover:bg-gray-800 active:bg-black text-white font-semibold text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
             Buy
           </button>
         </div>

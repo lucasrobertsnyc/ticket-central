@@ -158,7 +158,7 @@ export default function HomepageClient({ events }: Props) {
           </p>
 
           {/* Two-part search */}
-          <div className="flex flex-col sm:flex-row max-w-2xl mx-auto gap-0 shadow-sm rounded-xl overflow-hidden border border-gray-300 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition">
+          <div className="flex flex-col sm:flex-row max-w-2xl mx-auto gap-0 shadow-sm rounded-xl overflow-hidden border border-gray-300 focus-within:ring-2 focus-within:ring-gray-400 focus-within:border-gray-400 transition">
             <div className="flex-1 flex items-center bg-white px-4 py-3 gap-2 border-b sm:border-b-0 sm:border-r border-gray-200">
               <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -248,7 +248,7 @@ export default function HomepageClient({ events }: Props) {
               onClick={() => startTransition(() => { setCategory(cat); setLeague(""); setGenre(""); })}
               className={`px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
                 category === cat
-                  ? "border-blue-600 text-blue-600"
+                  ? "border-gray-900 text-gray-900"
                   : "border-transparent text-gray-500 hover:text-gray-800"
               }`}
             >
@@ -265,7 +265,7 @@ export default function HomepageClient({ events }: Props) {
               onClick={() => startTransition(() => setLeague(""))}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
                 league === ""
-                  ? "bg-blue-600 text-white"
+                  ? "bg-gray-900 text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
@@ -277,7 +277,7 @@ export default function HomepageClient({ events }: Props) {
                 onClick={() => startTransition(() => setLeague(league === lg ? "" : lg))}
                 className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
                   league === lg
-                    ? "bg-blue-600 text-white"
+                    ? "bg-gray-900 text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
@@ -295,7 +295,7 @@ export default function HomepageClient({ events }: Props) {
               onClick={() => startTransition(() => setGenre(""))}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
                 genre === ""
-                  ? "bg-blue-600 text-white"
+                  ? "bg-gray-900 text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
@@ -307,7 +307,7 @@ export default function HomepageClient({ events }: Props) {
                 onClick={() => startTransition(() => setGenre(genre === g ? "" : g))}
                 className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
                   genre === g
-                    ? "bg-blue-600 text-white"
+                    ? "bg-gray-900 text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
@@ -343,7 +343,7 @@ export default function HomepageClient({ events }: Props) {
             {hasFilter && (
               <button
                 onClick={clearAll}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium transition ml-1"
+                className="text-sm text-gray-500 hover:text-gray-700 font-medium transition ml-1"
               >
                 Clear
               </button>

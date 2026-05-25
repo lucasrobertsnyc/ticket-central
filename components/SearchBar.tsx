@@ -20,7 +20,7 @@ export default function SearchBar({ value, onChange, resultCount }: Props) {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Section, row, or platform…"
-          className="w-full bg-white text-gray-900 placeholder-gray-400 border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition shadow-sm"
+          className="w-full bg-white text-gray-900 placeholder-gray-400 border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition shadow-sm"
         />
       </div>
       <span className="text-gray-400 text-xs tabular-nums whitespace-nowrap flex-shrink-0">
