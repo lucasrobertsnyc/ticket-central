@@ -128,7 +128,7 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
       <div className="flex-1 flex overflow-hidden min-h-0">
 
         {/* ── Left: scrollable listings panel ── */}
-        <div className="w-full lg:w-[46%] xl:w-[44%] flex flex-col overflow-hidden border-r border-gray-200 bg-white">
+        <div className="w-full lg:w-[58%] xl:w-[56%] flex flex-col overflow-hidden border-r border-gray-200 bg-white">
 
           {/* Event header — scrolls naturally */}
           <EventHeader event={event} totalListings={filtered.length} />

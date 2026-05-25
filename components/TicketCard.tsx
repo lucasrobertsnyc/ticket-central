@@ -80,9 +80,13 @@ export default function TicketCard({ listing, isBestDeal, rank, allInMin, allInM
             {!hasFees && (
               <span className="text-green-600 text-xs font-semibold">No fees</span>
             )}
-            <span className={`text-xs font-bold px-1.5 py-0.5 rounded tabular-nums ${scoreBadge}`} title={scoreLabel(score)}>
+          </div>
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className="text-gray-400 text-xs">Deal Score:</span>
+            <span className={`text-xs font-bold px-1.5 py-0.5 rounded tabular-nums ${scoreBadge}`}>
               {score}
             </span>
+            <span className="text-gray-400 text-xs">{scoreLabel(score)}</span>
           </div>
           {listing.dealerNotes && (
             <p className="text-gray-400 text-xs mt-1 truncate max-w-[220px]" title={listing.dealerNotes}>
