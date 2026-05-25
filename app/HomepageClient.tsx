@@ -320,9 +320,8 @@ export default function HomepageClient({ events }: Props) {
             <span className="text-xs text-gray-400 font-medium hidden sm:block">Sort:</span>
             <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
               {([
-                { value: "date",     label: "Date"     },
-                { value: "price",    label: "Price"    },
-                { value: "location", label: "Location" },
+                { value: "date",  label: "Date"  },
+                { value: "price", label: "Price" },
               ] as { value: SortBy; label: string }[]).map(({ value, label }) => (
                 <button
                   key={value}
