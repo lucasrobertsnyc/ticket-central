@@ -30,17 +30,16 @@ interface MapProps {
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 
-// Professional price-tier spectrum (SeatGeek/StubHub style)
 const CLR: Record<SectionType, { base: string; act: string; dim: string }> = {
-  floor: { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.25)" },
-  lower: { base: "#3b82f6", act: "#2563eb", dim: "rgba(59,130,246,0.25)" },
-  club:  { base: "#06b6d4", act: "#0891b2", dim: "rgba(6,182,212,0.25)"  },
-  upper: { base: "#8b5cf6", act: "#7c3aed", dim: "rgba(139,92,246,0.25)" },
-  suite: { base: "#f59e0b", act: "#d97706", dim: "rgba(245,158,11,0.25)" },
+  floor: { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.25)"    },
+  lower: { base: "#cbd5e1", act: "#94a3b8", dim: "rgba(203,213,225,0.5)"   },
+  club:  { base: "#b8c4d0", act: "#7f8fa0", dim: "rgba(184,196,208,0.5)"   },
+  upper: { base: "#dde3ea", act: "#aab4be", dim: "rgba(221,227,234,0.5)"   },
+  suite: { base: "#e8edf2", act: "#c0cad4", dim: "rgba(232,237,242,0.5)"   },
 };
 
 const MAP_BG = "#f8fafc";
-const SECTION_STROKE = "#f8fafc";
+const SECTION_STROKE = "#ffffff";
 const INK = "rgba(15,23,42,0.72)";
 const INK_DIM = "rgba(15,23,42,0.28)";
 
