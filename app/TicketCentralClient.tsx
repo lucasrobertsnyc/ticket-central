@@ -155,6 +155,7 @@ export default function TicketCentralClient({ event, initialListings }: Props) {
                 onSectionTypeToggle={toggleSectionType}
                 onClearSectionTypes={() => startTransition(() => setFilters((f) => ({ ...f, sectionTypes: [] })))}
                 genre={event.genre}
+                venue={event.venue}
               />
             </div>
           )}

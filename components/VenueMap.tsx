@@ -11,6 +11,7 @@ interface Props {
   onSectionTypeToggle: (type: SectionType) => void;
   onClearSectionTypes: () => void;
   genre?: string;
+  venue?: string;
 }
 
 interface MapProps {
@@ -19,6 +20,7 @@ interface MapProps {
   onSectionTypeToggle: (t: SectionType) => void;
   onZoneHover: (t: SectionType | null) => void;
   genre?: string;
+  venue?: string;
   showBadges?: boolean;
   minByType?: Record<SectionType, number | null>;
   countByType?: Record<SectionType, number>;
@@ -143,21 +145,40 @@ function divLine(cx: number, cy: number, iRx: number, iRy: number, oRx: number, 
   };
 }
 
-const ARENA_RINGS = [
-  { type: "lower" as SectionType, label: "LOWER BOWL", iRx: 90,  iRy: 46,  oRx: 152, oRy: 94,  divs: 16 },
-  { type: "club"  as SectionType, label: "CLUB",        iRx: 160, iRy: 101, oRx: 184, oRy: 117, divs: 10 },
-  { type: "upper" as SectionType, label: "UPPER DECK",  iRx: 192, iRy: 124, oRx: 250, oRy: 148, divs: 20 },
-];
-
 const SB = { w: 14, h: 10, gap: 3, count: 5 };
 const sbTotalH = SB.count * SB.h + (SB.count - 1) * SB.gap;
-const sbTop = AR.CY - sbTotalH / 2;
-const SUITE_SETS = [{ x: AR.CX - 250 - SB.w - 6 }, { x: AR.CX + 250 + 6 }];
 
-function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, genre = "", showBadges, minByType, countByType }: MapProps) {
+function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, genre = "", venue = "", showBadges, minByType, countByType }: MapProps) {
   const isNBA = genre === "NBA", isNHL = genre === "NHL";
+  const isMSG = venue === "Madison Square Garden";
+
+  // ── Venue-specific geometry ────────────────────────────────────────────────
+  // MSG is a true cylindrical building — rings are near-circular.
+  // Crypto.com Arena is a standard elongated oval.
+  const ARENA_RINGS = isMSG ? [
+    { type: "lower" as SectionType, label: "LOWER ARENA", iRx: 80,  iRy: 62,  oRx: 130, oRy: 100, divs: 20 },
+    { type: "club"  as SectionType, label: "SUITE LEVEL", iRx: 138, iRy: 108, oRx: 158, oRy: 124, divs: 10 },
+    { type: "upper" as SectionType, label: "BALCONY",     iRx: 166, iRy: 132, oRx: 210, oRy: 144, divs: 20 },
+  ] : [
+    { type: "lower" as SectionType, label: "LOWER BOWL",  iRx: 90,  iRy: 46,  oRx: 152, oRy: 94,  divs: 22 },
+    { type: "club"  as SectionType, label: "CLUB",        iRx: 160, iRy: 101, oRx: 184, oRy: 117, divs: 10 },
+    { type: "upper" as SectionType, label: "UPPER DECK",  iRx: 192, iRy: 124, oRx: 250, oRy: 148, divs: 20 },
+  ];
+
+  const outerRx   = isMSG ? 216 : 256;
+  const outerRy   = isMSG ? 146 : 151;
+  const floorRx   = isMSG ? 72  : 82;
+  const floorRy   = isMSG ? 46  : 38;
+  // Suite side-boxes — position relative to outer ring
+  const sbTop = AR.CY - sbTotalH / 2;
+  const suiteX1 = AR.CX - outerRx - SB.w - 2;
+  const suiteX2 = AR.CX + outerRx + 2;
+
+  // Upper section numbers: MSG → 201-220 (Balcony); Crypto → 301-320
+  const upperSecBase = isMSG ? 201 : 301;
+
   const floorLabel = isNBA ? "COURT" : isNHL ? "ICE" : "STAGE";
-  const floorSub   = isNBA ? "COURTSIDE" : isNHL ? "RINKSIDE" : "GA / FLOOR";
+  const floorSub   = isNBA ? (isMSG ? "COURTSIDE" : "COURTSIDE") : isNHL ? "RINKSIDE" : "GA / FLOOR";
 
   const floorActive = activeSectionTypes.includes("floor");
   const floorDimmed = activeSectionTypes.length > 0 && !floorActive;
@@ -165,14 +186,13 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
   const activeColor = isNBA ? "#b8883a" : isNHL ? "#99cef0" : CLR.floor.act;
   const dimColor    = isNBA ? "#ede8d8" : isNHL ? "#e8f5fd" : CLR.floor.dim;
   const floorColor  = hoveredZone === "floor" ? activeColor : floorDimmed ? dimColor : floorActive ? activeColor : baseColor;
-  // Floor text: dark on ice; white on wood court and dark stage
   const floorInk    = isNHL ? INK : "rgba(255,255,255,0.88)";
   const floorStroke = hoveredZone === "floor" || floorActive ? "#2563eb" : "#e2e8f0";
 
   return (
     <svg viewBox={`0 0 ${AR.W} ${AR.H}`} className="w-full" style={{ background: "#ffffff" }}>
       {/* Outer boundary */}
-      <ellipse cx={AR.CX} cy={AR.CY} rx={256} ry={151} fill="none" stroke="#e2e8f0" strokeWidth="1.5" />
+      <ellipse cx={AR.CX} cy={AR.CY} rx={outerRx} ry={outerRy} fill="none" stroke="#e2e8f0" strokeWidth="1.5" />
 
       {/* Seating rings — outer to inner */}
       {[...ARENA_RINGS].reverse().map((ring) => {
@@ -200,7 +220,7 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
                 strokeWidth={isAisle ? "1.2" : "0.6"}
                 style={{ pointerEvents: "none" }} />;
             })}
-            {/* Section numbers — lower bowl only */}
+            {/* Section numbers — lower bowl */}
             {ring.type === "lower" && Array.from({ length: ring.divs }, (_, i) => {
               const angle = (i + 0.5) * (360 / ring.divs);
               const rad = toRad(angle);
@@ -210,7 +230,20 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
                 <text key={i} x={x} y={y + 2.5} textAnchor="middle" fontSize="6"
                   fill={INK} fontFamily="system-ui" fontWeight="700"
                   style={{ pointerEvents: "none", userSelect: "none" }}
-                >{100 + i + 1}</text>
+                >{101 + i}</text>
+              );
+            })}
+            {/* Section numbers — upper ring */}
+            {ring.type === "upper" && Array.from({ length: ring.divs }, (_, i) => {
+              const angle = (i + 0.5) * (360 / ring.divs);
+              const rad = toRad(angle);
+              const x = AR.CX + midRx * Math.sin(rad);
+              const y = AR.CY - midRy * Math.cos(rad);
+              return (
+                <text key={i} x={x} y={y + 2.5} textAnchor="middle" fontSize="5.5"
+                  fill={INK} fontFamily="system-ui" fontWeight="600"
+                  style={{ pointerEvents: "none", userSelect: "none" }}
+                >{upperSecBase + i}</text>
               );
             })}
             {/* Zone label at bottom of ring */}
@@ -224,7 +257,7 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
 
       {/* Floor ellipse */}
       <path
-        d={ellipsePath(AR.CX, AR.CY, 82, 38)}
+        d={ellipsePath(AR.CX, AR.CY, floorRx, floorRy)}
         fill={floorColor} stroke={floorStroke} strokeWidth="1.5"
         style={{ cursor: "pointer", transition: "fill 0.12s" }}
         onClick={() => onSectionTypeToggle("floor")}
@@ -290,8 +323,8 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
         fill={floorInk} fontFamily="system-ui,sans-serif" fontWeight="600" letterSpacing="0.3"
         style={{ pointerEvents: "none", userSelect: "none" }} opacity={0.65}>{floorSub}</text>
 
-      {/* Suite boxes */}
-      {SUITE_SETS.map((set, si) => (
+      {/* Suite boxes — positioned outside the outer ring */}
+      {[{ x: suiteX1 }, { x: suiteX2 }].map((set, si) => (
         <g key={si} style={{ cursor: "pointer" }}
           onClick={() => onSectionTypeToggle("suite")}
           onMouseEnter={() => onZoneHover("suite")}
@@ -315,10 +348,10 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
       {showBadges && minByType && countByType && (
         <>
           <PriceBadge x={AR.CX} y={AR.CY - 6} count={countByType.floor} min={minByType.floor} active={activeSectionTypes.includes("floor")} />
-          <PriceBadge x={AR.CX + 122} y={AR.CY} count={countByType.lower} min={minByType.lower} active={activeSectionTypes.includes("lower")} />
-          <PriceBadge x={AR.CX + 170} y={AR.CY + 22} count={countByType.club} min={minByType.club} active={activeSectionTypes.includes("club")} />
-          <PriceBadge x={AR.CX} y={AR.CY + 141} count={countByType.upper} min={minByType.upper} active={activeSectionTypes.includes("upper")} />
-          <PriceBadge x={SUITE_SETS[0].x + SB.w / 2} y={sbTop - 16} count={countByType.suite} min={minByType.suite} active={activeSectionTypes.includes("suite")} />
+          <PriceBadge x={AR.CX + (isMSG ? 106 : 122)} y={AR.CY} count={countByType.lower} min={minByType.lower} active={activeSectionTypes.includes("lower")} />
+          <PriceBadge x={AR.CX + (isMSG ? 148 : 170)} y={AR.CY + 22} count={countByType.club} min={minByType.club} active={activeSectionTypes.includes("club")} />
+          <PriceBadge x={AR.CX} y={AR.CY + (isMSG ? 136 : 141)} count={countByType.upper} min={minByType.upper} active={activeSectionTypes.includes("upper")} />
+          <PriceBadge x={suiteX1 + SB.w / 2} y={sbTop - 16} count={countByType.suite} min={minByType.suite} active={activeSectionTypes.includes("suite")} />
         </>
       )}
 
@@ -357,11 +390,14 @@ function GoalPost({ x, flip }: { x: number; flip?: boolean }) {
   );
 }
 
-function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, showBadges, minByType, countByType }: MapProps) {
+function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, venue = "", showBadges, minByType, countByType }: MapProps) {
   const lowerMidY_top = NFY - 14;
   const lowerMidY_bot = NFY + NFL_FIELD.h + 14;
-  const sideSecNums = [101, 108, 115, 122, 129];
-  const sideSecX = sideSecNums.map((_, i) => NFX + EZ_W + playW * (i + 1) / (sideSecNums.length + 1));
+  const isATT = venue === "AT&T Stadium";
+  // Arrowhead: sections 103–135 along sidelines; AT&T: 101–128 sideline + 401s end zones
+  const topSecNums = isATT ? [102, 108, 114, 119, 125] : [103, 110, 118, 126, 133];
+  const botSecNums = isATT ? [220, 226, 232, 238, 244] : [310, 318, 326, 334, 342];
+  const sideSecX = topSecNums.map((_, i) => NFX + EZ_W + playW * (i + 1) / (topSecNums.length + 1));
 
   return (
     <svg viewBox={`0 0 ${NF.W} ${NF.H}`} className="w-full" style={{ background: "#ffffff" }}>
@@ -400,7 +436,7 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
       })}
 
       {/* Section numbers — top sideline */}
-      {sideSecNums.map((num, i) => (
+      {topSecNums.map((num, i) => (
         <text key={i} x={sideSecX[i]} y={lowerMidY_top + 3}
           textAnchor="middle" fontSize="6.5" fill={INK}
           fontFamily="system-ui" fontWeight="700"
@@ -408,12 +444,12 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         >{num}</text>
       ))}
       {/* Section numbers — bottom sideline */}
-      {sideSecNums.map((_, i) => (
+      {botSecNums.map((num, i) => (
         <text key={i} x={sideSecX[i]} y={lowerMidY_bot + 3}
           textAnchor="middle" fontSize="6.5" fill={INK}
           fontFamily="system-ui" fontWeight="700"
           style={{ pointerEvents: "none", userSelect: "none" }}
-        >{136 + i * 7}</text>
+        >{num}</text>
       ))}
 
       {/* Suite strips */}
@@ -562,7 +598,7 @@ const MLB_R = {
 // 13 sections → 14 dividers
 const MLB_DIVS = Array.from({ length: 14 }, (_, i) => FAN_S + i * (FAN_E - FAN_S) / 13);
 
-function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, showBadges, minByType, countByType }: MapProps) {
+function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, venue = "", showBadges, minByType, countByType }: MapProps) {
   const cx = BL.HX, cy = BL.HY;
   // Diamond coords (45°-rotated square, half-diagonal = 32 px)
   const d = 32;
@@ -692,11 +728,11 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         onMouseLeave={() => onZoneHover(null)}
       />
 
-      {/* Distance markers on wall */}
+      {/* Distance markers on wall — Yankee Stadium: LF 318, CF 408, RF 314 */}
       {[
-        { deg: (FAN_S + FAN_E) / 2, r: MLB_R.wall - 8, text: "410′" },
-        { deg: FAN_S + 20,           r: MLB_R.wall - 8, text: "330′" },
-        { deg: FAN_E - 20,           r: MLB_R.wall - 8, text: "330′" },
+        { deg: (FAN_S + FAN_E) / 2, r: MLB_R.wall - 8, text: "408′" },
+        { deg: FAN_S + 22,           r: MLB_R.wall - 8, text: "318′" },
+        { deg: FAN_E - 18,           r: MLB_R.wall - 8, text: "314′" },
       ].map(({ deg, r, text }) => {
         const pt = arcPoint(cx, cy, r, deg);
         return (
@@ -705,6 +741,20 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
             style={{ pointerEvents: "none", userSelect: "none" }}>{text}</text>
         );
       })}
+
+      {/* Monument Park — Yankee Stadium deep center */}
+      {(() => {
+        const pt = arcPoint(BL.HX, BL.HY, MLB_R.wall - 18, (FAN_S + FAN_E) / 2);
+        return (
+          <g style={{ pointerEvents: "none" }}>
+            <rect x={pt.x - 14} y={pt.y - 6} width={28} height={12} rx={2}
+              fill="#166534" stroke="#15803d" strokeWidth="0.7" />
+            <text x={pt.x} y={pt.y + 2.5} textAnchor="middle" fontSize="4.5"
+              fill="rgba(255,255,255,0.75)" fontFamily="system-ui" fontWeight="700"
+              letterSpacing="0.3">MONUMENT PARK</text>
+          </g>
+        );
+      })()}
 
       {/* Bullpens — corner outfield */}
       {[FAN_S + 10, FAN_E - 10].map((deg, i) => {
@@ -815,7 +865,7 @@ function MapListingRow({ listing, cheapest }: { listing: TicketListing; cheapest
 
 function ExpandedModal({
   listings, activeSectionTypes, hoveredZone, onSectionTypeToggle, onClearSectionTypes,
-  onZoneHover, onClose, genre, minByType, countByType,
+  onZoneHover, onClose, genre, venue, minByType, countByType,
 }: {
   listings: TicketListing[];
   activeSectionTypes: SectionType[];
@@ -825,6 +875,7 @@ function ExpandedModal({
   onZoneHover: (t: SectionType | null) => void;
   onClose: () => void;
   genre: string;
+  venue: string;
   minByType: Record<SectionType, number | null>;
   countByType: Record<SectionType, number>;
 }) {
@@ -901,15 +952,15 @@ function ExpandedModal({
             <div className="flex-1 flex items-center justify-center min-h-0">
               <div className="w-full max-w-2xl rounded-xl overflow-hidden border border-white/10 shadow-lg">
                 {isNFL ? (
-                  <NFLMap activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+                  <NFLMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
                     onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover}
                     showBadges minByType={minByType} countByType={countByType} />
                 ) : isMLB ? (
-                  <MLBMap activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+                  <MLBMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
                     onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover}
                     showBadges minByType={minByType} countByType={countByType} />
                 ) : (
-                  <ArenaMap genre={genre} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+                  <ArenaMap genre={genre} venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
                     onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover}
                     showBadges minByType={minByType} countByType={countByType} />
                 )}
@@ -1010,7 +1061,7 @@ function LegendPanel({ genre, activeSectionTypes, onSectionTypeToggle, onClearSe
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
-export default function VenueMap({ listings, activeSectionTypes, onSectionTypeToggle, onClearSectionTypes, genre = "" }: Props) {
+export default function VenueMap({ listings, activeSectionTypes, onSectionTypeToggle, onClearSectionTypes, genre = "", venue = "" }: Props) {
   const { minByType, countByType } = useZoneData(listings);
   const [expanded, setExpanded] = useState(false);
   const [hoveredZone, setHoveredZone] = useState<SectionType | null>(null);
@@ -1067,13 +1118,13 @@ export default function VenueMap({ listings, activeSectionTypes, onSectionTypeTo
             onMouseLeave={handleMouseLeave}
           >
             {isNFL ? (
-              <NFLMap activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+              <NFLMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
                 onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
             ) : isMLB ? (
-              <MLBMap activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+              <MLBMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
                 onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
             ) : (
-              <ArenaMap genre={genre} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
+              <ArenaMap genre={genre} venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
                 onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
             )}
 
@@ -1119,6 +1170,7 @@ export default function VenueMap({ listings, activeSectionTypes, onSectionTypeTo
           onZoneHover={onZoneHover}
           onClose={() => setExpanded(false)}
           genre={genre}
+          venue={venue}
           minByType={minByType}
           countByType={countByType}
         />
