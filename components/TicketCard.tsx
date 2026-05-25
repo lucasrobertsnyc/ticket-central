@@ -112,6 +112,9 @@ export default function TicketCard({ listing, isBestDeal, rank, allInMin, allInM
             </div>
             <div className="text-gray-400 text-xs">each &middot; all-in</div>
           </div>
+          <button className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
+            Buy
+          </button>
         </div>
       </div>
 
