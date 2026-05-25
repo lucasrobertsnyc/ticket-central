@@ -4,6 +4,12 @@ import { useState, useMemo, useTransition } from "react";
 import type { Event } from "@/types/ticket";
 import EventCard from "@/components/EventCard";
 
+function parseEventDate(dateStr: string): Date {
+  // "Sunday, June 14, 2026" → strip weekday → "June 14, 2026"
+  const clean = dateStr.replace(/^[A-Za-z]+,\s*/, "");
+  return new Date(clean);
+}
+
 interface Props {
   events: Event[];
 }
@@ -12,8 +18,10 @@ function extractLocations(events: Event[]): { label: string; match: string }[] {
   const seen = new Set<string>();
   const locs: { label: string; match: string }[] = [];
   const stateNames: Record<string, string> = {
-    NY: "New York", CA: "California", TX: "Texas", FL: "Florida",
-    MO: "Missouri",
+    CA: "California", CO: "Colorado", FL: "Florida", GA: "Georgia",
+    IL: "Illinois",   MA: "Massachusetts", MO: "Missouri", NC: "North Carolina",
+    NV: "Nevada",     NY: "New York",      PA: "Pennsylvania", TN: "Tennessee",
+    TX: "Texas",
   };
   for (const e of events) {
     const state = e.city.split(", ")[1];
@@ -30,6 +38,7 @@ const LEAGUES = ["NFL", "NBA", "MLB", "NHL"] as const;
 type League = (typeof LEAGUES)[number];
 
 type Category = "all" | "concerts" | "sports";
+type SortBy   = "date" | "price" | "location";
 
 export default function HomepageClient({ events }: Props) {
   const [isPending, startTransition] = useTransition();
@@ -38,6 +47,7 @@ export default function HomepageClient({ events }: Props) {
   const [category, setCategory] = useState<Category>("all");
   const [league, setLeague]     = useState<League | "">("");
   const [genre, setGenre]       = useState<string>("");
+  const [sortBy, setSortBy]     = useState<SortBy>("date");
 
   const locationOptions = useMemo(() => extractLocations(events), [events]);
 
@@ -63,7 +73,7 @@ export default function HomepageClient({ events }: Props) {
   const filtered = useMemo(() => {
     const a = artist.toLowerCase().trim();
     const l = location;
-    return events.filter((e) => {
+    const result = events.filter((e) => {
       if (category === "concerts" && SPORT_GENRES.has(e.genre)) return false;
       if (category === "sports"   && !SPORT_GENRES.has(e.genre)) return false;
       if (category === "sports"   && league && e.genre !== league) return false;
@@ -77,7 +87,16 @@ export default function HomepageClient({ events }: Props) {
         e.genre.toLowerCase().includes(a)
       );
     });
-  }, [events, artist, location, category, league, genre]);
+
+    result.sort((a, b) => {
+      if (sortBy === "date")     return parseEventDate(a.date).getTime() - parseEventDate(b.date).getTime();
+      if (sortBy === "price")    return a.lowestAllInPrice - b.lowestAllInPrice;
+      if (sortBy === "location") return a.city.localeCompare(b.city);
+      return 0;
+    });
+
+    return result;
+  }, [events, artist, location, category, league, genre, sortBy]);
 
   const hasSearchFilter = !!artist || !!location;
   const hasFilter = hasSearchFilter || category !== "all" || !!league || !!genre;
@@ -98,6 +117,7 @@ export default function HomepageClient({ events }: Props) {
       setCategory("all");
       setLeague("");
       setGenre("");
+      setSortBy("date");
     });
   }
 
@@ -293,16 +313,39 @@ export default function HomepageClient({ events }: Props) {
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-4 mb-4">
+        <div className="flex items-center justify-between mt-4 mb-4 gap-3 flex-wrap">
           <h2 className="text-gray-900 font-bold text-base">{sectionTitle}</h2>
-          {hasFilter && (
-            <button
-              onClick={clearAll}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium transition"
-            >
-              Clear filters
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Sort pills */}
+            <span className="text-xs text-gray-400 font-medium hidden sm:block">Sort:</span>
+            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+              {([
+                { value: "date",     label: "Date"     },
+                { value: "price",    label: "Price"    },
+                { value: "location", label: "Location" },
+              ] as { value: SortBy; label: string }[]).map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => startTransition(() => setSortBy(value))}
+                  className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                    sortBy === value
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {hasFilter && (
+              <button
+                onClick={clearAll}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium transition ml-1"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
 
         {filtered.length === 0 ? (
