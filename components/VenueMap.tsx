@@ -760,8 +760,14 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
 
       {/* Field */}
       <rect x={NFX} y={NFY} width={NFL_FIELD.w} height={NFL_FIELD.h} rx={2}
-        fill={fieldFill(hoveredZone, activeSectionTypes, tierMap)}
-        stroke={hoveredZone === "floor" || activeSectionTypes.includes("floor") ? tierMap.floor.act : "#15803d"} strokeWidth="1.5"
+        fill={
+          hoveredZone === "floor" || activeSectionTypes.includes("floor")
+            ? "#16a34a"
+            : activeSectionTypes.length > 0 && !activeSectionTypes.includes("floor")
+            ? "rgba(21,128,61,0.45)"
+            : "#15803d"
+        }
+        stroke={hoveredZone === "floor" || activeSectionTypes.includes("floor") ? "rgba(255,255,255,0.45)" : "#15803d"} strokeWidth="1.5"
         style={{ cursor: "pointer", transition: "fill 0.12s" }}
         onClick={() => onSectionTypeToggle("floor")}
         onMouseEnter={() => onZoneHover("floor")}
@@ -802,10 +808,6 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
       })}
       <line x1={NFX} y1={NFY} x2={NFX + NFL_FIELD.w} y2={NFY} stroke="rgba(255,255,255,0.28)" strokeWidth="0.8" style={{ pointerEvents: "none" }} />
       <line x1={NFX} y1={NFY + NFL_FIELD.h} x2={NFX + NFL_FIELD.w} y2={NFY + NFL_FIELD.h} stroke="rgba(255,255,255,0.28)" strokeWidth="0.8" style={{ pointerEvents: "none" }} />
-      <text x={NF.CX} y={NF.CY - 10} textAnchor="middle" fontSize="8"
-        fill="rgba(255,255,255,0.75)" fontFamily="system-ui" fontWeight="800" letterSpacing="0.5"
-        style={{ pointerEvents: "none", userSelect: "none" }}>FIELD LEVEL</text>
-
       {showBadges && minByType && countByType && (
         <>
           <PriceBadge x={NF.CX} y={NF.CY} count={countByType.floor} min={minByType.floor} active={activeSectionTypes.includes("floor")} />
@@ -1007,8 +1009,14 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
 
       {/* Outfield grass (clickable) */}
       <path d={arcBandPath(cx, cy, MLB_R.fieldIn, MLB_R.fieldOut, FAN_S, FAN_E)}
-        fill={fieldFill(hoveredZone, activeSectionTypes, tierMap)}
-        stroke={hoveredZone === "floor" || activeSectionTypes.includes("floor") ? tierMap.floor.act : "#15803d"} strokeWidth="1.5"
+        fill={
+          hoveredZone === "floor" || activeSectionTypes.includes("floor")
+            ? "#16a34a"
+            : activeSectionTypes.length > 0 && !activeSectionTypes.includes("floor")
+            ? "rgba(21,128,61,0.45)"
+            : "#15803d"
+        }
+        stroke={hoveredZone === "floor" || activeSectionTypes.includes("floor") ? "rgba(255,255,255,0.45)" : "#15803d"} strokeWidth="1.5"
         style={{ cursor: "pointer", transition: "fill 0.12s" }}
         onClick={() => onSectionTypeToggle("floor")}
         onMouseEnter={() => onZoneHover("floor")}
