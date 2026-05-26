@@ -161,7 +161,7 @@ export const MOCK_EVENTS: Event[] = [
     genre: "Hip-Hop",
     lowestAllInPrice: 82,
     listingCount: 21,
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/1/15/Drake_at_The_Carter_Effect_2017_%2836818935200%29_%28cropped%29.jpg",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/bd/Drake_July_2016_%284x5_close_cropped%29.jpg",
   },
   {
     id: "evt-014",

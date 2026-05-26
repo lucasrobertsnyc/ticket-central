@@ -30,18 +30,20 @@ interface MapProps {
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 
+// Professional price-tier spectrum (SeatGeek/StubHub style)
 const CLR: Record<SectionType, { base: string; act: string; dim: string }> = {
-  floor: { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.3)"    },
-  lower: { base: "#c4cdd6", act: "#8fa0af", dim: "rgba(196,205,214,0.7)"  },
-  club:  { base: "#bfc9d3", act: "#8a9dac", dim: "rgba(191,201,211,0.7)"  },
-  upper: { base: "#d0d8e0", act: "#9daab6", dim: "rgba(208,216,224,0.7)"  },
-  suite: { base: "#c4cdd6", act: "#8fa0af", dim: "rgba(196,205,214,0.7)"  },
+  floor: { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.25)" },
+  lower: { base: "#3b82f6", act: "#2563eb", dim: "rgba(59,130,246,0.25)" },
+  club:  { base: "#06b6d4", act: "#0891b2", dim: "rgba(6,182,212,0.25)"  },
+  upper: { base: "#8b5cf6", act: "#7c3aed", dim: "rgba(139,92,246,0.25)" },
+  suite: { base: "#f59e0b", act: "#d97706", dim: "rgba(245,158,11,0.25)" },
 };
 
-const MAP_BG = "#f0f2f5";
-const SECTION_STROKE = "#ffffff";
-const INK = "rgba(15,23,42,0.72)";
-const INK_DIM = "rgba(15,23,42,0.35)";
+// Dark map background (matches SeatGeek's dark map)
+const MAP_BG = "#0f172a";
+const SECTION_STROKE = "#0f172a";
+const INK = "rgba(255,255,255,0.85)";
+const INK_DIM = "rgba(255,255,255,0.4)";
 
 const GRS = { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.25)" };
 
@@ -230,7 +232,7 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
 
       {/* Outer stadium silhouette */}
       <ellipse cx={AR.CX} cy={AR.CY} rx={outerRx + 14} ry={outerRy + 10}
-        fill="#e4e8ec" stroke="rgba(0,0,0,0.06)" strokeWidth="1" />
+        fill="#1e293b" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
 
       {/* Seating rings — each section is its own polygon */}
       {[...ARENA_RINGS].reverse().map((ring) => {
@@ -460,12 +462,12 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
       {!isNBA && !isNHL && (
         <g style={{ pointerEvents: "none" }}>
           <rect x={AR.CX - 38} y={AR.CY + 8} width={76} height={22} rx={3}
-            fill="#dde3e9" stroke="rgba(0,0,0,0.1)" strokeWidth="0.9" />
-          <rect x={AR.CX - 32} y={AR.CY + 7} width={64} height={4} rx={1} fill="#c8d0d8" />
+            fill="#0f172a" stroke="rgba(255,255,255,0.2)" strokeWidth="0.9" />
+          <rect x={AR.CX - 32} y={AR.CY + 7} width={64} height={4} rx={1} fill="#1e293b" />
           <text x={AR.CX} y={AR.CY + 22} textAnchor="middle" fontSize="6"
-            fill="rgba(15,23,42,0.45)" fontFamily="system-ui" letterSpacing="2">STAGE</text>
-          <rect x={AR.CX - 42} y={AR.CY + 12} width={5} height={12} rx={1} fill="rgba(0,0,0,0.06)" />
-          <rect x={AR.CX + 37} y={AR.CY + 12} width={5} height={12} rx={1} fill="rgba(0,0,0,0.06)" />
+            fill="rgba(255,255,255,0.5)" fontFamily="system-ui" letterSpacing="2">STAGE</text>
+          <rect x={AR.CX - 42} y={AR.CY + 12} width={5} height={12} rx={1} fill="rgba(255,255,255,0.1)" />
+          <rect x={AR.CX + 37} y={AR.CY + 12} width={5} height={12} rx={1} fill="rgba(255,255,255,0.1)" />
         </g>
       )}
 
@@ -578,7 +580,7 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
 
       {/* Outer stadium silhouette */}
       <rect x={NFX - 90} y={NFY - 90} width={NFL_FIELD.w + 180} height={NFL_FIELD.h + 180} rx={22}
-        fill="#e4e8ec" stroke="rgba(0,0,0,0.06)" strokeWidth="1" />
+        fill="#1e293b" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
 
       {/* Individual section blocks for each band — top sideline, bottom sideline, end zones */}
       {[...NFL_BANDS].reverse().map((band) => {
@@ -714,6 +716,23 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         fill="rgba(255,255,255,0.5)" fontFamily="system-ui" fontWeight="600"
         style={{ pointerEvents: "none", userSelect: "none" }}>SUITES</text>
 
+      {/* Band zone labels — right side of top sideline for each band */}
+      {NFL_BANDS.map((band) => {
+        const prevPad = band.type === "lower" ? 0 : band.type === "club" ? 28 : 46;
+        const thickness = band.pad - prevPad;
+        const topY = NFY - band.pad + thickness / 2;
+        const isDimmed = activeSectionTypes.length > 0 && !activeSectionTypes.includes(band.type) && hoveredZone !== band.type;
+        return (
+          <text key={band.type}
+            x={NF.CX + 80} y={topY + 2}
+            textAnchor="middle" fontSize="4.8"
+            fill={isDimmed ? INK_DIM : INK}
+            fontFamily="system-ui" fontWeight="700" letterSpacing="0.3"
+            style={{ pointerEvents: "none", userSelect: "none" }}
+          >{band.label}</text>
+        );
+      })}
+
       {/* Field */}
       <rect x={NFX} y={NFY} width={NFL_FIELD.w} height={NFL_FIELD.h} rx={2}
         fill={fieldFill(hoveredZone, activeSectionTypes)}
@@ -758,36 +777,9 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
       })}
       <line x1={NFX} y1={NFY} x2={NFX + NFL_FIELD.w} y2={NFY} stroke="rgba(255,255,255,0.28)" strokeWidth="0.8" style={{ pointerEvents: "none" }} />
       <line x1={NFX} y1={NFY + NFL_FIELD.h} x2={NFX + NFL_FIELD.w} y2={NFY + NFL_FIELD.h} stroke="rgba(255,255,255,0.28)" strokeWidth="0.8" style={{ pointerEvents: "none" }} />
-      <GoalPost x={NFX + EZ_W * 0.5} />
-      <GoalPost x={NFX + NFL_FIELD.w - EZ_W * 0.5} flip />
       <text x={NF.CX} y={NF.CY - 10} textAnchor="middle" fontSize="8"
         fill="rgba(255,255,255,0.75)" fontFamily="system-ui" fontWeight="800" letterSpacing="0.5"
         style={{ pointerEvents: "none", userSelect: "none" }}>FIELD LEVEL</text>
-
-      {/* Lumen Field: open north end — overlay hatched zone on left endzone seating */}
-      {isOpenEndLeft && (() => {
-        const maxPad = 82; // upper band pad
-        const bx = NFX - maxPad, by = NFY - maxPad, bh = NFL_FIELD.h + maxPad * 2;
-        const openW = maxPad + EZ_W;
-        return (
-          <g style={{ pointerEvents: "none" }}>
-            {/* Wash out the left endzone seating bands with dark overlay */}
-            <rect x={bx} y={by} width={openW} height={bh} rx={4}
-              fill={MAP_BG} opacity={0.85} />
-            {/* Diagonal hatch marks to indicate "no seating" */}
-            {Array.from({ length: 8 }, (_, i) => {
-              const yy = by + (bh * i) / 7;
-              return <line key={i} x1={bx} y1={yy} x2={bx + openW} y2={yy - 28}
-                stroke="rgba(255,255,255,0.15)" strokeWidth="0.8" opacity={0.5} />;
-            })}
-            {/* Label */}
-            <text x={bx + openW / 2} y={NF.CY} textAnchor="middle" fontSize="5.5"
-              fill="rgba(255,255,255,0.35)" fontFamily="system-ui" fontWeight="700" letterSpacing="0.5"
-              transform={`rotate(-90, ${bx + openW / 2}, ${NF.CY})`}
-              style={{ userSelect: "none" }}>OPEN END</text>
-          </g>
-        );
-      })()}
 
       {showBadges && minByType && countByType && (
         <>
@@ -961,7 +953,7 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
 
       {/* Outer ballpark silhouette */}
       <path d={sectorPath(cx, cy, MLB_R.upperOut + 16, FAN_S - 4, FAN_E + 4)}
-        fill="#e4e8ec" style={{ pointerEvents: "none" }} />
+        fill="#1e293b" style={{ pointerEvents: "none" }} />
 
       {/* ── Individual section polygons — outer to inner ── */}
       {renderZone("upper", MLB_R.upperIn, MLB_R.upperOut, upperCount)}
@@ -1046,7 +1038,7 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
 
       {/* Distance markers — real per-venue dimensions */}
       {bp.cf !== "—" && [
-        { deg: (FAN_S + FAN_E) / 2, r: MLB_R.wall - 12, text: bp.cf  },
+        { deg: (FAN_S + FAN_E) / 2, r: MLB_R.wall - 5,  text: bp.cf  },
         { deg: FAN_S + 20,          r: MLB_R.wall - 12, text: bp.lf  },
         { deg: FAN_E - 16,          r: MLB_R.wall - 12, text: bp.rf  },
       ].map(({ deg, r, text }) => {
@@ -1114,20 +1106,6 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         />
       </g>
 
-      {/* Zone labels */}
-      {[
-        { r: (MLB_R.lowerIn + MLB_R.lowerOut) / 2 + 4, text: "LOWER BOWL", deg: -90 },
-        { r: (MLB_R.clubIn  + MLB_R.clubOut)  / 2,     text: "CLUB",        deg: -115 },
-        { r: (MLB_R.upperIn + MLB_R.upperOut) / 2,     text: "UPPER DECK",  deg: -90 },
-      ].map(({ r, text, deg }) => {
-        const pt = arcPoint(cx, cy, r, deg);
-        return (
-          <text key={text} x={pt.x} y={pt.y + 2.5} textAnchor="middle" fontSize="6.5"
-            fill={INK} fontFamily="system-ui" fontWeight="700" letterSpacing="0.5"
-            style={{ pointerEvents: "none", userSelect: "none" }}
-          >{text}</text>
-        );
-      })}
 
       <text x={arcPoint(cx, cy, 82, -90).x} y={arcPoint(cx, cy, 82, -90).y + 2.5}
         textAnchor="middle" fontSize="6" fill="rgba(255,255,255,0.8)"
@@ -1166,7 +1144,7 @@ function MapListingRow({ listing, cheapest }: { listing: TicketListing; cheapest
         <div className={`font-bold text-sm ${cheapest ? "text-green-400" : "text-white"}`}>${listing.allInTotal}</div>
         <div className="text-gray-500 text-xs">all-in</div>
       </div>
-      <button className="bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors flex-shrink-0">
+      <button className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors flex-shrink-0">
         Buy
       </button>
     </div>
@@ -1239,7 +1217,7 @@ function ExpandedModal({
                 );
               })}
               {activeSectionTypes.length > 0 && (
-                <button onClick={onClearSectionTypes} className="text-xs text-gray-400 hover:text-gray-200 transition">Clear</button>
+                <button onClick={onClearSectionTypes} className="text-xs text-blue-400 hover:text-blue-300 transition">Clear</button>
               )}
             </div>
           </div>
@@ -1323,7 +1301,7 @@ function LegendPanel({ genre, activeSectionTypes, onSectionTypeToggle, onClearSe
         return (
           <button key={type} onClick={() => onSectionTypeToggle(type)}
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all border ${
-              active   ? "border-gray-300 bg-gray-100 text-gray-900"
+              active   ? "border-blue-200 bg-blue-50 text-blue-700"
               : dimmed ? "border-transparent opacity-40 text-gray-500"
               :          "border-gray-200 hover:bg-gray-50 text-gray-600"
             }`}
@@ -1331,7 +1309,7 @@ function LegendPanel({ genre, activeSectionTypes, onSectionTypeToggle, onClearSe
             <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: CLR[type].act }} />
             <span className="font-semibold">{label}</span>
             {min !== null && (
-              <span className={`tabular-nums ${active ? "text-gray-700" : "text-gray-400"}`}>
+              <span className={`tabular-nums ${active ? "text-blue-500" : "text-gray-400"}`}>
                 from {fmt(min)}
               </span>
             )}
@@ -1340,7 +1318,7 @@ function LegendPanel({ genre, activeSectionTypes, onSectionTypeToggle, onClearSe
       })}
       {activeSectionTypes.length > 0 && (
         <button onClick={onClearSectionTypes}
-          className="px-2.5 py-1.5 rounded-lg text-xs text-gray-500 hover:text-gray-700 font-medium transition">
+          className="px-2.5 py-1.5 rounded-lg text-xs text-blue-600 hover:text-blue-700 font-medium transition">
           Clear
         </button>
       )}
@@ -1463,7 +1441,7 @@ export default function VenueMap({
               {/* Expand button — floating bottom-right */}
               <button
                 onClick={() => setExpanded(true)}
-                className="absolute bottom-3 right-3 flex items-center gap-1 bg-white border border-gray-200 text-gray-600 text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm hover:shadow-md hover:border-gray-300 transition"
+                className="absolute bottom-3 right-3 flex items-center gap-1 bg-white border border-gray-200 text-blue-600 text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm hover:shadow-md hover:border-blue-200 transition"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
@@ -1510,7 +1488,7 @@ export default function VenueMap({
             <span className="text-gray-400 text-xs hidden sm:block">Click a zone to filter</span>
             <button
               onClick={() => setExpanded(true)}
-              className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-xs font-semibold transition px-2 py-1 rounded-md hover:bg-gray-100"
+              className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-xs font-semibold transition px-2 py-1 rounded-md hover:bg-blue-50"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
@@ -1536,20 +1514,20 @@ export default function VenueMap({
               return (
                 <button key={type} onClick={() => onSectionTypeToggle(type)}
                   className={`flex items-center justify-between w-full px-3 py-2 rounded-lg text-left transition-all ${
-                    active   ? "bg-gray-100 border border-gray-200"
+                    active   ? "bg-blue-50 border border-blue-200"
                     : dimmed ? "border border-transparent opacity-40"
                     :          "border border-transparent hover:bg-gray-50"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: CLR[type].act }} />
-                    <span className={`text-sm font-medium ${active ? "text-gray-900" : dimmed ? "text-gray-400" : "text-gray-700"}`}>
+                    <span className={`text-sm font-medium ${active ? "text-blue-700" : dimmed ? "text-gray-400" : "text-gray-700"}`}>
                       {label}
                     </span>
-                    {count > 0 && <span className={`text-xs ${active ? "text-gray-600" : "text-gray-400"}`}>{count}</span>}
+                    {count > 0 && <span className={`text-xs ${active ? "text-blue-500" : "text-gray-400"}`}>{count}</span>}
                   </div>
                   {min !== null ? (
-                    <span className={`text-xs font-semibold tabular-nums ${active ? "text-gray-900" : dimmed ? "text-gray-300" : "text-gray-500"}`}>
+                    <span className={`text-xs font-semibold tabular-nums ${active ? "text-blue-600" : dimmed ? "text-gray-300" : "text-gray-500"}`}>
                       from {fmt(min)}
                     </span>
                   ) : (
@@ -1559,7 +1537,7 @@ export default function VenueMap({
               );
             })}
             {activeSectionTypes.length > 0 && (
-              <button onClick={onClearSectionTypes} className="mt-2 text-xs text-gray-500 hover:text-gray-700 font-medium transition text-left px-3">
+              <button onClick={onClearSectionTypes} className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-medium transition text-left px-3">
                 Clear zone filter
               </button>
             )}

@@ -46,7 +46,7 @@ export default function FilterSidebar({ filters, onChange, absoluteMin, absolute
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
           <h2 className="text-gray-900 font-semibold text-sm">Filters</h2>
           {isDirty && (
-            <button onClick={reset} className="text-gray-500 hover:text-gray-700 text-xs font-medium transition">
+            <button onClick={reset} className="text-blue-600 hover:text-blue-700 text-xs font-medium transition">
               Reset all
             </button>
           )}
@@ -81,7 +81,7 @@ export default function FilterSidebar({ filters, onChange, absoluteMin, absolute
               />
               {/* Blue fill between the two thumbs */}
               <div
-                className="absolute rounded-full bg-gray-700 pointer-events-none"
+                className="absolute rounded-full bg-blue-500 pointer-events-none"
                 style={{
                   top: "50%",
                   transform: "translateY(-50%)",
@@ -135,7 +135,7 @@ export default function FilterSidebar({ filters, onChange, absoluteMin, absolute
               <select
                 value={filters.minQuantity}
                 onChange={(e) => onChange({ ...filters, minQuantity: Number(e.target.value) })}
-                className="w-full bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition appearance-none cursor-pointer"
+                className="w-full bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition appearance-none cursor-pointer"
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
                   <option key={n} value={n}>{n}</option>
@@ -161,13 +161,13 @@ export default function FilterSidebar({ filters, onChange, absoluteMin, absolute
                   onClick={() => toggleSection(value)}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition ${
                     active
-                      ? "bg-gray-100 border border-gray-200 text-gray-900"
+                      ? "bg-blue-50 border border-blue-200 text-blue-700"
                       : "text-gray-600 hover:bg-gray-50 border border-transparent"
                   }`}
                 >
                   <span className="font-medium">{label}</span>
                   {active && (
-                    <svg className="w-3.5 h-3.5 text-gray-700 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                     </svg>
                   )}

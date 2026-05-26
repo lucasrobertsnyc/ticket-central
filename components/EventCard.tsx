@@ -143,7 +143,7 @@ export default memo(function EventCard({ event }: Props) {
             <img
               src={event.imageUrl}
               alt={event.artist}
-              className="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:opacity-85 group-hover:scale-105 transition-all duration-500"
+              className="absolute inset-0 w-full h-full object-cover object-center opacity-75 group-hover:opacity-85 group-hover:scale-105 transition-all duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             <div className="absolute top-3 left-3">
@@ -188,7 +188,7 @@ export default memo(function EventCard({ event }: Props) {
             </div>
             <div className="text-right">
               <p className="text-gray-400 text-xs mb-1.5">{event.listingCount} listings</p>
-              <span className="inline-block bg-gray-900 group-hover:bg-gray-800 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors">
+              <span className="inline-block bg-blue-600 group-hover:bg-blue-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors">
                 Compare prices
               </span>
             </div>

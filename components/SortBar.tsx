@@ -38,7 +38,7 @@ export default function SortBar({ field, dir, onChange, count }: Props) {
               onClick={() => handleClick(f)}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition ${
                 active
-                  ? "bg-gray-100 text-gray-900 border border-gray-200"
+                  ? "bg-blue-50 text-blue-700 border border-blue-200"
                   : "text-gray-500 hover:text-gray-800 hover:bg-gray-50 border border-transparent"
               }`}
             >
