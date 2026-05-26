@@ -1330,13 +1330,11 @@ function LegendPanel({ genre, activeSectionTypes, onSectionTypeToggle, onClearSe
       {/* Price tier scale */}
       <div className="flex items-center gap-2 mb-2">
         <span className="text-gray-400 text-xs whitespace-nowrap">Price</span>
+        <span className="text-gray-500 text-xs whitespace-nowrap">Low</span>
         <div className="flex-1 h-2 rounded-full overflow-hidden" style={{
           background: "linear-gradient(to right, #22c55e, #eab308, #f97316, #ef4444)"
         }} />
-        <div className="flex justify-between text-gray-500 text-xs gap-1">
-          <span>Low</span>
-          <span>High</span>
-        </div>
+        <span className="text-gray-500 text-xs whitespace-nowrap">High</span>
       </div>
       <div className="flex flex-wrap gap-1.5">
       {(["floor", "lower", "suite", "club", "upper"] as SectionType[]).map((type) => {
