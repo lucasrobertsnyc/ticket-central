@@ -762,12 +762,12 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
       <rect x={NFX} y={NFY} width={NFL_FIELD.w} height={NFL_FIELD.h} rx={2}
         fill={
           hoveredZone === "floor" || activeSectionTypes.includes("floor")
-            ? "#16a34a"
+            ? "#166534"
             : activeSectionTypes.length > 0 && !activeSectionTypes.includes("floor")
-            ? "rgba(21,128,61,0.45)"
-            : "#15803d"
+            ? "rgba(5,46,22,0.7)"
+            : "#14532d"
         }
-        stroke={hoveredZone === "floor" || activeSectionTypes.includes("floor") ? "rgba(255,255,255,0.45)" : "#15803d"} strokeWidth="1.5"
+        stroke={hoveredZone === "floor" || activeSectionTypes.includes("floor") ? "rgba(255,255,255,0.4)" : "#052e16"} strokeWidth="1.5"
         style={{ cursor: "pointer", transition: "fill 0.12s" }}
         onClick={() => onSectionTypeToggle("floor")}
         onMouseEnter={() => onZoneHover("floor")}
@@ -778,8 +778,8 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
           width={playW / 10} height={NFL_FIELD.h}
           fill="rgba(255,255,255,0.05)" style={{ pointerEvents: "none" }} />
       ))}
-      <rect x={NFX} y={NFY} width={EZ_W} height={NFL_FIELD.h} rx={2} fill="#16a34a" style={{ pointerEvents: "none" }} />
-      <rect x={NFX + NFL_FIELD.w - EZ_W} y={NFY} width={EZ_W} height={NFL_FIELD.h} rx={2} fill="#16a34a" style={{ pointerEvents: "none" }} />
+      <rect x={NFX} y={NFY} width={EZ_W} height={NFL_FIELD.h} rx={2} fill="#166534" style={{ pointerEvents: "none" }} />
+      <rect x={NFX + NFL_FIELD.w - EZ_W} y={NFY} width={EZ_W} height={NFL_FIELD.h} rx={2} fill="#166534" style={{ pointerEvents: "none" }} />
       <text x={NFX + EZ_W / 2} y={NF.CY + 2} textAnchor="middle" fontSize="5"
         fill="rgba(255,255,255,0.55)" fontFamily="system-ui" fontWeight="800" letterSpacing="0.5"
         transform={`rotate(-90, ${NFX + EZ_W / 2}, ${NF.CY})`}
@@ -1011,12 +1011,12 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
       <path d={arcBandPath(cx, cy, MLB_R.fieldIn, MLB_R.fieldOut, FAN_S, FAN_E)}
         fill={
           hoveredZone === "floor" || activeSectionTypes.includes("floor")
-            ? "#16a34a"
+            ? "#166534"
             : activeSectionTypes.length > 0 && !activeSectionTypes.includes("floor")
-            ? "rgba(21,128,61,0.45)"
-            : "#15803d"
+            ? "rgba(5,46,22,0.7)"
+            : "#14532d"
         }
-        stroke={hoveredZone === "floor" || activeSectionTypes.includes("floor") ? "rgba(255,255,255,0.45)" : "#15803d"} strokeWidth="1.5"
+        stroke={hoveredZone === "floor" || activeSectionTypes.includes("floor") ? "rgba(255,255,255,0.4)" : "#052e16"} strokeWidth="1.5"
         style={{ cursor: "pointer", transition: "fill 0.12s" }}
         onClick={() => onSectionTypeToggle("floor")}
         onMouseEnter={() => onZoneHover("floor")}
@@ -1114,7 +1114,7 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
       {/* Infield grass */}
       <polygon
         points={`${hp.x},${hp.y} ${b1.x},${b1.y} ${b2.x},${b2.y} ${b3.x},${b3.y}`}
-        fill="#22c55e" style={{ pointerEvents: "none" }}
+        fill="#166534" style={{ pointerEvents: "none" }}
       />
 
       {/* ── Diamond markings ── */}
