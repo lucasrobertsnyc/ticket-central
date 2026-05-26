@@ -30,35 +30,41 @@ interface MapProps {
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 
-// Professional price-tier spectrum (SeatGeek/StubHub style)
-const CLR: Record<SectionType, { base: string; act: string; dim: string }> = {
-  floor: { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.25)" },
+type TierColor = { base: string; act: string; dim: string };
+
+// Price-tier spectrum: green (cheapest) → yellow → orange → red (most expensive)
+const TIER_COLORS: TierColor[] = [
+  { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.22)"  }, // green
+  { base: "#eab308", act: "#ca8a04", dim: "rgba(234,179,8,0.22)"  }, // yellow
+  { base: "#f97316", act: "#ea580c", dim: "rgba(249,115,22,0.22)" }, // orange
+  { base: "#ef4444", act: "#dc2626", dim: "rgba(239,68,68,0.22)"  }, // red
+];
+
+// Fallback zone colors (used when no price data is available)
+const CLR: Record<SectionType, TierColor> = {
+  floor: TIER_COLORS[0],
   lower: { base: "#3b82f6", act: "#2563eb", dim: "rgba(59,130,246,0.25)" },
   club:  { base: "#06b6d4", act: "#0891b2", dim: "rgba(6,182,212,0.25)"  },
   upper: { base: "#8b5cf6", act: "#7c3aed", dim: "rgba(139,92,246,0.25)" },
   suite: { base: "#f59e0b", act: "#d97706", dim: "rgba(245,158,11,0.25)" },
 };
 
-// Dark map background (matches SeatGeek's dark map)
+// Dark map background
 const MAP_BG = "#0f172a";
 const SECTION_STROKE = "#0f172a";
 const INK = "rgba(255,255,255,0.85)";
 const INK_DIM = "rgba(255,255,255,0.4)";
 
-const GRS = { base: "#22c55e", act: "#16a34a", dim: "rgba(34,197,94,0.25)" };
-
-function fieldFill(hov: SectionType | null, active: SectionType[]): string {
-  if (hov === "floor") return GRS.act;
-  if (active.length > 0 && !active.includes("floor")) return GRS.dim;
-  if (active.includes("floor")) return GRS.act;
-  return GRS.base;
+function zoneFill(type: SectionType, hov: SectionType | null, active: SectionType[], tier?: Record<SectionType, TierColor>): string {
+  const c = (tier ?? CLR)[type];
+  if (hov === type) return c.act;
+  if (active.length > 0 && !active.includes(type)) return c.dim;
+  if (active.includes(type)) return c.act;
+  return c.base;
 }
 
-function zoneFill(type: SectionType, hov: SectionType | null, active: SectionType[]): string {
-  if (hov === type) return CLR[type].act;
-  if (active.length > 0 && !active.includes(type)) return CLR[type].dim;
-  if (active.includes(type)) return CLR[type].act;
-  return CLR[type].base;
+function fieldFill(hov: SectionType | null, active: SectionType[], tier?: Record<SectionType, TierColor>): string {
+  return zoneFill("floor", hov, active, tier);
 }
 
 /** Build a curved trapezoid SVG path for a section between two elliptic rings */
@@ -86,6 +92,23 @@ function sectionPolygonPath(
 // ── Data helpers ──────────────────────────────────────────────────────────────
 
 const ALL_ZONES: SectionType[] = ["floor", "lower", "club", "upper", "suite"];
+
+/** Maps each zone to a price-tier color based on relative min prices.
+ *  Cheapest zone → green, most expensive → red. Falls back to CLR palette
+ *  when no price data is available. */
+function buildTierMap(minByType?: Record<SectionType, number | null>): Record<SectionType, TierColor> {
+  if (!minByType) return CLR;
+  const zones = ALL_ZONES.filter(t => minByType[t] !== null);
+  if (zones.length === 0) return CLR;
+  const sorted = [...zones].sort((a, b) => (minByType[a] ?? 0) - (minByType[b] ?? 0));
+  const result: Record<SectionType, TierColor> = { ...CLR };
+  const n = sorted.length;
+  sorted.forEach((zone, i) => {
+    const idx = n === 1 ? 0 : n === 2 ? (i === 0 ? 0 : 3) : n === 3 ? [0, 2, 3][i] : Math.min(i, 3);
+    result[zone] = TIER_COLORS[idx];
+  });
+  return result;
+}
 
 function useZoneData(listings: TicketListing[]) {
   return useMemo(() => ({
@@ -218,11 +241,12 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
   const floorLabel = isNBA ? "COURT" : isNHL ? "ICE" : "STAGE";
   const floorSub   = isNBA ? "COURTSIDE" : isNHL ? "RINKSIDE" : "GA / FLOOR";
 
+  const tierMap     = buildTierMap(minByType);
   const floorActive = activeSectionTypes.includes("floor");
   const floorDimmed = activeSectionTypes.length > 0 && !floorActive;
   const baseColor   = isNBA ? "#d4a96a" : isNHL ? "#cce8f8" : "#1e293b";
-  const activeColor = isNBA ? "#b8883a" : isNHL ? "#99cef0" : CLR.floor.act;
-  const dimColor    = isNBA ? "rgba(212,169,106,0.3)" : isNHL ? "rgba(204,232,248,0.3)" : CLR.floor.dim;
+  const activeColor = isNBA ? "#b8883a" : isNHL ? "#99cef0" : tierMap.floor.act;
+  const dimColor    = isNBA ? "rgba(212,169,106,0.3)" : isNHL ? "rgba(204,232,248,0.3)" : tierMap.floor.dim;
   const floorColor  = hoveredZone === "floor" ? activeColor : floorDimmed ? dimColor : floorActive ? activeColor : baseColor;
   const floorInk    = isNHL ? "rgba(15,23,42,0.8)" : "rgba(255,255,255,0.92)";
   const floorStroke = hoveredZone === "floor" || floorActive ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.15)";
@@ -236,7 +260,7 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
 
       {/* Seating rings — each section is its own polygon */}
       {[...ARENA_RINGS].reverse().map((ring) => {
-        const fill     = zoneFill(ring.type, hoveredZone, activeSectionTypes);
+        const fill     = zoneFill(ring.type, hoveredZone, activeSectionTypes, tierMap);
         const isActive = activeSectionTypes.includes(ring.type) || hoveredZone === ring.type;
         const midRy    = (ring.iRy + ring.oRy) / 2;
         const midRx    = (ring.iRx + ring.oRx) / 2;
@@ -486,7 +510,7 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
       {/* Suite boxes */}
       {[{ x: suiteX1 }, { x: suiteX2 }].map((set, si) => {
         const suiteActive = activeSectionTypes.includes("suite") || hoveredZone === "suite";
-        const suiteFill = zoneFill("suite", hoveredZone, activeSectionTypes);
+        const suiteFill = zoneFill("suite", hoveredZone, activeSectionTypes, tierMap);
         return (
           <g key={si} style={{ cursor: "pointer" }}
             onClick={() => onSectionTypeToggle("suite")}
@@ -571,6 +595,7 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
   const topSecNums = nflCfg.top;
   const botSecNums = nflCfg.bot;
   const isOpenEndLeft = nflCfg.openEndLeft ?? false;   // Lumen Field open north end
+  const tierMap = buildTierMap(minByType);
 
   // Section block gap (creates visual separation between sections)
   const SEC_GAP = 1.5;
@@ -584,7 +609,7 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
 
       {/* Individual section blocks for each band — top sideline, bottom sideline, end zones */}
       {[...NFL_BANDS].reverse().map((band) => {
-        const fill    = zoneFill(band.type, hoveredZone, activeSectionTypes);
+        const fill    = zoneFill(band.type, hoveredZone, activeSectionTypes, tierMap);
         const isAct   = activeSectionTypes.includes(band.type) || hoveredZone === band.type;
         const bx = NFX - band.pad, by = NFY - band.pad;
         const bw = NFL_FIELD.w + band.pad * 2, bh = NFL_FIELD.h + band.pad * 2;
@@ -687,7 +712,7 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
 
       {/* Suite strips — two thin horizontal strips between lower and club */}
       {(() => {
-        const suiteFill = zoneFill("suite", hoveredZone, activeSectionTypes);
+        const suiteFill = zoneFill("suite", hoveredZone, activeSectionTypes, tierMap);
         const suiteActive = activeSectionTypes.includes("suite") || hoveredZone === "suite";
         const numSuiteSecs = 14;
         const stripW = NFL_FIELD.w + 56 + 2;
@@ -735,8 +760,8 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
 
       {/* Field */}
       <rect x={NFX} y={NFY} width={NFL_FIELD.w} height={NFL_FIELD.h} rx={2}
-        fill={fieldFill(hoveredZone, activeSectionTypes)}
-        stroke={hoveredZone === "floor" ? "#16a34a" : "#15803d"} strokeWidth="1.5"
+        fill={fieldFill(hoveredZone, activeSectionTypes, tierMap)}
+        stroke={hoveredZone === "floor" || activeSectionTypes.includes("floor") ? tierMap.floor.act : "#15803d"} strokeWidth="1.5"
         style={{ cursor: "pointer", transition: "fill 0.12s" }}
         onClick={() => onSectionTypeToggle("floor")}
         onMouseEnter={() => onZoneHover("floor")}
@@ -864,6 +889,7 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
   const pm = { x: cx,     y: cy - 38 };
 
   const bp = BALLPARK_DATA[venue] ?? DEFAULT_BALLPARK;
+  const tierMap = buildTierMap(minByType);
 
   // Helper: build a single MLB fan-wedge section path (circular arc band, not ellipse)
   function mlbSectionPath(r1: number, r2: number, startDeg: number, endDeg: number): string {
@@ -897,7 +923,7 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
     r1: number, r2: number,
     count: number
   ) {
-    const fill    = zoneFill(type, hoveredZone, activeSectionTypes);
+    const fill    = zoneFill(type, hoveredZone, activeSectionTypes, tierMap);
     const isAct   = activeSectionTypes.includes(type) || hoveredZone === type;
     const isInact = activeSectionTypes.length > 0 && !activeSectionTypes.includes(type) && hoveredZone !== type;
     const secStep = TOTAL_ARC / count;
@@ -981,8 +1007,8 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
 
       {/* Outfield grass (clickable) */}
       <path d={arcBandPath(cx, cy, MLB_R.fieldIn, MLB_R.fieldOut, FAN_S, FAN_E)}
-        fill={fieldFill(hoveredZone, activeSectionTypes)}
-        stroke={hoveredZone === "floor" ? "#16a34a" : "#15803d"} strokeWidth="1.5"
+        fill={fieldFill(hoveredZone, activeSectionTypes, tierMap)}
+        stroke={hoveredZone === "floor" || activeSectionTypes.includes("floor") ? tierMap.floor.act : "#15803d"} strokeWidth="1.5"
         style={{ cursor: "pointer", transition: "fill 0.12s" }}
         onClick={() => onSectionTypeToggle("floor")}
         onMouseEnter={() => onZoneHover("floor")}
@@ -1169,6 +1195,7 @@ function ExpandedModal({
   minByType: Record<SectionType, number | null>;
   countByType: Record<SectionType, number>;
 }) {
+  const tierMap = buildTierMap(minByType);
   const panelListings = useMemo(() => {
     let result: TicketListing[];
     if (hoveredZone) result = listings.filter(l => l.sectionType === hoveredZone);
@@ -1212,7 +1239,7 @@ function ExpandedModal({
                     className={`px-2.5 py-0.5 rounded-full text-xs font-semibold transition-all border ${
                       isAct ? "border-transparent text-white" : "border-white/15 text-gray-400 hover:text-white hover:border-white/30"
                     }`}
-                    style={isAct ? { backgroundColor: CLR[t].act } : {}}
+                    style={isAct ? { backgroundColor: tierMap[t].act } : {}}
                   >{getZoneLabel(t, genre)}</button>
                 );
               })}
@@ -1281,16 +1308,29 @@ function ExpandedModal({
 
 // ── Legend panel ──────────────────────────────────────────────────────────────
 
-function LegendPanel({ genre, activeSectionTypes, onSectionTypeToggle, onClearSectionTypes, minByType, countByType }: {
+function LegendPanel({ genre, activeSectionTypes, onSectionTypeToggle, onClearSectionTypes, minByType, countByType, tierMap }: {
   genre: string;
   activeSectionTypes: SectionType[];
   onSectionTypeToggle: (t: SectionType) => void;
   onClearSectionTypes: () => void;
   minByType: Record<SectionType, number | null>;
   countByType: Record<SectionType, number>;
+  tierMap: Record<SectionType, TierColor>;
 }) {
   return (
-    <div className="flex flex-wrap gap-1.5 px-3 py-2.5">
+    <div className="px-3 pt-2.5 pb-1.5">
+      {/* Price tier scale */}
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-gray-400 text-xs whitespace-nowrap">Price</span>
+        <div className="flex-1 h-2 rounded-full overflow-hidden" style={{
+          background: "linear-gradient(to right, #22c55e, #eab308, #f97316, #ef4444)"
+        }} />
+        <div className="flex justify-between text-gray-500 text-xs gap-1">
+          <span>Low</span>
+          <span>High</span>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
       {(["floor", "lower", "suite", "club", "upper"] as SectionType[]).map((type) => {
         const label = getZoneLabel(type, genre);
         const min = minByType[type];
@@ -1306,7 +1346,7 @@ function LegendPanel({ genre, activeSectionTypes, onSectionTypeToggle, onClearSe
               :          "border-gray-200 hover:bg-gray-50 text-gray-600"
             }`}
           >
-            <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: CLR[type].act }} />
+            <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: tierMap[type].act }} />
             <span className="font-semibold">{label}</span>
             {min !== null && (
               <span className={`tabular-nums ${active ? "text-blue-500" : "text-gray-400"}`}>
@@ -1322,6 +1362,7 @@ function LegendPanel({ genre, activeSectionTypes, onSectionTypeToggle, onClearSe
           Clear
         </button>
       )}
+      </div>
     </div>
   );
 }
@@ -1333,6 +1374,7 @@ export default function VenueMap({
   genre = "", venue = "", mode = "card",
 }: Props) {
   const { minByType, countByType } = useZoneData(listings);
+  const tierMap = buildTierMap(minByType);
   const [expanded, setExpanded] = useState(false);
   const [hoveredZone, setHoveredZone] = useState<SectionType | null>(null);
   const svgContainerRef = useRef<HTMLDivElement>(null);
@@ -1368,13 +1410,13 @@ export default function VenueMap({
     >
       {isNFL ? (
         <NFLMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
-          onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
+          onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} minByType={minByType} countByType={countByType} />
       ) : isMLB ? (
         <MLBMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
-          onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
+          onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} minByType={minByType} countByType={countByType} />
       ) : (
         <ArenaMap genre={genre} venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
-          onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
+          onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} minByType={minByType} countByType={countByType} />
       )}
 
       {/* Tooltip */}
@@ -1386,7 +1428,7 @@ export default function VenueMap({
         {hoveredZone && (
           <>
             <div className="flex items-center gap-2 mb-0.5">
-              <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: CLR[hoveredZone].act }} />
+              <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: tierMap[hoveredZone].act }} />
               <span className="text-white font-semibold text-sm">{getZoneLabel(hoveredZone, genre)}</span>
             </div>
             <div className="text-gray-400 text-xs">
@@ -1412,13 +1454,13 @@ export default function VenueMap({
             >
               {isNFL ? (
                 <NFLMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
-                  onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
+                  onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} minByType={minByType} countByType={countByType} />
               ) : isMLB ? (
                 <MLBMap venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
-                  onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
+                  onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} minByType={minByType} countByType={countByType} />
               ) : (
                 <ArenaMap genre={genre} venue={venue} activeSectionTypes={activeSectionTypes} hoveredZone={hoveredZone}
-                  onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} />
+                  onSectionTypeToggle={onSectionTypeToggle} onZoneHover={onZoneHover} minByType={minByType} countByType={countByType} />
               )}
               {/* Tooltip */}
               <div ref={tooltipRef}
@@ -1428,7 +1470,7 @@ export default function VenueMap({
                 {hoveredZone && (
                   <>
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: CLR[hoveredZone].act }} />
+                      <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: tierMap[hoveredZone].act }} />
                       <span className="text-white font-semibold text-sm">{getZoneLabel(hoveredZone, genre)}</span>
                     </div>
                     <div className="text-gray-400 text-xs">
@@ -1460,6 +1502,7 @@ export default function VenueMap({
               onClearSectionTypes={onClearSectionTypes}
               minByType={minByType}
               countByType={countByType}
+              tierMap={tierMap}
             />
           </div>
         </div>
@@ -1520,7 +1563,7 @@ export default function VenueMap({
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: CLR[type].act }} />
+                    <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: tierMap[type].act }} />
                     <span className={`text-sm font-medium ${active ? "text-blue-700" : dimmed ? "text-gray-400" : "text-gray-700"}`}>
                       {label}
                     </span>
