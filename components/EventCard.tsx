@@ -162,12 +162,7 @@ export default memo(function EventCard({ event }: Props) {
                     <span className="text-gray-400 text-xs font-normal ml-1">all-in</span>
                   </p>
                 </>
-              ) : (
-                <>
-                  <p className="text-gray-400 text-xs">Availability</p>
-                  <p className="text-gray-700 font-semibold text-sm leading-tight">Check tickets</p>
-                </>
-              )}
+              ) : null}
             </div>
             <div className="text-right">
               <p className="text-gray-400 text-xs mb-1.5">

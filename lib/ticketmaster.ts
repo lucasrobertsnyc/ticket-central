@@ -208,15 +208,41 @@ const ALL_PLATFORMS: Platform[] = [
   "SeatGeek", "StubHub", "Vivid Seats", "TickPick", "GameTime", "Ticketmaster", "AXS",
 ];
 
-/** Returns 20-35 deterministic ticket listings for a Ticketmaster event.
- *  Each listing carries the event's real Ticketmaster checkout URL as `buyUrl`. */
+// Per-platform checkout search URLs — each Buy button opens the right platform
+// for the specific event. Pure computation; no extra API calls.
+function platformBuyUrl(platform: Platform, event: Event): string {
+  const q = encodeURIComponent(`${event.artist} ${event.venue}`);
+  switch (platform) {
+    case "SeatGeek":     return `https://seatgeek.com/search?q=${q}`;
+    case "StubHub":      return `https://www.stubhub.com/find/s/?q=${q}`;
+    case "Vivid Seats":  return `https://www.vividseats.com/search?searchTerm=${q}`;
+    case "TickPick":     return `https://www.tickpick.com/search?q=${q}`;
+    case "GameTime":     return `https://gametime.co/events?search=${q}`;
+    case "AXS":          return `https://www.axs.com/search?searchTerm=${q}`;
+    case "Ticketmaster": return event.url ?? `https://www.ticketmaster.com/search?q=${q}`;
+    default:             return event.url ?? "";
+  }
+}
+
+/** Genre-based floor prices used when Ticketmaster hasn't published pricing yet. */
+const GENRE_BASE: Record<string, number> = {
+  NFL: 89, NBA: 69, NHL: 59, MLB: 29, MLS: 25,
+  "Hip-Hop": 65, Pop: 65, Rock: 55, "R&B": 55,
+  Latin: 55, Electronic: 45, Country: 50, Alternative: 40,
+};
+
+/** Returns 20-35 deterministic ticket listings for any event.
+ *  Each listing's buyUrl points to that platform's search page for the event. */
 export function generateListingsForEvent(event: Event): TicketListing[] {
   const seed = event.id.split("").reduce((a, c, i) => a + c.charCodeAt(0) * (i + 1), 0);
   const rand = makePrng(seed);
 
-  const base = Math.max(event.lowestAllInPrice || 60, 35);
-  const isField  = event.genre === "NFL" || event.genre === "MLB";
-  const isCourt  = event.genre === "NBA" || event.genre === "NHL";
+  const base = Math.max(
+    event.lowestAllInPrice || GENRE_BASE[event.genre] || 55,
+    25,
+  );
+  const isField = event.genre === "NFL" || event.genre === "MLB";
+  const isCourt = event.genre === "NBA" || event.genre === "NHL";
 
   const zones: Array<{ type: SectionType; mult: number; prefix: string; maxRow: number }> = [
     { type: "floor",  mult: 0.95, prefix: isCourt ? "Courtside"   : isField ? "Field Level" : "Floor GA", maxRow: 5  },
@@ -252,12 +278,23 @@ export function generateListingsForEvent(event: Event): TicketListing[] {
         fees,
         tax,
         allInTotal:  baseP + fees + tax,
-        buyUrl:      event.url,
+        buyUrl:      platformBuyUrl(platform, event),
       });
     }
   }
 
   return listings.sort((a, b) => a.allInTotal - b.allInTotal);
+}
+
+/**
+ * For events where Ticketmaster hasn't published a price yet (lowestAllInPrice === 0),
+ * compute the realistic starting price by generating the listings and taking the minimum.
+ * This keeps the homepage card consistent with what's shown on the detail page.
+ */
+export function inferStartingPrice(event: Event): number {
+  if (event.lowestAllInPrice > 0) return event.lowestAllInPrice;
+  const listings = generateListingsForEvent(event);
+  return listings.length > 0 ? listings[0].allInTotal : 0;
 }
 
 // ── Internal fetch helper ─────────────────────────────────────────────────────
@@ -355,7 +392,9 @@ export async function getTicketmasterEvents(): Promise<Event[]> {
 
   const events = unique
     .map(tmToEvent)
-    .filter((e): e is Event => e !== null);
+    .filter((e): e is Event => e !== null)
+    // Fill in missing prices so the homepage never shows "Check tickets"
+    .map(e => e.lowestAllInPrice > 0 ? e : { ...e, lowestAllInPrice: inferStartingPrice(e) });
 
   // Sort chronologically (Date TBA goes last)
   events.sort((a, b) => {
