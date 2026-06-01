@@ -36,8 +36,10 @@ function extractLocations(events: Event[]): { label: string; match: string }[] {
   return locs.sort((a, b) => a.label.localeCompare(b.label));
 }
 
-// Preferred display order for league pills
+// Specific leagues to show in the sports tab — "Sports" (generic TM fallback)
+// is intentionally excluded; those events are too vague to classify
 const LEAGUE_ORDER = ["NFL", "NBA", "MLB", "NHL", "MLS", "WNBA", "MiLB", "AHL", "ECHL", "Soccer", "NWSL"];
+const EXCLUDED_SPORT_GENRES = new Set(["Sports"]); // generic fallback — hide from sports tab
 
 type Category = "all" | "concerts" | "sports";
 type SortBy   = "date" | "price" | "location";
@@ -57,7 +59,9 @@ export default function HomepageClient({ events }: Props) {
 
   // All sport genres present in data, ordered by LEAGUE_ORDER then alphabetically
   const availableLeagues = useMemo(() => {
-    const presentArr = events.filter(e => ALL_SPORT_GENRES.has(e.genre)).map(e => e.genre);
+    const presentArr = events
+      .filter(e => ALL_SPORT_GENRES.has(e.genre) && !EXCLUDED_SPORT_GENRES.has(e.genre))
+      .map(e => e.genre);
     const present = new Set(presentArr);
     const ordered = LEAGUE_ORDER.filter(lg => present.has(lg));
     // Any sport genres not in LEAGUE_ORDER go at the end
@@ -84,6 +88,7 @@ export default function HomepageClient({ events }: Props) {
     const result = events.filter((e) => {
       if (category === "concerts" && ALL_SPORT_GENRES.has(e.genre)) return false;
       if (category === "sports"   && !ALL_SPORT_GENRES.has(e.genre)) return false;
+      if (category === "sports"   && EXCLUDED_SPORT_GENRES.has(e.genre)) return false;
       if (category === "sports"   && league && e.genre !== league) return false;
       if (category === "concerts" && genre  && e.genre !== genre)  return false;
       if (l && !e.city.includes(l)) return false;
