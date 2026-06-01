@@ -208,20 +208,12 @@ const ALL_PLATFORMS: Platform[] = [
   "SeatGeek", "StubHub", "Vivid Seats", "TickPick", "GameTime", "Ticketmaster", "AXS",
 ];
 
-// Per-platform checkout search URLs — each Buy button opens the right platform
-// for the specific event. Pure computation; no extra API calls.
-function platformBuyUrl(platform: Platform, event: Event): string {
-  const q = encodeURIComponent(`${event.artist} ${event.venue}`);
-  switch (platform) {
-    case "SeatGeek":     return `https://seatgeek.com/search?q=${q}`;
-    case "StubHub":      return `https://www.stubhub.com/find/s/?q=${q}`;
-    case "Vivid Seats":  return `https://www.vividseats.com/search?searchTerm=${q}`;
-    case "TickPick":     return `https://www.tickpick.com/search?q=${q}`;
-    case "GameTime":     return `https://gametime.co/events?search=${q}`;
-    case "AXS":          return `https://www.axs.com/search?searchTerm=${q}`;
-    case "Ticketmaster": return event.url ?? `https://www.ticketmaster.com/search?q=${q}`;
-    default:             return event.url ?? "";
-  }
+// The TM Discovery API provides one real checkout URL per event (event.url).
+// Per-seat per-platform URLs require the Commerce/Exchange APIs (paid tiers).
+// All Buy buttons use the direct event checkout URL so users reach a real
+// purchase flow instead of a generic search page.
+function platformBuyUrl(_platform: Platform, event: Event): string {
+  return event.url ?? "";
 }
 
 /** Genre-based floor prices used when Ticketmaster hasn't published pricing yet. */

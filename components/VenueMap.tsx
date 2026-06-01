@@ -1181,11 +1181,11 @@ function MapListingRow({ listing, cheapest }: { listing: TicketListing; cheapest
       {listing.buyUrl ? (
         <a href={listing.buyUrl} target="_blank" rel="noopener noreferrer"
           className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors flex-shrink-0">
-          Buy ↗
+          Get Tickets ↗
         </a>
       ) : (
         <button className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors flex-shrink-0">
-          Buy
+          Get Tickets
         </button>
       )}
     </div>
