@@ -14,12 +14,22 @@ const GENRE_FALLBACK_BG: Record<string, string> = {
   "Hip-Hop":           "#0d0d0d",
   "Latin / Reggaeton": "#061410",
   "Rock / Pop":        "#070e18",
-  // Sports
+  // Major pro sports
   "NFL":               "#060f08",
   "NBA":               "#160800",
   "MLB":               "#060a18",
   "NHL":               "#060c18",
   "MLS":               "#070f0a",
+  // Minor / women's leagues
+  "WNBA":              "#160800",
+  "MiLB":              "#060a18",
+  "AHL":               "#060c18",
+  "ECHL":              "#060c18",
+  "NWSL":              "#070f0a",
+  "G-League":          "#160800",
+  "AFL":               "#060f08",
+  "CFL":               "#060f08",
+  "Soccer":            "#070f0a",
 };
 
 function TeamPanel({

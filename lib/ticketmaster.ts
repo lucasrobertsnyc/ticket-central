@@ -106,11 +106,47 @@ function mapGenre(tm: TmEvent): string {
   const segment  = (cls?.segment?.name  ?? "").toLowerCase();
   const genre    = (cls?.genre?.name    ?? "").toLowerCase();
   const subGenre = (cls?.subGenre?.name ?? "").toLowerCase();
+  const sub      = subGenre;
 
-  if (segment === "sports") {
-    return GENRE_MAP[genre] ?? GENRE_MAP[subGenre] ?? "Sports";
+  if (segment !== "sports") {
+    return GENRE_MAP[genre] ?? GENRE_MAP[subGenre] ?? "Music";
   }
-  return GENRE_MAP[genre] ?? GENRE_MAP[subGenre] ?? "Music";
+
+  // ── Sports: check subGenre before the broad genre mapping ────────────────
+  if (genre.includes("basketball")) {
+    if (sub.includes("wnba") || sub.includes("women's national basketball") || sub.includes("women's pro")) return "WNBA";
+    if (sub.includes("g league") || sub.includes("nba g")) return "G-League";
+    return "NBA";
+  }
+  if (genre.includes("baseball")) {
+    // Minor league indicators in subGenre or event name
+    if (
+      sub.includes("minor") || sub.includes("milb") ||
+      sub.includes("triple-a") || sub.includes("triple a") || sub.includes("aaa") ||
+      sub.includes("double-a") || sub.includes("double a") || sub.includes("aa") ||
+      sub.includes("single-a") || sub.includes("independent") || sub.includes("atlantic")
+    ) return "MiLB";
+    return "MLB";
+  }
+  if (genre.includes("hockey")) {
+    if (sub.includes("ahl") || sub.includes("american hockey league")) return "AHL";
+    if (sub.includes("echl")) return "ECHL";
+    if (sub.includes("iihf") || sub.includes("world championship")) return "IIHF";
+    return "NHL";
+  }
+  if (genre.includes("football")) {
+    if (sub.includes("arena") || sub.includes("indoor") || sub.includes("afl")) return "AFL";
+    if (sub.includes("cfl") || sub.includes("canadian")) return "CFL";
+    if (sub.includes("usfl") || sub.includes("xfl")) return sub.includes("usfl") ? "USFL" : "XFL";
+    if (sub.includes("college") || sub.includes("ncaa")) return "NCAAF";
+    return "NFL";
+  }
+  if (genre.includes("soccer") || genre.includes("football") && sub.includes("soccer")) {
+    if (sub.includes("nwsl") || sub.includes("women")) return "NWSL";
+    return "Soccer";
+  }
+
+  return GENRE_MAP[genre] ?? GENRE_MAP[subGenre] ?? "Sports";
 }
 
 // ── Image helper ──────────────────────────────────────────────────────────────
@@ -357,7 +393,11 @@ const CITIES = [
 const TOUR_RE = /\b(tours?|pregame|ballpark\s+tour|stadium\s+tour|vip\s+tour|batting\s+practice|field\s+experience|wrestling|midget|showcase|comedy\s+night)\b/i;
 
 // All sport genres — every sport event must have an identifiable opponent
-const PRO_SPORT_GENRES = new Set(["NFL", "NBA", "MLB", "NHL", "MLS", "Sports"]);
+const PRO_SPORT_GENRES = new Set([
+  "NFL", "NBA", "MLB", "NHL", "MLS",
+  "WNBA", "MiLB", "AHL", "ECHL", "AFL", "CFL", "USFL", "XFL",
+  "NCAAF", "NCAAB", "G-League", "NWSL", "IIHF", "Soccer", "Sports",
+]);
 
 /**
  * Returns true if the event is a real, bookable game/show — not a stadium

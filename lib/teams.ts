@@ -164,9 +164,106 @@ const NHL: Record<string, TeamInfo> = {
   "Jets":         { abbr: "WPG", primary: "#041E42", secondary: "#AC162C", espnId: "wpg", league: "nhl" },
 };
 
+// ── WNBA teams ────────────────────────────────────────────────────────────────
+// ESPN CDN: https://a.espncdn.com/i/teamlogos/wnba/500/{espnId}.png
+const WNBA: Record<string, TeamInfo> = {
+  "Dream":         { abbr: "ATL", primary: "#C8102E", secondary: "#041E42", espnId: "atl",  league: "wnba" },
+  "Sky":           { abbr: "CHI", primary: "#418FDE", secondary: "#FAD538", espnId: "chi",  league: "wnba" },
+  "Sun":           { abbr: "CON", primary: "#E03A3E", secondary: "#0B5FA5", espnId: "conn", league: "wnba" },
+  "Wings":         { abbr: "DAL", primary: "#0C2340", secondary: "#C4D600", espnId: "dal",  league: "wnba" },
+  "Fever":         { abbr: "IND", primary: "#002D62", secondary: "#E03A3E", espnId: "ind",  league: "wnba" },
+  "Aces":          { abbr: "LVA", primary: "#000000", secondary: "#C8102E", espnId: "lva",  league: "wnba" },
+  "Sparks":        { abbr: "LAS", primary: "#552583", secondary: "#FDB927", espnId: "las",  league: "wnba" },
+  "Lynx":          { abbr: "MIN", primary: "#266092", secondary: "#79BC44", espnId: "min",  league: "wnba" },
+  "Liberty":       { abbr: "NYL", primary: "#6ECEB2", secondary: "#000000", espnId: "ny",   league: "wnba" },
+  "Mercury":       { abbr: "PHX", primary: "#201747", secondary: "#E56020", espnId: "phx",  league: "wnba" },
+  "Storm":         { abbr: "SEA", primary: "#2C5234", secondary: "#FECA02", espnId: "sea",  league: "wnba" },
+  "Mystics":       { abbr: "WAS", primary: "#0C2340", secondary: "#E03A3E", espnId: "wsh",  league: "wnba" },
+  "Valkyries":     { abbr: "GSV", primary: "#002660", secondary: "#FDB927", espnId: "gsv",  league: "wnba" },
+};
+
+// ── AHL teams (American Hockey League) ───────────────────────────────────────
+// ESPN does not carry AHL team logos — fallback to colors + abbreviation
+const AHL: Record<string, TeamInfo> = {
+  "Wolves":        { abbr: "CHI", primary: "#C8102E", secondary: "#C49A00", espnId: "", league: "ahl" },
+  "Eagles":        { abbr: "COL", primary: "#8B0000", secondary: "#C8A547", espnId: "", league: "ahl" },
+  "Admirals":      { abbr: "MIL", primary: "#002B5C", secondary: "#FFFFFF", espnId: "", league: "ahl" },
+  "Monsters":      { abbr: "CLE", primary: "#041E42", secondary: "#C8102E", espnId: "", league: "ahl" },
+  "Condors":       { abbr: "BAK", primary: "#003087", secondary: "#FFFFFF", espnId: "", league: "ahl" },
+  "Gulls":         { abbr: "SD",  primary: "#005083", secondary: "#F47A38", espnId: "", league: "ahl" },
+  "Moose":         { abbr: "MB",  primary: "#004225", secondary: "#FFFFFF", espnId: "", league: "ahl" },
+  "Heat":          { abbr: "STK", primary: "#CE1126", secondary: "#F1BE48", espnId: "", league: "ahl" },
+  "Bears":         { abbr: "HER", primary: "#C8102E", secondary: "#FFFFFF", espnId: "", league: "ahl" },
+  "Checkers":      { abbr: "CHA", primary: "#001489", secondary: "#FFFFFF", espnId: "", league: "ahl" },
+  "Wolf Pack":     { abbr: "HFD", primary: "#0038A8", secondary: "#CE1126", espnId: "", league: "ahl" },
+  "Marlies":       { abbr: "TOR", primary: "#003E7E", secondary: "#FFFFFF", espnId: "", league: "ahl" },
+  "Laval Rocket":  { abbr: "LAV", primary: "#AF1E2D", secondary: "#192168", espnId: "", league: "ahl" },
+  "Belleville Senators": { abbr: "BEL", primary: "#C52032", secondary: "#C2912C", espnId: "", league: "ahl" },
+  "Abbotsford Canucks":  { abbr: "ABB", primary: "#00205B", secondary: "#00843D", espnId: "", league: "ahl" },
+  "Ontario Reign": { abbr: "ONT", primary: "#111111", secondary: "#A2AAAD", espnId: "", league: "ahl" },
+  "Henderson Silver Knights": { abbr: "HSK", primary: "#B4975A", secondary: "#333F42", espnId: "", league: "ahl" },
+  "Coachella Valley Firebirds": { abbr: "CVF", primary: "#001628", secondary: "#99D9D9", espnId: "", league: "ahl" },
+  "Firebirds":     { abbr: "CVF", primary: "#001628", secondary: "#99D9D9", espnId: "", league: "ahl" },
+  "Silver Knights":{ abbr: "HSK", primary: "#B4975A", secondary: "#333F42", espnId: "", league: "ahl" },
+  "Reign":         { abbr: "ONT", primary: "#111111", secondary: "#A2AAAD", espnId: "", league: "ahl" },
+  "Rocket":        { abbr: "LAV", primary: "#AF1E2D", secondary: "#192168", espnId: "", league: "ahl" },
+  "Toronto Marlies":{ abbr: "TOR", primary: "#003E7E", secondary: "#FFFFFF", espnId: "", league: "ahl" },
+};
+
+// ── MiLB teams (Minor League Baseball) ───────────────────────────────────────
+// Keyed by nickname; no ESPN logos available
+const MiLB: Record<string, TeamInfo> = {
+  // Triple-A
+  "Aviators":      { abbr: "LVA", primary: "#003831", secondary: "#EFB21E", espnId: "", league: "milb" },
+  "Stripers":      { abbr: "GWN", primary: "#CE1141", secondary: "#13274F", espnId: "", league: "milb" },
+  "Tides":         { abbr: "NOR", primary: "#DF4601", secondary: "#000000", espnId: "", league: "milb" },
+  "RailRiders":    { abbr: "SWB", primary: "#003087", secondary: "#C4CED4", espnId: "", league: "milb" },
+  "Bisons":        { abbr: "BUF", primary: "#00338D", secondary: "#C60C30", espnId: "", league: "milb" },
+  "Clippers":      { abbr: "COL", primary: "#C8102E", secondary: "#002147", espnId: "", league: "milb" },
+  "Mud Hens":      { abbr: "TOL", primary: "#002D62", secondary: "#C8102E", espnId: "", league: "milb" },
+  "Redbirds":      { abbr: "MEM", primary: "#C41E3A", secondary: "#0C2340", espnId: "", league: "milb" },
+  "Bulls":         { abbr: "DUR", primary: "#003087", secondary: "#C8102E", espnId: "", league: "milb" },
+  "Sounds":        { abbr: "NAS", primary: "#002D62", secondary: "#C8102E", espnId: "", league: "milb" },
+  "River Cats":    { abbr: "SAC", primary: "#002D62", secondary: "#C8102E", espnId: "", league: "milb" },
+  "Rainiers":      { abbr: "TAC", primary: "#002D62", secondary: "#00843D", espnId: "", league: "milb" },
+  "Aces":          { abbr: "RNO", primary: "#041E42", secondary: "#C8102E", espnId: "", league: "milb" }, // Reno Aces
+  "El Paso Chihuahuas": { abbr: "ELP", primary: "#003087", secondary: "#C8102E", espnId: "", league: "milb" },
+  "Chihuahuas":    { abbr: "ELP", primary: "#003087", secondary: "#C8102E", espnId: "", league: "milb" },
+  "Isotopes":      { abbr: "ABQ", primary: "#002D62", secondary: "#CE1141", espnId: "", league: "milb" },
+  // Double-A
+  "RoughRiders":   { abbr: "FRI", primary: "#003278", secondary: "#C0111F", espnId: "", league: "milb" },
+  "Roughriders":   { abbr: "FRI", primary: "#003278", secondary: "#C0111F", espnId: "", league: "milb" },
+  "Fisher Cats":   { abbr: "NH",  primary: "#134A8E", secondary: "#E8291C", espnId: "", league: "milb" },
+  "Curve":         { abbr: "ALT", primary: "#27251F", secondary: "#FDB827", espnId: "", league: "milb" },
+  "Sea Dogs":      { abbr: "POR", primary: "#BD3039", secondary: "#0C2340", espnId: "", league: "milb" },
+  "Rumble Ponies": { abbr: "BIN", primary: "#003087", secondary: "#FDBB30", espnId: "", league: "milb" },
+  "Yard Goats":    { abbr: "HFD", primary: "#6F2C3E", secondary: "#88B04B", espnId: "", league: "milb" },
+  "Bowie Baysox":  { abbr: "BOW", primary: "#DF4601", secondary: "#000000", espnId: "", league: "milb" },
+  "Baysox":        { abbr: "BOW", primary: "#DF4601", secondary: "#000000", espnId: "", league: "milb" },
+  "Erie SeaWolves":{ abbr: "ERI", primary: "#CE1141", secondary: "#002B5C", espnId: "", league: "milb" },
+  "SeaWolves":     { abbr: "ERI", primary: "#CE1141", secondary: "#002B5C", espnId: "", league: "milb" },
+  "Tulsa Drillers":{ abbr: "TUL", primary: "#003087", secondary: "#C8102E", espnId: "", league: "milb" },
+  "Drillers":      { abbr: "TUL", primary: "#003087", secondary: "#C8102E", espnId: "", league: "milb" },
+  "Midland RockHounds": { abbr: "MID", primary: "#003831", secondary: "#EFB21E", espnId: "", league: "milb" },
+  "RockHounds":    { abbr: "MID", primary: "#003831", secondary: "#EFB21E", espnId: "", league: "milb" },
+  // Atlantic/Independent League
+  "Ducks":         { abbr: "LID", primary: "#1B2A5E", secondary: "#CC0000", espnId: "", league: "milb" },
+  "FerryHawks":    { abbr: "SIF", primary: "#003087", secondary: "#CC0000", espnId: "", league: "milb" },
+  "Alpacas":       { abbr: "ACK", primary: "#6B3A8C", secondary: "#F5C400", espnId: "", league: "milb" },
+  "High Hopes":    { abbr: "HH",  primary: "#1B5E20", secondary: "#FFFFFF", espnId: "", league: "milb" },
+  // Southern/Other
+  "Barons":        { abbr: "BIR", primary: "#CE1141", secondary: "#0C2340", espnId: "", league: "milb" },
+  "Lookouts":      { abbr: "CHA", primary: "#003087", secondary: "#C8102E", espnId: "", league: "milb" },
+  "Chattanooga Lookouts": { abbr: "CHA", primary: "#003087", secondary: "#C8102E", espnId: "", league: "milb" },
+};
+
 // ── Public helpers ────────────────────────────────────────────────────────────
 
-export const SPORT_GENRES = new Set(["NFL", "NBA", "MLB", "NHL", "MLS"]);
+export const SPORT_GENRES = new Set([
+  "NFL", "NBA", "MLB", "NHL", "MLS",
+  "WNBA", "MiLB", "AHL", "ECHL", "Soccer", "NWSL",
+  "NCAAF", "NCAAB", "G-League", "AFL", "CFL",
+]);
 
 const FALLBACK_TEAM: TeamInfo = {
   abbr: "?", primary: "#1e293b", secondary: "#94a3b8", espnId: "", league: "",
@@ -182,22 +279,29 @@ function searchRecord(record: Record<string, TeamInfo>, name: string): TeamInfo 
 
 /**
  * Look up a team by name fragment (city + nickname from TM event title).
- * Pass `genre` ("NFL" | "NBA" | "MLB" | "NHL") to disambiguate shared
- * nicknames like Cardinals, Rangers, Giants.
+ * Pass `genre` to disambiguate shared nicknames across leagues.
  */
 export function getTeam(name: string, genre?: string): TeamInfo {
   const records: Record<string, Record<string, TeamInfo>> = {
-    NFL, NBA, MLB, NHL,
+    NFL, NBA, MLB, NHL, WNBA, AHL,
+    MiLB,
+    ECHL: AHL,
   };
 
-  // League-qualified lookup first (most accurate)
+  // League-qualified lookup first (most accurate, avoids cross-league conflicts)
   if (genre && records[genre]) {
     const hit = searchRecord(records[genre], name);
     if (hit) return hit;
   }
 
-  // Cross-league fallback
-  for (const record of [NFL, NBA, MLB, NHL]) {
+  // For WNBA genre, also check NBA record (teams stored there too)
+  if (genre === "WNBA") {
+    const hit = searchRecord(NBA, name);
+    if (hit) return hit;
+  }
+
+  // Cross-league fallback — ordered by likelihood for sports events
+  for (const record of [NFL, NBA, MLB, NHL, WNBA, AHL, MiLB]) {
     const hit = searchRecord(record, name);
     if (hit) return hit;
   }
