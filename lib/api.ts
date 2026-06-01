@@ -33,15 +33,35 @@ async function withSpotifyImage(event: Event): Promise<Event> {
   return url ? { ...event, imageUrl: url } : event;
 }
 
+// ── Date filtering ────────────────────────────────────────────────────────────
+
+/**
+ * Returns true if the event is today or in the future.
+ * The TM API already filters by startDateTime but timezone differences can
+ * let a few same-day past events slip through — this catches them.
+ * Events with "Date TBA" are kept (date unknown, assume future).
+ */
+function isUpcoming(event: Event): boolean {
+  if (!event.date || event.date === "Date TBA") return true;
+  try {
+    const d = new Date(event.date);
+    if (isNaN(d.getTime())) return true;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return d >= today;
+  } catch {
+    return true;
+  }
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /** Returns all upcoming events, enriched with Spotify artist images. */
 export async function getEvents(): Promise<Event[]> {
   const hasTM = Boolean(process.env.TICKETMASTER_API_KEY);
 
-  const raw = hasTM
-    ? await getTicketmasterEvents()   // live data
-    : MOCK_EVENTS;                    // offline fallback
+  const raw = (hasTM ? await getTicketmasterEvents() : MOCK_EVENTS)
+    .filter(isUpcoming);
 
   // Enrich with Spotify images in parallel (no-ops if Spotify creds aren't set)
   return Promise.all(raw.map(withSpotifyImage));
