@@ -24,8 +24,8 @@ const GENRE_FALLBACK_BG: Record<string, string> = {
 
 function SportHero({ event }: { event: Event }) {
   const matchup = parseMatchup(event.artist);
-  const team1 = matchup ? getTeam(matchup[0]) : { abbr: "HM", primary: "#1e293b", secondary: "#94a3b8", espnId: "", league: "" };
-  const team2 = matchup ? getTeam(matchup[1]) : { abbr: "AW", primary: "#374151", secondary: "#94a3b8", espnId: "", league: "" };
+  const team1 = matchup ? getTeam(matchup[0], event.genre) : { abbr: "HM", primary: "#1e293b", secondary: "#94a3b8", espnId: "", league: "" };
+  const team2 = matchup ? getTeam(matchup[1], event.genre) : { abbr: "AW", primary: "#374151", secondary: "#94a3b8", espnId: "", league: "" };
 
   const logo1 = team1.espnId ? logoUrl(team1) : null;
   const logo2 = team2.espnId ? logoUrl(team2) : null;
@@ -180,19 +180,24 @@ export default memo(function EventCard({ event }: Props) {
 
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
             <div>
-              <p className="text-gray-400 text-xs">Tickets from</p>
               {event.lowestAllInPrice > 0 ? (
-                <p className="text-gray-900 font-extrabold text-xl tabular-nums leading-tight">
-                  ${event.lowestAllInPrice}
-                  <span className="text-gray-400 text-xs font-normal ml-1">all-in</span>
-                </p>
+                <>
+                  <p className="text-gray-400 text-xs">Tickets from</p>
+                  <p className="text-gray-900 font-extrabold text-xl tabular-nums leading-tight">
+                    ${event.lowestAllInPrice}
+                    <span className="text-gray-400 text-xs font-normal ml-1">all-in</span>
+                  </p>
+                </>
               ) : (
-                <p className="text-gray-400 font-semibold text-base leading-tight">Price TBA</p>
+                <>
+                  <p className="text-gray-400 text-xs">Availability</p>
+                  <p className="text-gray-700 font-semibold text-sm leading-tight">Check tickets</p>
+                </>
               )}
             </div>
             <div className="text-right">
               <p className="text-gray-400 text-xs mb-1.5">
-                {event.listingCount > 0 ? `${event.listingCount} listings` : "View event"}
+                {event.listingCount > 0 ? `${event.listingCount} listings` : ""}
               </p>
               <span className="inline-block bg-blue-600 group-hover:bg-blue-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors">
                 Compare prices

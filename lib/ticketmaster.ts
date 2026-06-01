@@ -151,8 +151,13 @@ function tmToEvent(tm: TmEvent): Event | null {
     const venue      = tm._embedded?.venues?.[0];
     const attraction = tm._embedded?.attractions?.[0];
 
-    // Use the headlining attraction name for concerts; fall back to event name
-    const artist    = attraction?.name ?? tm.name;
+    // For matchup events ("Team A vs. Team B"), use the event name so both
+    // teams are visible. Strip any promotional suffix after ":" or " - ".
+    // For concerts, use the attraction (artist) name which is cleaner.
+    const isVsMatchup = / vs\.? /i.test(tm.name);
+    const artist      = isVsMatchup
+      ? tm.name.replace(/\s*[:|]\s*.+$/, "").replace(/\s+[-–]\s+[A-Z].+$/, "").trim()
+      : (attraction?.name ?? tm.name);
     const venueName = venue?.name ?? "Venue TBA";
     const city      = [venue?.city?.name, venue?.state?.stateCode]
       .filter(Boolean).join(", ");
