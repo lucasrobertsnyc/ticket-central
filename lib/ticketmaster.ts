@@ -334,13 +334,13 @@ export async function getTicketmasterEvents(): Promise<Event[]> {
     return [];
   }
 
-  // Parallel: music from top 5 cities + sports from all 10
+  // Parallel: music from top 5 cities + sports from all 10 cities
   const [musicBatches, sportsBatches] = await Promise.all([
     Promise.all(CITIES.slice(0, 5).map(ll =>
       fetchEvents({ latlong: ll, classificationName: "music", size: 12 })
     )),
-    Promise.all(CITIES.slice(0, 5).map(ll =>
-      fetchEvents({ latlong: ll, classificationName: "sports", size: 6 })
+    Promise.all(CITIES.map(ll =>
+      fetchEvents({ latlong: ll, classificationName: "sports", size: 15 })
     )),
   ]);
 

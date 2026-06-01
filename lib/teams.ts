@@ -81,6 +81,20 @@ const NBA: Record<string, TeamInfo> = {
   "Raptors":      { abbr: "TOR", primary: "#CE1141", secondary: "#000000", espnId: "tor", league: "nba" },
   "Jazz":         { abbr: "UTA", primary: "#002B5C", secondary: "#00471B", espnId: "uta", league: "nba" },
   "Wizards":      { abbr: "WAS", primary: "#002B5C", secondary: "#E31837", espnId: "was", league: "nba" },
+  // WNBA — Ticketmaster classifies as Basketball → maps to "NBA" genre
+  "Dream":         { abbr: "ATL", primary: "#C8102E", secondary: "#041E42", espnId: "atl",  league: "wnba" },
+  "Sky":           { abbr: "CHI", primary: "#418FDE", secondary: "#FAD538", espnId: "chi",  league: "wnba" },
+  "Sun":           { abbr: "CON", primary: "#E03A3E", secondary: "#0B5FA5", espnId: "conn", league: "wnba" },
+  "Wings":         { abbr: "DAL", primary: "#0C2340", secondary: "#C4D600", espnId: "dal",  league: "wnba" },
+  "Fever":         { abbr: "IND", primary: "#002D62", secondary: "#E03A3E", espnId: "ind",  league: "wnba" },
+  "Aces":          { abbr: "LVA", primary: "#000000", secondary: "#C8102E", espnId: "lva",  league: "wnba" },
+  "Sparks":        { abbr: "LAS", primary: "#552583", secondary: "#FDB927", espnId: "la",   league: "wnba" },
+  "Lynx":          { abbr: "MIN", primary: "#266092", secondary: "#79BC44", espnId: "min",  league: "wnba" },
+  "Liberty":       { abbr: "NYL", primary: "#86CEBC", secondary: "#000000", espnId: "ny",   league: "wnba" },
+  "Mercury":       { abbr: "PHX", primary: "#201747", secondary: "#E56020", espnId: "phx",  league: "wnba" },
+  "Storm":         { abbr: "SEA", primary: "#2C5234", secondary: "#FECA02", espnId: "sea",  league: "wnba" },
+  "Mystics":       { abbr: "WAS", primary: "#0C2340", secondary: "#E03A3E", espnId: "wsh",  league: "wnba" },
+  "Valkyries":     { abbr: "GSV", primary: "#002660", secondary: "#FDB927", espnId: "gsv",  league: "wnba" },
 };
 
 const MLB: Record<string, TeamInfo> = {

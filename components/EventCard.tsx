@@ -22,102 +22,76 @@ const GENRE_FALLBACK_BG: Record<string, string> = {
   "MLS":               "#070f0a",
 };
 
-function SportHero({ event }: { event: Event }) {
-  const matchup = parseMatchup(event.artist);
-  const team1 = matchup ? getTeam(matchup[0], event.genre) : { abbr: "HM", primary: "#1e293b", secondary: "#94a3b8", espnId: "", league: "" };
-  const team2 = matchup ? getTeam(matchup[1], event.genre) : { abbr: "AW", primary: "#374151", secondary: "#94a3b8", espnId: "", league: "" };
-
-  const logo1 = team1.espnId ? logoUrl(team1) : null;
-  const logo2 = team2.espnId ? logoUrl(team2) : null;
+function TeamPanel({
+  name, team, side,
+}: {
+  name: string | null;
+  team: ReturnType<typeof getTeam>;
+  side: "left" | "right" | "center";
+}) {
+  const logo = team.espnId ? logoUrl(team) : null;
+  const gradient = side === "left"
+    ? "repeating-linear-gradient(135deg,rgba(0,0,0,0.06) 0,rgba(0,0,0,0.06) 1px,transparent 0,transparent 8px)"
+    : "repeating-linear-gradient(-135deg,rgba(0,0,0,0.06) 0,rgba(0,0,0,0.06) 1px,transparent 0,transparent 8px)";
 
   return (
-    <div className="relative h-40 overflow-hidden flex">
+    <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden"
+      style={{ backgroundColor: team.primary }}>
+      <div className="absolute inset-0" style={{ backgroundImage: gradient }} />
+      {logo ? (
+        <img src={logo} alt={name ?? ""} loading="lazy"
+          className={`relative object-contain drop-shadow-lg ${side === "center" ? "w-20 h-20" : "w-16 h-16"}`}
+          style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))" }} />
+      ) : (
+        <span className={`relative font-black ${side === "center" ? "text-4xl" : "text-3xl"}`}
+          style={{ color: team.secondary }}>{team.abbr}</span>
+      )}
+      {name && (
+        <span className="relative text-[9px] font-bold uppercase tracking-wider mt-1.5 opacity-80"
+          style={{ color: team.secondary }}>{name}</span>
+      )}
+    </div>
+  );
+}
 
-      {/* Left team */}
-      <div
-        className="flex-1 flex flex-col items-center justify-center relative overflow-hidden"
-        style={{ backgroundColor: team1.primary }}
-      >
-        {/* Subtle diagonal texture */}
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "repeating-linear-gradient(135deg,rgba(0,0,0,0.06) 0,rgba(0,0,0,0.06) 1px,transparent 0,transparent 8px)",
-          }}
-        />
-        {logo1 ? (
-          <img
-            src={logo1}
-            alt={matchup?.[0] ?? ""}
-            className="relative w-16 h-16 object-contain drop-shadow-lg"
-            style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))" }}
-          />
-        ) : (
-          <span className="relative text-3xl font-black" style={{ color: team1.secondary }}>{team1.abbr}</span>
-        )}
-        {matchup && (
-          <span
-            className="relative text-[9px] font-bold uppercase tracking-wider mt-1.5 opacity-80"
-            style={{ color: team1.secondary }}
-          >
-            {matchup[0]}
-          </span>
-        )}
-      </div>
+function SportHero({ event }: { event: Event }) {
+  const matchup = parseMatchup(event.artist);
 
-      {/* VS badge */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-        <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl">
-          <span className="text-white text-[9px] font-black tracking-tight">VS</span>
+  // Matchup event (Team A vs Team B)
+  if (matchup) {
+    const team1 = getTeam(matchup[0], event.genre);
+    const team2 = getTeam(matchup[1], event.genre);
+    return (
+      <div className="relative h-40 overflow-hidden flex">
+        <TeamPanel name={matchup[0]} team={team1} side="left" />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+          <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xl">
+            <span className="text-white text-[9px] font-black tracking-tight">VS</span>
+          </div>
+        </div>
+        <TeamPanel name={matchup[1]} team={team2} side="right" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute top-3 left-3 z-10">
+          <span className="inline-block bg-black/55 backdrop-blur-sm text-white/90 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">{event.genre}</span>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 px-3.5 pb-2.5 pointer-events-none">
+          <h3 className="text-white font-extrabold text-base leading-tight drop-shadow">{event.artist}</h3>
         </div>
       </div>
+    );
+  }
 
-      {/* Right team */}
-      <div
-        className="flex-1 flex flex-col items-center justify-center relative overflow-hidden"
-        style={{ backgroundColor: team2.primary }}
-      >
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "repeating-linear-gradient(-135deg,rgba(0,0,0,0.06) 0,rgba(0,0,0,0.06) 1px,transparent 0,transparent 8px)",
-          }}
-        />
-        {logo2 ? (
-          <img
-            src={logo2}
-            alt={matchup?.[1] ?? ""}
-            className="relative w-16 h-16 object-contain drop-shadow-lg"
-            style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))" }}
-          />
-        ) : (
-          <span className="relative text-3xl font-black" style={{ color: team2.secondary }}>{team2.abbr}</span>
-        )}
-        {matchup && (
-          <span
-            className="relative text-[9px] font-bold uppercase tracking-wider mt-1.5 opacity-80"
-            style={{ color: team2.secondary }}
-          >
-            {matchup[1]}
-          </span>
-        )}
-      </div>
-
-      {/* Bottom gradient */}
+  // Single-team event — look up the team from the full artist name and show one centered logo
+  const team = getTeam(event.artist, event.genre);
+  return (
+    <div className="relative h-40 overflow-hidden flex">
+      <TeamPanel name={null} team={team} side="center" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
-
-      {/* League badge */}
       <div className="absolute top-3 left-3 z-10">
-        <span className="inline-block bg-black/55 backdrop-blur-sm text-white/90 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">
-          {event.genre}
-        </span>
+        <span className="inline-block bg-black/55 backdrop-blur-sm text-white/90 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">{event.genre}</span>
       </div>
-
-      {/* Matchup name */}
       <div className="absolute bottom-0 left-0 right-0 px-3.5 pb-2.5 pointer-events-none">
-        <h3 className="text-white font-extrabold text-base leading-tight drop-shadow">
-          {event.artist}
-        </h3>
+        <h3 className="text-white font-extrabold text-base leading-tight drop-shadow">{event.artist}</h3>
       </div>
     </div>
   );
