@@ -23,6 +23,7 @@ import {
   getTicketmasterEvent,
   generateListingsForEvent,
 } from "@/lib/ticketmaster";
+import { getSeatGeekEvent } from "@/lib/seatgeek";
 
 // ── Spotify image enrichment ──────────────────────────────────────────────────
 
@@ -65,10 +66,10 @@ export async function getEvent(eventId: string): Promise<Event | null> {
   let event: Event | null = null;
 
   if (eventId.startsWith("tm-")) {
-    // Live Ticketmaster event
     event = await getTicketmasterEvent(eventId);
+  } else if (eventId.startsWith("sg-")) {
+    event = await getSeatGeekEvent(eventId);
   } else {
-    // Mock event
     event = MOCK_EVENTS.find(e => e.id === eventId) ?? null;
   }
 
@@ -79,8 +80,17 @@ export async function getEvent(eventId: string): Promise<Event | null> {
 /** Returns ticket listings for an event. */
 export async function getListings(eventId: string): Promise<TicketListing[]> {
   if (eventId.startsWith("tm-")) {
-    // Ticketmaster events: generate deterministic demo listings
+    // Ticketmaster events: generate deterministic demo listings stamped with
+    // the event's real Ticketmaster checkout URL on each listing's buyUrl.
     const event = await getTicketmasterEvent(eventId);
+    if (!event) return [];
+    return generateListingsForEvent(event);
+  }
+
+  if (eventId.startsWith("sg-")) {
+    // SeatGeek events: same approach — deterministic demo listings with the
+    // real SeatGeek event page as the buy URL.
+    const event = await getSeatGeekEvent(eventId);
     if (!event) return [];
     return generateListingsForEvent(event);
   }

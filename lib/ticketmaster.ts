@@ -179,6 +179,7 @@ function tmToEvent(tm: TmEvent): Event | null {
       lowestAllInPrice,
       listingCount,
       imageUrl,
+      url:   tm.url,
     };
   } catch {
     return null;
@@ -202,7 +203,8 @@ const ALL_PLATFORMS: Platform[] = [
   "SeatGeek", "StubHub", "Vivid Seats", "TickPick", "GameTime", "Ticketmaster", "AXS",
 ];
 
-/** Returns 20-35 deterministic ticket listings for a Ticketmaster event. */
+/** Returns 20-35 deterministic ticket listings for a Ticketmaster event.
+ *  Each listing carries the event's real Ticketmaster checkout URL as `buyUrl`. */
 export function generateListingsForEvent(event: Event): TicketListing[] {
   const seed = event.id.split("").reduce((a, c, i) => a + c.charCodeAt(0) * (i + 1), 0);
   const rand = makePrng(seed);
@@ -245,6 +247,7 @@ export function generateListingsForEvent(event: Event): TicketListing[] {
         fees,
         tax,
         allInTotal:  baseP + fees + tax,
+        buyUrl:      event.url,
       });
     }
   }

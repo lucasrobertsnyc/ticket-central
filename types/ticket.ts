@@ -24,6 +24,8 @@ export interface TicketListing {
   tax: number;
   allInTotal: number;
   dealerNotes?: string;
+  /** Direct checkout URL — opens the real purchase page on the originating platform */
+  buyUrl?: string;
 }
 
 export interface Event {
@@ -38,6 +40,8 @@ export interface Event {
   listingCount: number;
   /** Hero image URL — stock photo by default, replaced by Spotify when creds are set */
   imageUrl: string;
+  /** The event's purchase page on the originating platform (Ticketmaster, SeatGeek, etc.) */
+  url?: string;
 }
 
 export interface FilterState {

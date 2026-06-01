@@ -127,6 +127,7 @@ interface SGEvent {
   datetime_local?: string;
   datetime_utc?: string;
   type?: string;
+  url?: string;
   taxonomies?: SGTaxonomy[];
   performers?: SGPerformer[];
   venue?: SGVenue;
@@ -194,6 +195,7 @@ function sgEventToAppEvent(sg: SGEvent): Event | null {
       lowestAllInPrice: Math.round(lowestPrice),
       listingCount,
       imageUrl,
+      url: sg.url,
     };
   } catch {
     return null;

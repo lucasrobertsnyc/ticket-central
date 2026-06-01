@@ -1178,9 +1178,16 @@ function MapListingRow({ listing, cheapest }: { listing: TicketListing; cheapest
         <div className={`font-bold text-sm ${cheapest ? "text-green-400" : "text-white"}`}>${listing.allInTotal}</div>
         <div className="text-gray-500 text-xs">all-in</div>
       </div>
-      <button className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors flex-shrink-0">
-        Buy
-      </button>
+      {listing.buyUrl ? (
+        <a href={listing.buyUrl} target="_blank" rel="noopener noreferrer"
+          className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors flex-shrink-0">
+          Buy ↗
+        </a>
+      ) : (
+        <button className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors flex-shrink-0">
+          Buy
+        </button>
+      )}
     </div>
   );
 }
