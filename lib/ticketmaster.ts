@@ -1,186 +1,181 @@
 /**
- * Ticketmaster Discovery API v2 integration.
+ * Ticketmaster Discovery API v2 client.
  *
- * Required environment variable (add to .env.local):
- *   TICKETMASTER_API_KEY=your_api_key
+ * Docs: https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/
  *
- * Get a free key at https://developer.ticketmaster.com/
- * Free tier: 5,000 calls/day, 5 req/sec.
+ * Required env var (add to .env.local):
+ *   TICKETMASTER_API_KEY=your_consumer_key
  *
- * What this module fetches:
- *   - getTicketmasterEvents()  → upcoming US music + sports events → Event[]
- *   - getTicketmasterEvent(id) → single event by TM id            → Event | null
+ * Free tier: 5,000 calls/day · 5 req/sec.
+ * All fetches are cached 1 hour via Next.js data cache (next: { revalidate: 3600 }).
  *
- * Ticket listings are NOT available via the Discovery API (it's event
- * discovery only).  Listings stay on mock data; only events are live.
+ * Note: The Discovery API provides event metadata only.  Seat-level inventory
+ * (listings by section/row/price) requires the Commerce API, a separate
+ * paid partnership tier.  For the detail page we generate plausible demo
+ * listings with generateListingsForEvent().
  */
 
-import type { Event } from "@/types/ticket";
+import type { Event, TicketListing, SectionType, Platform } from "@/types/ticket";
 
 const TM_BASE = "https://app.ticketmaster.com/discovery/v2";
-const API_KEY = process.env.TICKETMASTER_API_KEY ?? "";
 
-// ─── Genre mapping ────────────────────────────────────────────────────────────
+// ── Raw TM API shapes (only the fields we actually read) ──────────────────────
 
-/**
- * Map Ticketmaster segment + genre names to the app's canonical genre strings.
- * Segment "Music" → concert genres; Segment "Sports" → league names.
- */
-function mapTMGenre(
-  segment: string,
-  genre: string,
-  subGenre: string
-): string {
-  const seg = segment.toLowerCase();
-  const gen = genre.toLowerCase();
-  const sub = subGenre.toLowerCase();
-
-  if (seg === "sports") {
-    if (gen.includes("football") || sub.includes("nfl")) return "NFL";
-    if (gen.includes("basketball") || sub.includes("nba")) return "NBA";
-    if (gen.includes("baseball") || sub.includes("mlb")) return "MLB";
-    if (gen.includes("hockey") || sub.includes("nhl")) return "NHL";
-    if (gen.includes("soccer") || sub.includes("mls")) return "MLS";
-    return "NFL"; // default sports fallback
-  }
-
-  if (seg === "music") {
-    if (gen.includes("r&b") || gen.includes("soul") || sub.includes("r&b")) return "R&B / Pop";
-    if (gen.includes("hip-hop") || gen.includes("rap")) return "Hip-Hop";
-    if (gen.includes("rock") || gen.includes("alternative") || gen.includes("metal")) return "Rock / Pop";
-    if (gen.includes("pop")) return "Pop / R&B";
-    if (gen.includes("country") || gen.includes("folk") || gen.includes("bluegrass")) return "Pop / Country";
-    if (gen.includes("latin") || gen.includes("reggaeton") || gen.includes("salsa")) return "Latin / Reggaeton";
-    return "Pop / R&B"; // default music fallback
-  }
-
-  return "Pop / R&B";
+interface TmImage {
+  url: string;
+  width?: number;
+  height?: number;
+  ratio?: string;   // "16_9" | "3_2" | "4_3"
 }
 
-// ─── Image selection ──────────────────────────────────────────────────────────
+interface TmClassification {
+  primary?: boolean;
+  segment?:  { id?: string; name?: string };
+  genre?:    { id?: string; name?: string };
+  subGenre?: { id?: string; name?: string };
+}
 
-/** Pick the best image from a TM images array (prefer 16:9 ratio, widest). */
-function pickImage(
-  images: Array<{ url: string; ratio?: string; width?: number; height?: number }>
-): string {
+interface TmEvent {
+  id: string;
+  name: string;
+  url?: string;
+  dates?: {
+    start?: {
+      localDate?: string;   // "2026-06-14"
+      localTime?: string;   // "20:00:00"
+      dateTBD?: boolean;
+      timeTBD?: boolean;
+    };
+  };
+  images?: TmImage[];
+  priceRanges?: { type?: string; currency?: string; min?: number; max?: number }[];
+  classifications?: TmClassification[];
+  _embedded?: {
+    venues?: Array<{
+      name?: string;
+      city?:  { name?: string };
+      state?: { name?: string; stateCode?: string };
+    }>;
+    attractions?: Array<{
+      name?: string;
+      images?: TmImage[];
+    }>;
+  };
+}
+
+interface TmEventsResponse {
+  _embedded?: { events?: TmEvent[] };
+  page?: { size?: number; totalElements?: number; totalPages?: number; number?: number };
+}
+
+// ── Genre mapping ─────────────────────────────────────────────────────────────
+
+const GENRE_MAP: Record<string, string> = {
+  // Music
+  "hip-hop/rap":       "Hip-Hop",
+  "hip-hop":           "Hip-Hop",
+  "rap":               "Hip-Hop",
+  "r&b":               "R&B",
+  "soul":              "R&B",
+  "pop":               "Pop",
+  "rock":              "Rock",
+  "alternative":       "Alternative",
+  "alternative/indie": "Alternative",
+  "country":           "Country",
+  "latin":             "Latin",
+  "latin pop":         "Latin",
+  "electronic":        "Electronic",
+  "dance/electronic":  "Electronic",
+  "edm":               "Electronic",
+  "jazz":              "Jazz",
+  "blues":             "Blues",
+  "classical":         "Classical",
+  "metal":             "Metal",
+  "reggae":            "Reggae",
+  "folk":              "Folk",
+  // Sports
+  "football":          "NFL",
+  "basketball":        "NBA",
+  "hockey":            "NHL",
+  "baseball":          "MLB",
+  "soccer":            "Soccer",
+};
+
+function mapGenre(tm: TmEvent): string {
+  const cls = (tm.classifications ?? []).find(c => c.primary) ?? tm.classifications?.[0];
+  const segment  = (cls?.segment?.name  ?? "").toLowerCase();
+  const genre    = (cls?.genre?.name    ?? "").toLowerCase();
+  const subGenre = (cls?.subGenre?.name ?? "").toLowerCase();
+
+  if (segment === "sports") {
+    return GENRE_MAP[genre] ?? GENRE_MAP[subGenre] ?? "Sports";
+  }
+  return GENRE_MAP[genre] ?? GENRE_MAP[subGenre] ?? "Music";
+}
+
+// ── Image helper ──────────────────────────────────────────────────────────────
+
+/** Prefer 16:9 wide images; fall back to widest available. */
+function pickImage(images?: TmImage[]): string {
   if (!images?.length) return "";
-  // Prefer 16:9 wide images
-  const wideImages = images.filter((img) => img.ratio === "16_9");
-  const pool = wideImages.length ? wideImages : images;
-  // Pick widest
+  const pool = images.filter(i => i.ratio === "16_9").length
+    ? images.filter(i => i.ratio === "16_9")
+    : images;
   return pool.reduce(
     (best, img) => ((img.width ?? 0) > (best.width ?? 0) ? img : best),
     pool[0]
   ).url;
 }
 
-// ─── Date / time formatting ───────────────────────────────────────────────────
+// ── Date / time formatters ────────────────────────────────────────────────────
 
-/** "2025-06-14" → "Saturday, June 14, 2025" */
-function formatDate(localDate: string): string {
-  if (!localDate) return "";
-  // Parse without timezone shift by treating as local noon
-  const [year, month, day] = localDate.split("-").map(Number);
-  const d = new Date(year, month - 1, day, 12, 0, 0);
-  return d.toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+function formatDate(localDate?: string, tbd?: boolean): string {
+  if (tbd || !localDate) return "Date TBA";
+  const [y, m, d] = localDate.split("-").map(Number);
+  return new Date(y, m - 1, d, 12).toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
   });
 }
 
-/** "19:30:00" → "7:30 PM" */
-function formatTime(localTime: string | undefined): string {
-  if (!localTime) return "TBA";
+function formatTime(localTime?: string, tbd?: boolean): string {
+  if (tbd || !localTime) return "TBA";
   const [hStr, mStr] = localTime.split(":");
   const h = parseInt(hStr, 10);
-  const m = parseInt(mStr, 10);
-  const ampm = h >= 12 ? "PM" : "AM";
-  const hour = h % 12 || 12;
-  return `${hour}:${m.toString().padStart(2, "0")} ${ampm}`;
+  return `${h % 12 || 12}:${mStr} ${h >= 12 ? "PM" : "AM"}`;
 }
 
-// ─── Response types (subset of TM API response) ───────────────────────────────
+// ── TM event → our Event type ─────────────────────────────────────────────────
 
-interface TMEvent {
-  id: string;
-  name: string;
-  dates?: {
-    start?: {
-      localDate?: string;
-      localTime?: string;
-    };
-  };
-  images?: Array<{ url: string; ratio?: string; width?: number; height?: number }>;
-  priceRanges?: Array<{ type?: string; currency?: string; min?: number; max?: number }>;
-  classifications?: Array<{
-    primary?: boolean;
-    segment?: { id?: string; name?: string };
-    genre?: { id?: string; name?: string };
-    subGenre?: { id?: string; name?: string };
-  }>;
-  _embedded?: {
-    venues?: Array<{
-      name?: string;
-      city?: { name?: string };
-      state?: { name?: string; stateCode?: string };
-    }>;
-  };
-  url?: string;
-}
-
-interface TMEventsResponse {
-  _embedded?: {
-    events?: TMEvent[];
-  };
-  page?: {
-    totalElements?: number;
-    totalPages?: number;
-    number?: number;
-    size?: number;
-  };
-}
-
-// ─── Mapping ──────────────────────────────────────────────────────────────────
-
-function tmEventToAppEvent(tm: TMEvent): Event | null {
+function tmToEvent(tm: TmEvent): Event | null {
   try {
-    const primaryClass =
-      tm.classifications?.find((c) => c.primary) ?? tm.classifications?.[0];
+    const venue      = tm._embedded?.venues?.[0];
+    const attraction = tm._embedded?.attractions?.[0];
 
-    const segment = primaryClass?.segment?.name ?? "";
-    const genre = primaryClass?.genre?.name ?? "";
-    const subGenre = primaryClass?.subGenre?.name ?? "";
+    // Use the headlining attraction name for concerts; fall back to event name
+    const artist    = attraction?.name ?? tm.name;
+    const venueName = venue?.name ?? "Venue TBA";
+    const city      = [venue?.city?.name, venue?.state?.stateCode]
+      .filter(Boolean).join(", ");
 
-    const venue = tm._embedded?.venues?.[0];
-    const venueName = venue?.name ?? "Unknown Venue";
-    const city = venue?.city?.name ?? "";
-    const stateCode = venue?.state?.stateCode ?? "";
-    const cityStr = stateCode ? `${city}, ${stateCode}` : city;
+    const priceRange = tm.priceRanges?.find(p => p.type === "standard")
+                    ?? tm.priceRanges?.[0];
+    const lowestAllInPrice = priceRange?.min ? Math.round(priceRange.min) : 0;
 
-    const priceRange = tm.priceRanges?.find((p) => p.type === "standard") ??
-      tm.priceRanges?.[0];
-    const lowestAllInPrice = Math.round(priceRange?.min ?? 0);
+    // Prefer attraction press photo; fall back to event image
+    const imageUrl = pickImage(attraction?.images) || pickImage(tm.images);
 
-    const date = formatDate(tm.dates?.start?.localDate ?? "");
-    const time = formatTime(tm.dates?.start?.localTime);
-
-    const imageUrl = pickImage(tm.images ?? []);
-
-    // Estimate listing count from price range spread (we don't have real count)
-    const listingCount = lowestAllInPrice > 0
-      ? Math.max(8, Math.min(30, Math.floor(Math.random() * 20) + 10))
-      : 0;
+    // Deterministic listing count estimate (stable across re-renders)
+    const idSum = tm.id.split("").reduce((s, c) => s + c.charCodeAt(0), 0);
+    const listingCount = lowestAllInPrice > 0 ? 10 + (idSum % 21) : 0;
 
     return {
-      id: `tm-${tm.id}`,
-      artist: tm.name,
-      venue: venueName,
-      city: cityStr,
-      date,
-      time,
-      genre: mapTMGenre(segment, genre, subGenre),
+      id:    `tm-${tm.id}`,
+      artist,
+      venue:  venueName,
+      city,
+      date:   formatDate(tm.dates?.start?.localDate,  tm.dates?.start?.dateTBD),
+      time:   formatTime(tm.dates?.start?.localTime,  tm.dates?.start?.timeTBD),
+      genre:  mapGenre(tm),
       lowestAllInPrice,
       listingCount,
       imageUrl,
@@ -190,103 +185,198 @@ function tmEventToAppEvent(tm: TMEvent): Event | null {
   }
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────────
+// ── Synthetic listing generator ───────────────────────────────────────────────
+//
+// The Discovery API does not expose per-seat inventory.  We generate stable,
+// deterministic demo listings so the event detail page is fully interactive.
 
-/**
- * Fetch upcoming US music + sports events from Ticketmaster.
- * Returns an empty array (not throws) if the API key is absent or the call fails.
- */
-export async function getTicketmasterEvents(): Promise<Event[]> {
-  if (!API_KEY) {
-    console.info("[Ticketmaster] TICKETMASTER_API_KEY not set — skipping.");
-    return [];
+function makePrng(seed: number) {
+  let s = (seed ^ 0xdeadbeef) >>> 0;
+  return (min: number, max: number): number => {
+    s = ((s * 1664525 + 1013904223) & 0xffffffff) >>> 0;
+    return min + (s % (max - min + 1));
+  };
+}
+
+const ALL_PLATFORMS: Platform[] = [
+  "SeatGeek", "StubHub", "Vivid Seats", "TickPick", "GameTime", "Ticketmaster", "AXS",
+];
+
+/** Returns 20-35 deterministic ticket listings for a Ticketmaster event. */
+export function generateListingsForEvent(event: Event): TicketListing[] {
+  const seed = event.id.split("").reduce((a, c, i) => a + c.charCodeAt(0) * (i + 1), 0);
+  const rand = makePrng(seed);
+
+  const base = Math.max(event.lowestAllInPrice || 60, 35);
+  const isField  = event.genre === "NFL" || event.genre === "MLB";
+  const isCourt  = event.genre === "NBA" || event.genre === "NHL";
+
+  const zones: Array<{ type: SectionType; mult: number; prefix: string; maxRow: number }> = [
+    { type: "floor",  mult: 0.95, prefix: isCourt ? "Courtside"   : isField ? "Field Level" : "Floor GA", maxRow: 5  },
+    { type: "lower",  mult: 1.35, prefix: isField ? "100"          : isCourt ? "100"         : "Orch",     maxRow: 30 },
+    { type: "club",   mult: 2.10, prefix: "Club",                                                           maxRow: 15 },
+    { type: "upper",  mult: 0.70, prefix: isField ? "300"          : "200",                                 maxRow: 25 },
+    { type: "suite",  mult: 3.20, prefix: "Suite",                                                          maxRow: 1  },
+  ];
+
+  const listings: TicketListing[] = [];
+  let n = 0;
+
+  for (const z of zones) {
+    for (let i = 0; i < rand(4, 8); i++) {
+      n++;
+      const qty      = rand(1, 4);
+      const row      = rand(1, z.maxRow);
+      const secNum   = rand(1, 30);
+      const platform = ALL_PLATFORMS[rand(0, ALL_PLATFORMS.length - 1)];
+      const spread   = 1 + (rand(0, 70) - 35) / 100;
+      const baseP    = Math.round(base * z.mult * spread);
+      const fees     = Math.round(baseP * (0.18 + rand(0, 8) / 100));
+      const tax      = Math.round(baseP * 0.08);
+
+      listings.push({
+        id:          `${event.id}-l${n}`,
+        platform,
+        section:     `${z.prefix} ${secNum}`,
+        sectionType: z.type,
+        row:         `Row ${row}`,
+        quantity:    qty,
+        basePrice:   baseP,
+        fees,
+        tax,
+        allInTotal:  baseP + fees + tax,
+      });
+    }
   }
 
-  const now = new Date();
-  const threeMonthsOut = new Date(now);
-  threeMonthsOut.setMonth(threeMonthsOut.getMonth() + 3);
+  return listings.sort((a, b) => a.allInTotal - b.allInTotal);
+}
 
-  const startDateTime = now.toISOString().replace(/\.\d{3}Z$/, "Z");
-  const endDateTime = threeMonthsOut.toISOString().replace(/\.\d{3}Z$/, "Z");
+// ── Internal fetch helper ─────────────────────────────────────────────────────
 
-  async function fetchSegment(classificationName: string, size = 20): Promise<TMEvent[]> {
-    const params = new URLSearchParams({
-      apikey: API_KEY,
-      countryCode: "US",
-      classificationName,
-      startDateTime,
-      endDateTime,
-      size: String(size),
-      sort: "date,asc",
-    });
+interface FetchOpts {
+  classificationName?: string;
+  latlong?: string;
+  size?: number;
+}
 
-    const url = `${TM_BASE}/events.json?${params}`;
+async function fetchEvents(opts: FetchOpts): Promise<TmEvent[]> {
+  const apiKey = process.env.TICKETMASTER_API_KEY;
+  if (!apiKey) return [];
 
-    const res = await fetch(url, {
-      next: { revalidate: 300 },
-    });
+  const now   = new Date();
+  const start = now.toISOString().slice(0, 16) + ":00Z";
+  const end   = new Date(now.getTime() + 180 * 86_400_000)
+                  .toISOString().slice(0, 16) + ":00Z";
 
-    if (!res.ok) {
-      console.error(
-        `[Ticketmaster] ${classificationName} request failed: ${res.status}`,
-        await res.text()
-      );
-      return [];
-    }
-
-    const data: TMEventsResponse = await res.json();
-    return data._embedded?.events ?? [];
+  const params = new URLSearchParams({
+    apikey:        apiKey,
+    countryCode:   "US",
+    sort:          "date,asc",
+    size:          String(opts.size ?? 20),
+    startDateTime: start,
+    endDateTime:   end,
+  });
+  if (opts.classificationName) params.set("classificationName", opts.classificationName);
+  if (opts.latlong) {
+    params.set("latlong", opts.latlong);
+    params.set("radius", "50");
+    params.set("unit", "miles");
   }
 
   try {
-    // Fetch music and sports in parallel, 20 each
-    const [musicEvents, sportsEvents] = await Promise.all([
-      fetchSegment("music", 20),
-      fetchSegment("sports", 20),
-    ]);
-
-    const allTMEvents = [...musicEvents, ...sportsEvents];
-
-    const appEvents = allTMEvents
-      .map(tmEventToAppEvent)
-      .filter((e): e is Event => e !== null && e.lowestAllInPrice > 0);
-
-    // Deduplicate by id
-    const seen = new Set<string>();
-    return appEvents.filter((e) => {
-      if (seen.has(e.id)) return false;
-      seen.add(e.id);
-      return true;
+    const res = await fetch(`${TM_BASE}/events.json?${params}`, {
+      next: { revalidate: 3600 },
     });
+    if (!res.ok) {
+      console.error("[Ticketmaster] fetch failed:", res.status, await res.text().then(t => t.slice(0, 200)));
+      return [];
+    }
+    const data: TmEventsResponse = await res.json();
+    return data._embedded?.events ?? [];
   } catch (err) {
-    console.error("[Ticketmaster] getTicketmasterEvents threw:", err);
+    console.error("[Ticketmaster] fetch threw:", err);
     return [];
   }
 }
 
+// Major US cities — coordinates for 50-mile radius search
+const CITIES = [
+  "40.7128,-74.0060",    // New York
+  "34.0522,-118.2437",   // Los Angeles
+  "41.8781,-87.6298",    // Chicago
+  "25.7617,-80.1918",    // Miami
+  "36.1699,-115.1398",   // Las Vegas
+  "33.7490,-84.3880",    // Atlanta
+  "32.7767,-96.7970",    // Dallas
+  "47.6062,-122.3321",   // Seattle
+  "42.3601,-71.0589",    // Boston
+  "36.1627,-86.7816",    // Nashville
+];
+
+// ── Public API ────────────────────────────────────────────────────────────────
+
 /**
- * Fetch a single Ticketmaster event by its app-level id (e.g. "tm-G5vjZ9Yz4nK7o").
- * The id must start with "tm-".
+ * Fetches ~100 upcoming events from 10 major US cities (music + sports).
+ * Returns [] when TICKETMASTER_API_KEY is not set or the API is unreachable.
+ */
+export async function getTicketmasterEvents(): Promise<Event[]> {
+  if (!process.env.TICKETMASTER_API_KEY) {
+    console.info("[Ticketmaster] API key not set — falling back to mock data.");
+    return [];
+  }
+
+  // Parallel: music from top 5 cities + sports from all 10
+  const [musicBatches, sportsBatches] = await Promise.all([
+    Promise.all(CITIES.slice(0, 5).map(ll =>
+      fetchEvents({ latlong: ll, classificationName: "music", size: 12 })
+    )),
+    Promise.all(CITIES.slice(0, 5).map(ll =>
+      fetchEvents({ latlong: ll, classificationName: "sports", size: 6 })
+    )),
+  ]);
+
+  // Flatten + deduplicate by TM id
+  const all  = [...musicBatches.flat(), ...sportsBatches.flat()];
+  const seen = new Set<string>();
+  const unique = all.filter(e => {
+    if (seen.has(e.id)) return false;
+    seen.add(e.id);
+    return true;
+  });
+
+  const events = unique
+    .map(tmToEvent)
+    .filter((e): e is Event => e !== null);
+
+  // Sort chronologically (Date TBA goes last)
+  events.sort((a, b) => {
+    if (a.date === "Date TBA") return 1;
+    if (b.date === "Date TBA") return -1;
+    return new Date(a.date).getTime() - new Date(b.date).getTime();
+  });
+
+  return events;
+}
+
+/**
+ * Fetches a single event by its app id (format: "tm-{ticketmasterId}").
+ * Returns null when not found or when the API key is absent.
  */
 export async function getTicketmasterEvent(appId: string): Promise<Event | null> {
-  if (!API_KEY) return null;
-  if (!appId.startsWith("tm-")) return null;
+  const apiKey = process.env.TICKETMASTER_API_KEY;
+  if (!apiKey || !appId.startsWith("tm-")) return null;
 
-  const tmId = appId.slice(3); // strip "tm-" prefix
-
-  const params = new URLSearchParams({ apikey: API_KEY });
-  const url = `${TM_BASE}/events/${tmId}.json?${params}`;
-
+  const tmId = appId.slice(3);
   try {
-    const res = await fetch(url, { next: { revalidate: 300 } });
-    if (!res.ok) {
-      console.error(`[Ticketmaster] getEvent ${tmId} failed: ${res.status}`);
-      return null;
-    }
-    const tm: TMEvent = await res.json();
-    return tmEventToAppEvent(tm);
-  } catch (err) {
-    console.error("[Ticketmaster] getTicketmasterEvent threw:", err);
+    const params = new URLSearchParams({ apikey: apiKey });
+    const res = await fetch(`${TM_BASE}/events/${tmId}.json?${params}`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    const tm: TmEvent = await res.json();
+    return tmToEvent(tm);
+  } catch {
     return null;
   }
 }
