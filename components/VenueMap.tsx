@@ -190,50 +190,114 @@ function ringPath(cx: number, cy: number, iRx: number, iRy: number, oRx: number,
 const SB = { w: 14, h: 9, gap: 3, count: 5 };
 const sbTotalH = SB.count * SB.h + (SB.count - 1) * SB.gap;
 
-// ── Per-venue arena configs (real section counts from official seating charts) ─
-interface ArenaCfg { lowerDivs: number; clubDivs: number; upperDivs: number; upperSecBase: number; lowerSecBase: number }
+// ── Per-venue arena configs ───────────────────────────────────────────────────
+interface ArenaCfg {
+  lowerDivs: number;
+  clubDivs:  number;
+  upperDivs: number;
+  upperSecBase: number;   // fallback base number when no explicit array
+  lowerSecBase: number;
+  /** Real section labels going clockwise from top of map */
+  lowerSections?: (string | number)[];
+  upperSections?: (string | number)[];
+  /** Use compact (square-ish) ring geometry — true for MSG-style arenas */
+  compact?: boolean;
+}
+
+// Helpers to build sequential section arrays
+const seq = (start: number, end: number): number[] =>
+  Array.from({ length: end - start + 1 }, (_, i) => start + i);
+
 const ARENA_VENUE: Record<string, ArenaCfg> = {
-  // lower / club / upper divider counts match official section totals
-  "Madison Square Garden": { lowerDivs: 19, clubDivs: 14, upperDivs: 27, upperSecBase: 201, lowerSecBase: 101 },
-  "TD Garden":             { lowerDivs: 22, clubDivs: 10, upperDivs: 30, upperSecBase: 301, lowerSecBase: 1   },
-  "Capital One Arena":     { lowerDivs: 22, clubDivs: 30, upperDivs: 34, upperSecBase: 400, lowerSecBase: 100 },
-  "Ball Arena":            { lowerDivs: 24, clubDivs: 30, upperDivs: 40, upperSecBase: 301, lowerSecBase: 102 },
-  "United Center":         { lowerDivs: 22, clubDivs: 34, upperDivs: 34, upperSecBase: 301, lowerSecBase: 101 },
-  "Barclays Center":       { lowerDivs: 31, clubDivs: 12, upperDivs: 31, upperSecBase: 201, lowerSecBase: 1   },
-  "Crypto.com Arena":      { lowerDivs: 26, clubDivs: 16, upperDivs: 32, upperSecBase: 301, lowerSecBase: 101 },
-  "Chase Center":          { lowerDivs: 22, clubDivs: 16, upperDivs: 26, upperSecBase: 201, lowerSecBase: 101 },
-  "Kia Forum":             { lowerDivs: 28, clubDivs: 12, upperDivs: 26, upperSecBase: 201, lowerSecBase: 101 },
-  "T-Mobile Arena":        { lowerDivs: 22, clubDivs: 14, upperDivs: 28, upperSecBase: 201, lowerSecBase: 101 },
-  "Spectrum Center":       { lowerDivs: 22, clubDivs: 12, upperDivs: 30, upperSecBase: 201, lowerSecBase: 101 },
+  // ── Madison Square Garden ──────────────────────────────────────────────────
+  // Lower arena: sections 1–21 (clockwise); Balcony: 201–237
+  // Concert floor sections A–F handled separately in floor label
+  "Madison Square Garden": {
+    lowerDivs: 21,  clubDivs: 12, upperDivs: 27,
+    upperSecBase: 201, lowerSecBase: 1,
+    lowerSections: seq(1, 21),
+    upperSections: seq(201, 227),
+    compact: true,
+  },
+  // ── Chase Center (Golden State Warriors) ──────────────────────────────────
+  // Lower bowl: 101–124; Upper bowl: 201–225
+  "Chase Center": {
+    lowerDivs: 24, clubDivs: 16, upperDivs: 25,
+    upperSecBase: 201, lowerSecBase: 101,
+    lowerSections: seq(101, 124),
+    upperSections: seq(201, 225),
+  },
+  // ── Crypto.com Arena (Lakers / Kings) ─────────────────────────────────────
+  // Lower bowl: 101–119; Club: ~20 suite boxes; Upper: 301–334
+  "Crypto.com Arena": {
+    lowerDivs: 19, clubDivs: 14, upperDivs: 34,
+    upperSecBase: 301, lowerSecBase: 101,
+    lowerSections: seq(101, 119),
+    upperSections: seq(301, 334),
+  },
+  // ── TD Garden (Celtics / Bruins) ───────────────────────────────────────────
+  // Lower bowl: 1–22; Upper: 301–330
+  "TD Garden": {
+    lowerDivs: 22, clubDivs: 10, upperDivs: 30,
+    upperSecBase: 301, lowerSecBase: 1,
+    lowerSections: seq(1, 22),
+    upperSections: seq(301, 330),
+  },
+  // ── Capital One Arena (Wizards / Capitals) ─────────────────────────────────
+  "Capital One Arena":   { lowerDivs: 22, clubDivs: 16, upperDivs: 34, upperSecBase: 401, lowerSecBase: 101, lowerSections: seq(101, 122), upperSections: seq(401, 434) },
+  // ── Ball Arena (Nuggets / Avalanche) ─────────────────────────────────────
+  "Ball Arena":          { lowerDivs: 24, clubDivs: 16, upperDivs: 40, upperSecBase: 301, lowerSecBase: 102, lowerSections: seq(102, 125), upperSections: seq(301, 340) },
+  // ── United Center (Bulls / Blackhawks) ────────────────────────────────────
+  "United Center":       { lowerDivs: 22, clubDivs: 14, upperDivs: 34, upperSecBase: 301, lowerSecBase: 101, lowerSections: seq(101, 122), upperSections: seq(301, 334) },
+  // ── Barclays Center (Nets / Islanders) ────────────────────────────────────
+  "Barclays Center":     { lowerDivs: 20, clubDivs: 12, upperDivs: 28, upperSecBase: 201, lowerSecBase: 1,   lowerSections: seq(1, 20),   upperSections: seq(201, 228) },
+  // ── Kia Forum ─────────────────────────────────────────────────────────────
+  "Kia Forum":           { lowerDivs: 28, clubDivs: 12, upperDivs: 26, upperSecBase: 201, lowerSecBase: 101, lowerSections: seq(101, 128), upperSections: seq(201, 226) },
+  // ── T-Mobile Arena (Golden Knights) ──────────────────────────────────────
+  "T-Mobile Arena":      { lowerDivs: 22, clubDivs: 14, upperDivs: 28, upperSecBase: 201, lowerSecBase: 1,   lowerSections: seq(1, 22),   upperSections: seq(201, 228) },
+  // ── Spectrum Center (Hornets) ─────────────────────────────────────────────
+  "Spectrum Center":     { lowerDivs: 22, clubDivs: 12, upperDivs: 30, upperSecBase: 201, lowerSecBase: 101, lowerSections: seq(101, 122), upperSections: seq(201, 230) },
+  // ── American Airlines Center (Mavericks / Stars) ──────────────────────────
+  "American Airlines Center": { lowerDivs: 22, clubDivs: 14, upperDivs: 30, upperSecBase: 301, lowerSecBase: 101, lowerSections: seq(101, 122), upperSections: seq(301, 330) },
+  // ── Scotiabank Arena (Raptors / Maple Leafs) ──────────────────────────────
+  "Scotiabank Arena":    { lowerDivs: 20, clubDivs: 12, upperDivs: 28, upperSecBase: 301, lowerSecBase: 101, lowerSections: seq(101, 120), upperSections: seq(301, 328) },
+  // ── Madison Square Garden as "MSG" shorthand ─────────────────────────────
+  "MSG":                 { lowerDivs: 21, clubDivs: 12, upperDivs: 27, upperSecBase: 201, lowerSecBase: 1,   lowerSections: seq(1, 21),   upperSections: seq(201, 227), compact: true },
 };
-const DEFAULT_ARENA_CFG: ArenaCfg = { lowerDivs: 40, clubDivs: 14, upperDivs: 30, upperSecBase: 301, lowerSecBase: 101 };
+const DEFAULT_ARENA_CFG: ArenaCfg = {
+  lowerDivs: 20, clubDivs: 14, upperDivs: 28,
+  upperSecBase: 301, lowerSecBase: 101,
+};
 
 function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, genre = "", venue = "", showBadges, minByType, countByType }: MapProps) {
   const isNBA = genre === "NBA", isNHL = genre === "NHL";
   const isMSG = venue === "Madison Square Garden";
 
-  // ── Venue-specific ring geometry — uses real section counts per venue ─────────
+  // ── Venue-specific ring geometry ─────────────────────────────────────────────
   const vCfg      = ARENA_VENUE[venue] ?? DEFAULT_ARENA_CFG;
   const lowerDivs = vCfg.lowerDivs;
   const clubDivs  = vCfg.clubDivs;
   const upperDivs = vCfg.upperDivs;
   const upperSecBase  = vCfg.upperSecBase;
   const lowerSecBase  = vCfg.lowerSecBase;
+  const isCompact     = vCfg.compact ?? isMSG;
 
-  const ARENA_RINGS = isMSG ? [
-    { type: "lower" as SectionType, label: "LOWER ARENA", iRx: 78,  iRy: 60,  oRx: 128, oRy: 98,  divs: lowerDivs },
-    { type: "club"  as SectionType, label: "SUITE LEVEL", iRx: 136, iRy: 106, oRx: 156, oRy: 122, divs: clubDivs  },
-    { type: "upper" as SectionType, label: "BALCONY",     iRx: 164, iRy: 130, oRx: 208, oRy: 142, divs: upperDivs },
+  // Compact (square-ish) geometry: MSG, smaller arenas
+  // Oval geometry: typical NBA/NHL arenas, wider than tall
+  const ARENA_RINGS = isCompact ? [
+    { type: "lower" as SectionType, label: "LOWER ARENA", iRx: 78,  iRy: 60,  oRx: 128, oRy: 100, divs: lowerDivs },
+    { type: "club"  as SectionType, label: "SUITES",      iRx: 136, iRy: 108, oRx: 156, oRy: 124, divs: clubDivs  },
+    { type: "upper" as SectionType, label: "BALCONY",     iRx: 164, iRy: 132, oRx: 210, oRy: 145, divs: upperDivs },
   ] : [
-    { type: "lower" as SectionType, label: "LOWER BOWL",  iRx: 88,  iRy: 44,  oRx: 150, oRy: 92,  divs: lowerDivs },
-    { type: "club"  as SectionType, label: "CLUB",        iRx: 158, iRy: 99,  oRx: 182, oRy: 115, divs: clubDivs  },
-    { type: "upper" as SectionType, label: "UPPER DECK",  iRx: 190, iRy: 122, oRx: 248, oRy: 146, divs: upperDivs },
+    { type: "lower" as SectionType, label: "LOWER BOWL",  iRx: 88,  iRy: 42,  oRx: 150, oRy: 90,  divs: lowerDivs },
+    { type: "club"  as SectionType, label: "CLUB",        iRx: 157, iRy: 97,  oRx: 180, oRy: 113, divs: clubDivs  },
+    { type: "upper" as SectionType, label: "UPPER DECK",  iRx: 188, iRy: 120, oRx: 250, oRy: 148, divs: upperDivs },
   ];
 
-  const outerRx   = isMSG ? 214 : 254;
-  const outerRy   = isMSG ? 144 : 149;
-  const floorRx   = isMSG ? 70  : 80;
-  const floorRy   = isMSG ? 44  : 36;
+  const outerRx = isCompact ? 216 : 256;
+  const outerRy = isCompact ? 147 : 151;
+  const floorRx = isCompact ? 70  : 80;
+  const floorRy = isCompact ? 46  : 34;
   const sbTop     = AR.CY - sbTotalH / 2;
   const suiteX1   = AR.CX - outerRx - SB.w - 2;
   const suiteX2   = AR.CX + outerRx + 2;
@@ -265,11 +329,12 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
         const midRy    = (ring.iRy + ring.oRy) / 2;
         const midRx    = (ring.iRx + ring.oRx) / 2;
         const step     = (2 * Math.PI) / ring.divs;
-        // Section number: lower uses lowerSecBase, upper uses upperSecBase
+        // Venue-specific section labels; fall back to sequential base+i
         const secBase  = ring.type === "upper" ? upperSecBase : lowerSecBase;
-        // Show section labels: lower every-other, upper every-other, club none (too narrow)
+        const secArr   = ring.type === "upper" ? vCfg.upperSections : (ring.type === "lower" ? vCfg.lowerSections : undefined);
+        // Show section labels: lower and upper only; skip alternate when too many
         const showLabels = ring.type !== "club";
-        const labelSkip  = ring.type === "lower" && ring.divs > 24 ? 2 : ring.type === "upper" && ring.divs > 32 ? 2 : 1;
+        const labelSkip  = ring.type === "lower" && ring.divs > 26 ? 2 : ring.type === "upper" && ring.divs > 34 ? 2 : 1;
 
         return (
           <g key={ring.type}>
@@ -316,7 +381,7 @@ function ArenaMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZone
                   fill={isDimmed ? INK_DIM : INK}
                   fontFamily="system-ui" fontWeight="700"
                   style={{ pointerEvents: "none", userSelect: "none" }}
-                >{secBase + i}</text>
+                >{secArr ? (secArr[i] ?? secBase + i) : secBase + i}</text>
               );
             })}
           </g>
@@ -578,17 +643,39 @@ function GoalPost({ x, flip }: { x: number; flip?: boolean }) {
   );
 }
 
-// ── Per-stadium NFL section numbers (top sideline / bottom sideline labels) ───
+// ── Per-stadium NFL section numbers ──────────────────────────────────────────
+// top = sections visible on the top sideline; bot = bottom sideline
+// Arrays span from one end zone toward center, listing lower-bowl sections
 const NFL_VENUE: Record<string, { top: number[]; bot: number[]; openEndLeft?: boolean }> = {
-  "AT&T Stadium":    { top: [102, 108, 114, 119, 125], bot: [220, 226, 232, 238, 244] },
-  "MetLife Stadium": { top: [109, 115, 121, 127, 133], bot: [310, 318, 326, 334, 342] },
-  "Lumen Field":     { top: [105, 111, 116, 122, 128], bot: [305, 313, 321, 329, 337], openEndLeft: true },
-  "M&T Bank Stadium":{ top: [106, 112, 118, 124, 130], bot: [201, 207, 213, 219, 225] },
-  "SoFi Stadium":    { top: [107, 113, 119, 125, 131], bot: [215, 221, 227, 233, 239] },
-  "Nissan Stadium":  { top: [103, 109, 115, 121, 127], bot: [215, 221, 227, 233, 239] },
-  "Rose Bowl":       { top: [10,  15,  20,  25,  30 ], bot: [60,  65,  70,  75,  80 ] },
+  // AT&T Stadium — Cowboys north sideline 106–125, visitors south 131–149
+  // 50yd line ≈ sections 118–122 (north) / 140–144 (south)
+  "AT&T Stadium":    { top: [107, 111, 115, 119, 123, 127], bot: [132, 136, 140, 144, 148, 152] },
+  // SoFi Stadium — VIP sideline sections; 50yd at 111–112 / 131–132
+  "SoFi Stadium":    { top: [105, 108, 111, 114, 117, 120], bot: [128, 131, 134, 137, 140, 143] },
+  // Hard Rock Stadium — Dolphins bench 141–143, visitors 113–115; 50yd ≈ 114–118 / 141–145
+  "Hard Rock Stadium":{ top: [108, 112, 116, 120, 124, 128], bot: [136, 140, 144, 148, 152, 156] },
+  // Arrowhead Stadium — Chiefs bench 117–120; 50yd ≈ 120–126
+  "Arrowhead Stadium":{ top: [114, 118, 122, 126, 130, 134], bot: [101, 105, 108, 112, 116, 120] },
+  // GEHA Field at Arrowhead (alternate name)
+  "GEHA Field at Arrowhead Stadium":{ top: [114, 118, 122, 126, 130, 134], bot: [101, 105, 108, 112, 116, 120] },
+  // MetLife Stadium — Jets/Giants; 50yd ≈ sections 117–127
+  "MetLife Stadium": { top: [109, 113, 117, 122, 127, 131], bot: [210, 215, 221, 227, 233, 238] },
+  // Lumen Field — Seattle; open north end
+  "Lumen Field":     { top: [104, 108, 112, 116, 120, 124], bot: [204, 210, 216, 222, 228, 234], openEndLeft: true },
+  // M&T Bank Stadium — Ravens
+  "M&T Bank Stadium":{ top: [104, 108, 112, 118, 124, 128], bot: [201, 205, 210, 215, 220, 224] },
+  // Nissan Stadium — Titans
+  "Nissan Stadium":  { top: [103, 107, 112, 117, 122, 127], bot: [212, 218, 224, 230, 236, 242] },
+  // Rose Bowl — sections 1–28 in one tier; sideline 1–14 and 15–28
+  "Rose Bowl":       { top: [3,  6,  9,  12,  16,  20 ], bot: [21,  24,  2,   5,   8,   11 ] },
+  // Allegiant Stadium — Raiders
+  "Allegiant Stadium":{ top: [108, 112, 116, 121, 126, 130], bot: [207, 213, 219, 225, 231, 237] },
+  // Soldier Field — Bears
+  "Soldier Field":   { top: [104, 108, 112, 117, 122, 126], bot: [200, 204, 208, 212, 216, 220] },
+  // Lincoln Financial Field — Eagles
+  "Lincoln Financial Field":{ top: [108, 112, 116, 121, 126, 130], bot: [201, 207, 213, 219, 225, 231] },
 };
-const DEFAULT_NFL = { top: [103, 110, 118, 126, 133], bot: [310, 318, 326, 334, 342] };
+const DEFAULT_NFL = { top: [103, 108, 114, 120, 126, 131], bot: [206, 212, 218, 224, 230, 236] };
 
 function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, venue = "", showBadges, minByType, countByType }: MapProps) {
   const nflCfg = NFL_VENUE[venue] ?? DEFAULT_NFL;
@@ -676,37 +763,31 @@ function NFLMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
         );
       })}
 
-      {/* Section number labels on lower sideline sections */}
-      {topSecNums.map((num, i) => {
-        const band = NFL_BANDS[0]; // lower
-        const bx = NFX - band.pad;
-        const bw = NFL_FIELD.w + band.pad * 2;
-        const numSide = 12;
-        const secW = (bw - 2 * band.pad) / numSide;
-        const sx = bx + band.pad + i * secW + secW / 2;
-        const sy = NFY - band.pad + band.pad / 2;
+      {/* Section number labels — evenly spaced across each lower sideline */}
+      {[
+        { nums: topSecNums, sy: NFY - NFL_BANDS[0].pad + NFL_BANDS[0].pad / 2 },
+        { nums: botSecNums, sy: NFY + NFL_FIELD.h + NFL_BANDS[0].pad + NFL_BANDS[0].pad / 2 },
+      ].map(({ nums, sy }, si) => {
+        const band  = NFL_BANDS[0];
+        const bx    = NFX - band.pad;
+        const bw    = NFL_FIELD.w + band.pad * 2;
+        const count = nums.length;
+        // Spread labels evenly across the inner width of the band
+        const innerW = bw - 2 * band.pad;
+        const step   = innerW / count;
         const isDimmed = activeSectionTypes.length > 0 && !activeSectionTypes.includes("lower") && hoveredZone !== "lower";
         return (
-          <text key={i} x={sx} y={sy + 2} textAnchor="middle" fontSize="5.5"
-            fill={isDimmed ? INK_DIM : INK} fontFamily="system-ui" fontWeight="700"
-            style={{ pointerEvents: "none", userSelect: "none" }}
-          >{num}</text>
-        );
-      })}
-      {botSecNums.map((num, i) => {
-        const band = NFL_BANDS[0]; // lower
-        const bx = NFX - band.pad;
-        const bw = NFL_FIELD.w + band.pad * 2;
-        const numSide = 12;
-        const secW = (bw - 2 * band.pad) / numSide;
-        const sx = bx + band.pad + i * secW + secW / 2;
-        const sy = NFY + NFL_FIELD.h + band.pad + band.pad / 2;
-        const isDimmed = activeSectionTypes.length > 0 && !activeSectionTypes.includes("lower") && hoveredZone !== "lower";
-        return (
-          <text key={i} x={sx} y={sy + 2} textAnchor="middle" fontSize="5.5"
-            fill={isDimmed ? INK_DIM : INK} fontFamily="system-ui" fontWeight="700"
-            style={{ pointerEvents: "none", userSelect: "none" }}
-          >{num}</text>
+          <g key={si}>
+            {nums.map((num, i) => {
+              const sx = bx + band.pad + i * step + step / 2;
+              return (
+                <text key={i} x={sx} y={sy + 2} textAnchor="middle" fontSize="5"
+                  fill={isDimmed ? INK_DIM : INK} fontFamily="system-ui" fontWeight="700"
+                  style={{ pointerEvents: "none", userSelect: "none" }}
+                >{num}</text>
+              );
+            })}
+          </g>
         );
       })}
 
@@ -864,21 +945,52 @@ const MLB_R = {
   wall:    260,
 };
 
-// ── Per-ballpark data (real field dimensions + unique features) ───────────────
+// ── Per-ballpark data ─────────────────────────────────────────────────────────
 interface BallparkCfg {
   lf: string; lcf: string; cf: string; rcf: string; rf: string;
-  secCount: number;         // lower-bowl section count
+  secCount: number;          // lower-bowl section count along the arc
   showMonumentPark: boolean;
-  hasGreenMonster: boolean; // Fenway — 37-ft left-field wall
-  hasIvyWall: boolean;      // Wrigley — ivy-covered brick outfield wall
+  hasGreenMonster: boolean;
+  hasIvyWall: boolean;
+  /** Real section numbers going LF→CF→RF along the lower bowl arc */
+  lowerSections?: number[];
+  /** Real section numbers for the upper deck arc */
+  upperSections?: number[];
 }
 const BALLPARK_DATA: Record<string, BallparkCfg> = {
-  "Yankee Stadium": { lf: "318′", lcf: "399′", cf: "408′", rcf: "385′", rf: "314′", secCount: 25, showMonumentPark: true,  hasGreenMonster: false, hasIvyWall: false },
-  "Fenway Park":    { lf: "310′", lcf: "379′", cf: "390′", rcf: "380′", rf: "302′", secCount: 20, showMonumentPark: false, hasGreenMonster: true,  hasIvyWall: false },
-  "Wrigley Field":  { lf: "355′", lcf: "368′", cf: "400′", rcf: "368′", rf: "353′", secCount: 22, showMonumentPark: false, hasGreenMonster: false, hasIvyWall: true  },
-  "Citi Field":     { lf: "335′", lcf: "379′", cf: "408′", rcf: "383′", rf: "330′", secCount: 23, showMonumentPark: false, hasGreenMonster: false, hasIvyWall: false },
+  // Yankee Stadium — Field Level outfield: 101–135; Main Level: 201–235; Upper: 301–435
+  "Yankee Stadium": {
+    lf: "318′", lcf: "399′", cf: "408′", rcf: "385′", rf: "314′",
+    secCount: 33, showMonumentPark: true, hasGreenMonster: false, hasIvyWall: false,
+    lowerSections: [101,103,105,107,109,111,113,115,117,119,121,123,125,127,129,131,133,135],
+    upperSections: [303,305,307,309,311,313,315,317,319,321,323,325,327,329,331,333],
+  },
+  // Fenway Park — Field Box 1–16; Bleachers 34–43; Royal Roof Deck 1–8
+  "Fenway Park": {
+    lf: "310′", lcf: "379′", cf: "390′", rcf: "380′", rf: "302′",
+    secCount: 20, showMonumentPark: false, hasGreenMonster: true, hasIvyWall: false,
+    lowerSections: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+    upperSections: [26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43],
+  },
+  // Wrigley Field — Field Box 1–23; Terrace Reserved 200–240; Upper Reserved 400–440
+  "Wrigley Field": {
+    lf: "355′", lcf: "368′", cf: "400′", rcf: "368′", rf: "353′",
+    secCount: 22, showMonumentPark: false, hasGreenMonster: false, hasIvyWall: true,
+    lowerSections: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],
+    upperSections: [401,404,408,412,416,420,424,428,432,436,440,444,448,452,456,460],
+  },
+  // Citi Field — Field Level 101–140; Excelsior 201–234; Upper 301–424
+  "Citi Field": {
+    lf: "335′", lcf: "379′", cf: "408′", rcf: "383′", rf: "330′",
+    secCount: 23, showMonumentPark: false, hasGreenMonster: false, hasIvyWall: false,
+    lowerSections: [101,104,107,110,113,116,119,122,125,128,131,134,137,140,143],
+    upperSections: [301,304,307,310,313,316,319,322,325,328,331,334,337,340,343],
+  },
 };
-const DEFAULT_BALLPARK: BallparkCfg = { lf: "—", lcf: "—", cf: "—", rcf: "—", rf: "—", secCount: 25, showMonumentPark: false, hasGreenMonster: false, hasIvyWall: false };
+const DEFAULT_BALLPARK: BallparkCfg = {
+  lf: "—", lcf: "—", cf: "—", rcf: "—", rf: "—",
+  secCount: 25, showMonumentPark: false, hasGreenMonster: false, hasIvyWall: false,
+};
 
 
 function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHover, venue = "", showBadges, minByType, countByType }: MapProps) {
@@ -911,11 +1023,12 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
     ].join(" ");
   }
 
-  // Section counts per ring
-  const lowerCount = bp.secCount;
+  // Section counts per ring — use real section arrays when available
+  const lowerSecs  = bp.lowerSections;
+  const upperSecs  = bp.upperSections;
+  const lowerCount = lowerSecs ? lowerSecs.length : bp.secCount;
   const clubCount  = Math.round(bp.secCount * 0.6);
-  const upperCount = bp.secCount;
-  // Suite is a thin continuous band — split into a few blocks
+  const upperCount = upperSecs ? upperSecs.length : bp.secCount;
   const suiteCount = Math.round(bp.secCount * 0.4);
 
   const TOTAL_ARC = FAN_E - FAN_S; // total degrees of arc (typically 130°)
@@ -964,7 +1077,9 @@ function MLBMap({ activeSectionTypes, hoveredZone, onSectionTypeToggle, onZoneHo
           const midDeg = FAN_S + (i + 0.5) * secStep;
           const midR = (r1 + r2) / 2;
           const pt = arcPoint(cx, cy, midR, midDeg);
-          const secNum = type === "lower" ? 100 + i + 1 : 200 + i + 1;
+          // Use real venue section numbers if available
+          const sArr  = type === "lower" ? lowerSecs : upperSecs;
+          const secNum = sArr ? (sArr[i] ?? (type === "lower" ? 100 + i + 1 : 200 + i + 1)) : (type === "lower" ? 100 + i + 1 : 200 + i + 1);
           return (
             <text key={i} x={pt.x} y={pt.y + 2.5} textAnchor="middle" fontSize="5.5"
               fill={isInact ? INK_DIM : INK} fontFamily="system-ui" fontWeight="700"
