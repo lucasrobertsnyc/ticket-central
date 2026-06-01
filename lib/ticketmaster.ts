@@ -359,6 +359,31 @@ const CITIES = [
   "36.1627,-86.7816",    // Nashville
 ];
 
+// ── Event quality filters ─────────────────────────────────────────────────────
+
+// Titles matching these patterns are stadium tours / experiences / non-games
+const TOUR_RE = /\b(tours?|pregame|ballpark\s+tour|stadium\s+tour|vip\s+tour|batting\s+practice|field\s+experience|wrestling|midget|showcase|comedy\s+night)\b/i;
+
+// All sport genres — every sport event must have an identifiable opponent
+const PRO_SPORT_GENRES = new Set(["NFL", "NBA", "MLB", "NHL", "MLS", "Sports"]);
+
+/**
+ * Returns true if the event is a real, bookable game/show — not a stadium
+ * tour, experience package, or a pro-sport listing without an opponent.
+ */
+function isRealEvent(event: Event): boolean {
+  // Remove tour / experience / non-game events
+  if (TOUR_RE.test(event.artist)) return false;
+
+  // For pro sports, require a matchup ("Team A vs Team B" / "Team A at Team B")
+  // Single-team listings like "New York Yankees" are season packages, not games
+  if (PRO_SPORT_GENRES.has(event.genre)) {
+    return / vs\.? | at /i.test(event.artist);
+  }
+
+  return true;
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
@@ -393,6 +418,7 @@ export async function getTicketmasterEvents(): Promise<Event[]> {
   const events = unique
     .map(tmToEvent)
     .filter((e): e is Event => e !== null)
+    .filter(isRealEvent)
     // Fill in missing prices so the homepage never shows "Check tickets"
     .map(e => e.lowestAllInPrice > 0 ? e : { ...e, lowestAllInPrice: inferStartingPrice(e) });
 
