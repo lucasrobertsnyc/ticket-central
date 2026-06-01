@@ -4,6 +4,7 @@ import { useState, useMemo, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import type { Event } from "@/types/ticket";
 import EventCard from "@/components/EventCard";
+import { SPORT_GENRES as ALL_SPORT_GENRES } from "@/lib/teams";
 
 function parseEventDate(dateStr: string): Date {
   // "Sunday, June 14, 2026" → strip weekday → "June 14, 2026"
@@ -35,9 +36,8 @@ function extractLocations(events: Event[]): { label: string; match: string }[] {
   return locs.sort((a, b) => a.label.localeCompare(b.label));
 }
 
-const SPORT_GENRES = new Set(["NFL", "NBA", "MLB", "NHL", "MLS"]);
-const LEAGUES = ["NFL", "NBA", "MLB", "NHL"] as const;
-type League = (typeof LEAGUES)[number];
+// Preferred display order for league pills
+const LEAGUE_ORDER = ["NFL", "NBA", "MLB", "NHL", "MLS", "WNBA", "MiLB", "AHL", "ECHL", "Soccer", "NWSL"];
 
 type Category = "all" | "concerts" | "sports";
 type SortBy   = "date" | "price" | "location";
@@ -49,37 +49,41 @@ export default function HomepageClient({ events }: Props) {
   const [artist, setArtist]     = useState("");
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState<Category>(initialCategory);
-  const [league, setLeague]     = useState<League | "">("");
+  const [league, setLeague]     = useState<string>("");
   const [genre, setGenre]       = useState<string>("");
   const [sortBy, setSortBy]     = useState<SortBy>("date");
 
   const locationOptions = useMemo(() => extractLocations(events), [events]);
 
-  // Which leagues actually have events in the data?
-  const availableLeagues = useMemo(
-    () => LEAGUES.filter((lg) => events.some((e) => e.genre === lg)),
-    [events]
-  );
+  // All sport genres present in data, ordered by LEAGUE_ORDER then alphabetically
+  const availableLeagues = useMemo(() => {
+    const presentArr = events.filter(e => ALL_SPORT_GENRES.has(e.genre)).map(e => e.genre);
+    const present = new Set(presentArr);
+    const ordered = LEAGUE_ORDER.filter(lg => present.has(lg));
+    // Any sport genres not in LEAGUE_ORDER go at the end
+    presentArr.forEach(g => { if (!LEAGUE_ORDER.includes(g) && !ordered.includes(g)) ordered.push(g); });
+    return ordered;
+  }, [events]);
 
-  // Which concert genres actually have events in the data?
+  // Concert genres = any genre NOT in ALL_SPORT_GENRES, filtered to ones with actual events
   const availableGenres = useMemo(() => {
     const seen = new Set<string>();
     const result: string[] = [];
     for (const e of events) {
-      if (!SPORT_GENRES.has(e.genre) && !seen.has(e.genre)) {
+      if (!ALL_SPORT_GENRES.has(e.genre) && e.genre !== "Music" && !seen.has(e.genre)) {
         seen.add(e.genre);
         result.push(e.genre);
       }
     }
-    return result;
+    return result.sort();
   }, [events]);
 
   const filtered = useMemo(() => {
     const a = artist.toLowerCase().trim();
     const l = location;
     const result = events.filter((e) => {
-      if (category === "concerts" && SPORT_GENRES.has(e.genre)) return false;
-      if (category === "sports"   && !SPORT_GENRES.has(e.genre)) return false;
+      if (category === "concerts" && ALL_SPORT_GENRES.has(e.genre)) return false;
+      if (category === "sports"   && !ALL_SPORT_GENRES.has(e.genre)) return false;
       if (category === "sports"   && league && e.genre !== league) return false;
       if (category === "concerts" && genre  && e.genre !== genre)  return false;
       if (l && !e.city.includes(l)) return false;

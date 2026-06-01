@@ -263,6 +263,7 @@ export const SPORT_GENRES = new Set([
   "NFL", "NBA", "MLB", "NHL", "MLS",
   "WNBA", "MiLB", "AHL", "ECHL", "Soccer", "NWSL",
   "NCAAF", "NCAAB", "G-League", "AFL", "CFL",
+  "Sports",  // generic TM fallback for unclassified sports
 ]);
 
 const FALLBACK_TEAM: TeamInfo = {
