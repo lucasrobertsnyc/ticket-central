@@ -4,6 +4,7 @@ import { useState, useMemo, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import type { Event } from "@/types/ticket";
 import EventCard from "@/components/EventCard";
+import TicketNetworkWidget from "@/components/TicketNetworkWidget";
 import { SPORT_GENRES as ALL_SPORT_GENRES } from "@/lib/teams";
 
 function parseEventDate(dateStr: string): Date {
@@ -378,6 +379,18 @@ export default function HomepageClient({ events }: Props) {
           </div>
         )}
       </main>
+
+      {/* ── TicketNetwork live events ────────────────────────── */}
+      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6 pb-10">
+        <div className="flex items-center gap-4 mb-5">
+          <div className="flex-1 h-px bg-gray-200" />
+          <h2 className="text-gray-500 text-xs font-semibold uppercase tracking-widest whitespace-nowrap">
+            More Events via TicketNetwork
+          </h2>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+        <TicketNetworkWidget />
+      </section>
 
       <footer className="border-t border-gray-200 bg-white mt-8 px-6 py-5">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
