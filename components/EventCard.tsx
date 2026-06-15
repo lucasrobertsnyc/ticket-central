@@ -109,15 +109,15 @@ function SportHero({ event }: { event: Event }) {
 
 interface Props {
   event: Event;
+  /** When set, card links here (new tab) instead of the internal event detail page. */
+  externalHref?: string;
 }
 
-export default memo(function EventCard({ event }: Props) {
+export default memo(function EventCard({ event, externalHref }: Props) {
   const fallback = GENRE_FALLBACK_BG[event.genre] ?? "#111";
   const isSport = SPORT_GENRES.has(event.genre);
-
-  return (
-    <Link href={`/events/${event.id}`} className="group block">
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-150 hover:shadow-lg hover:-translate-y-0.5">
+  const inner = (
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-150 hover:shadow-lg hover:-translate-y-0.5">
 
         {isSport ? (
           <SportHero event={event} />
@@ -186,6 +186,18 @@ export default memo(function EventCard({ event }: Props) {
         </div>
 
       </div>
+  );
+
+  if (externalHref) {
+    return (
+      <a href={externalHref} target="_blank" rel="noopener noreferrer" className="group block">
+        {inner}
+      </a>
+    );
+  }
+  return (
+    <Link href={`/events/${event.id}`} className="group block">
+      {inner}
     </Link>
   );
 });
