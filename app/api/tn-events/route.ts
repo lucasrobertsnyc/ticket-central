@@ -6,20 +6,14 @@ const TN_CONSUMER_KEY = "fuTwxN_M6RKMaobcsfJ5qSvcVAUa";
 const TN_WEBSITE_CONFIG = "12498";
 const TN_AFFILIATE_BASE = "http://TicketNetwork.7eer.net/c/7341108/133430/2322?u=";
 
-// Root category names as they appear in TN API ancestor data
-const SPORT_ROOTS = new Set([
-  "BASEBALL", "BASKETBALL", "HOCKEY", "FOOTBALL", "SOCCER",
-  "GOLF", "TENNIS", "BOXING", "WRESTLING", "MOTOR SPORTS",
-  "VOLLEYBALL", "LACROSSE", "RUGBY", "CRICKET", "SPORTS",
-]);
-
-// Map our UI filter keys → TN ancestor category names to match
-const CATEGORY_FILTER_MAP: Record<string, string[]> = {
-  concerts: ["CONCERTS"],
-  theatre:  ["THEATRE"],
-  sports:   Array.from(SPORT_ROOTS),
-  comedy:   ["COMEDY"],
-  other:    ["OTHER", "LAS VEGAS", "FAMILY"],
+// TN category path prefixes (discovered from API responses)
+// defaultCategory/path is filterable via startswith(); ancestor names are not.
+const CATEGORY_PATH_MAP: Record<string, string> = {
+  concerts: ".1859.1986.",      // CONCERTS root (music + comedy)
+  sports:   ".1859.1988.",      // SPORTS root
+  theatre:  ".1859.1989.",      // THEATRE root (includes family theatre)
+  comedy:   ".1859.1986.1872.", // COMEDY sub-category under CONCERTS
+  other:    ".1859.1987.",      // OTHER root (shows, Las Vegas, circus, exhibits)
 };
 
 function sanitizeString(s: string): string {
@@ -124,10 +118,8 @@ export async function GET(request: Request) {
   // Build OData filter clauses
   const clauses: string[] = ["_metadata/hasTickets eq true", "date/date le 2028-06-15"];
 
-  if (category && CATEGORY_FILTER_MAP[category]) {
-    const roots = CATEGORY_FILTER_MAP[category];
-    const orParts = roots.map((r) => `defaultCategory/ancestors/text/name eq '${r}'`);
-    clauses.push(`(${orParts.join(" or ")})`);
+  if (category && CATEGORY_PATH_MAP[category]) {
+    clauses.push(`startswith(defaultCategory/path, '${CATEGORY_PATH_MAP[category]}')`);
   }
 
   if (city) {
