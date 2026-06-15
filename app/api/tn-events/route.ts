@@ -6,6 +6,27 @@ const TN_CONSUMER_KEY = "fuTwxN_M6RKMaobcsfJ5qSvcVAUa";
 const TN_WEBSITE_CONFIG = "12498";
 const TN_AFFILIATE_BASE = "http://TicketNetwork.7eer.net/c/7341108/133430/2322?u=";
 
+function sanitizeString(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9\-\s]/g, "")
+    .replace(/\s/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function buildTnEventUrl(ev: TnEvent): string {
+  const dateParts = (ev.date.text.date ?? "").replace(/,/g, "").split(" ");
+  const mon3 = (dateParts[1] ?? "").substring(0, 3);
+  const day   = dateParts[2] ?? "";
+  const year  = dateParts[3] ?? "";
+  const dow3  = (dateParts[0] ?? "").substring(0, 3);
+  const venueName = ev.venue?.text?.name ?? "";
+  const slug = sanitizeString(
+    `${ev.text.name}-tickets-${dow3}-${mon3}-${day}-${year}-${venueName}`
+  );
+  return `https://www.ticketnetwork.com/tickets/${ev.id}/${slug}`;
+}
+
 function mapGenre(categoryName: string): string {
   const c = categoryName.toUpperCase();
   if (c.includes("WNBA"))                             return "WNBA";
@@ -45,7 +66,6 @@ interface TnEvent {
   pricingInfo?: { lowPrice?: { value: number } };
   defaultCategory?: { text: { name: string } };
   _metadata?: { ticketCount: number };
-  uriComponent?: string;
 }
 
 function tnToEvent(ev: TnEvent): Event {
@@ -55,7 +75,7 @@ function tnToEvent(ev: TnEvent): Event {
   const state = ev.stateProvince?.text?.abbr ?? "";
   const genre = mapGenre(ev.defaultCategory?.text?.name ?? "Other");
   const lowPrice = ev.pricingInfo?.lowPrice?.value ?? 0;
-  const tnUrl = `https://www.ticketnetwork.com/tickets/${ev.uriComponent ?? ev.id}`;
+  const tnUrl = buildTnEventUrl(ev);
   const buyUrl = TN_AFFILIATE_BASE + encodeURIComponent(tnUrl);
 
   return {
