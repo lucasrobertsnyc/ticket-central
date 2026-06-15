@@ -6,13 +6,13 @@ import EventCard from "@/components/EventCard";
 
 type Category = "all" | "concerts" | "sports" | "theatre" | "comedy" | "other";
 
-const CATEGORY_LABELS: { value: Category; label: string; emoji: string }[] = [
-  { value: "all",      label: "All",      emoji: "🎟" },
-  { value: "concerts", label: "Concerts", emoji: "🎵" },
-  { value: "sports",   label: "Sports",   emoji: "🏆" },
-  { value: "theatre",  label: "Theatre",  emoji: "🎭" },
-  { value: "comedy",   label: "Comedy",   emoji: "🎤" },
-  { value: "other",    label: "Shows",    emoji: "⭐" },
+const CATEGORY_LABELS: { value: Category; label: string }[] = [
+  { value: "all",      label: "All"      },
+  { value: "concerts", label: "Concerts" },
+  { value: "sports",   label: "Sports"   },
+  { value: "theatre",  label: "Theatre"  },
+  { value: "comedy",   label: "Comedy"   },
+  { value: "other",    label: "Shows"    },
 ];
 
 interface TnResponse {
@@ -67,10 +67,13 @@ export default function TicketNetworkWidget() {
     try {
       const res = await fetch(buildUrl(p, cat, c, q));
       const data: TnResponse = await res.json();
-      setEvents((prev) => append ? [...prev, ...data.events] : data.events);
-      setTotalCount(data.totalCount);
-      setPage(data.page);
-      if (data.topCities.length) setTopCities(data.topCities);
+      const evs: Event[] = data.events ?? [];
+      setEvents((prev) => append ? [...prev, ...evs] : evs);
+      if (data.totalCount != null) setTotalCount(data.totalCount);
+      if (data.page != null) setPage(data.page);
+      if (data.topCities?.length) setTopCities(data.topCities);
+    } catch {
+      // silently fail — keeps whatever was already shown
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -138,18 +141,17 @@ export default function TicketNetworkWidget() {
 
         {/* Category pills */}
         <div className="flex gap-1.5 flex-wrap">
-          {CATEGORY_LABELS.map(({ value, label, emoji }) => (
+          {CATEGORY_LABELS.map(({ value, label }) => (
             <button
               key={value}
               onClick={() => handleCategory(value)}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 category === value
                   ? "bg-blue-600 text-white shadow-sm"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              <span>{emoji}</span>
-              <span>{label}</span>
+              {label}
             </button>
           ))}
         </div>
